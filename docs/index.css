@@ -1,0 +1,44 @@
+
+:root {
+    --main-linear-gradient:linear-gradient(45deg, #360900, #002538);
+
+}
+
+body {
+    background-color: antiquewhite;
+    background-image:linear-gradient(90deg, antiquewhite, #ffe7c5);
+
+}
+
+h2, header, footer{
+    display: block;
+    background-color: black;
+    background-image: var(--main-linear-gradient);
+    box-shadow: 0 8px 8px #ffca99;
+    color: antiquewhite;
+
+}
+
+h2 {
+    padding: 0.75em;
+}
+header {
+    width: 100%;
+    text-align: center;
+}
+
+footer {
+    min-height: 256px;
+    text-align: center;
+    padding: 1em;
+    color: #5b4f44;
+}
+footer a {
+    color: #5b4f44;
+}
+
+p.card-container{
+    padding-left: 3em;
+    text-align: center;
+}
+
