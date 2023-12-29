@@ -1,0 +1,49 @@
+
+/* layout */
+
+body {
+    margin: auto;
+    padding: 0;
+    
+}
+
+.justify {
+    margin: auto;
+    width: 800px;
+}
+
+p {
+    margin: 2em;
+}
+
+h2 {
+    padding: 0.75em;
+}
+
+h3 {
+    padding: 1em;
+}
+
+header {
+    width: 100%;
+    text-align: center;
+}
+
+footer {
+    min-height: 256px;
+    text-align: center;
+    padding: 1em;
+    
+}
+
+.card-container {
+    padding-left: 3em;
+    text-align: center;
+    
+    text-align: center;
+}
+
+a.social-card {
+    display: inline-block;
+    width: 6em;
+}

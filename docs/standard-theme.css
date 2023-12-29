@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,500;1,900&display=swap');
+
+:root {
+
+    /* light */
+    --light-background: white;
+    --light-background-radiant: linear-gradient(90deg, rgb(214, 250, 255), rgb(255, 253, 227));
+    --light-foreground-link: black;
+    --light-foreground: black;
+    --light-shadow: #998e83;
+
+    /* dark */
+    --dark-background: black;
+    --dark-background-radiant: linear-gradient(90deg, #360900, #002538);
+    --dark-foreground-link: yellow;
+    --dark-foreground: yellow;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* light */
+
+.light {
+    background-color: var(--light-background);
+    background-image: var(--light-background-radiant);
+    color: var(--light-foreground)
+}
+
+.light a {
+    color: var(--light-foreground-link)
+}
+
+/* dark */
+
+.dark {
+    background-color: var(--dark-background);
+    background-image: var(--dark-background-radiant);
+    color: var(--dark-foreground)
+}
+
+.dark a {
+    color: var(--dark-foreground-link)
+}
+
+/* mix */
+
+.edge {
+    box-shadow: 0 0 1em var(--light-shadow);
+}
+
+
+h2.dark {
+
+    --outlined: 0.08em;
+    --noutlined: -0.08em;
+    --blur: 0.1em;
+
+    text-shadow:
+        var(--outlined) var(--noutlined) var(--blur) var(--dark-background),
+        0 var(--noutlined) var(--blur) var(--dark-background),
+        var(--outlined) var(--noutlined) var(--blur) var(--dark-background),
+        var(--outlined) 0 var(--blur) var(--dark-background),
+        var(--outlined) var(--outlined) var(--blur) var(--dark-background),
+        0 var(--outlined) var(--blur) var(--dark-background),
+        var(--noutlined) var(--outlined) var(--blur) var(--dark-background),
+        var(--noutlined) 0 var(--blur) var(--dark-background);
+}
+
+ 
