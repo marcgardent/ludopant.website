@@ -47,3 +47,26 @@ a.social-card {
     display: inline-block;
     width: 6em;
 }
+
+
+a.social-card:hover {
+    transform: scale(1.1); 
+}
+
+.social-title {
+    display: none;
+}
+
+.shallow-artwork {
+    background-image: url(img/artworks/Shallow_artwork.jpg);
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: white;
+    width: 15em;
+    height: 15em;
+}
+
+.display-inline-block {
+    display: inline-block;
+}
