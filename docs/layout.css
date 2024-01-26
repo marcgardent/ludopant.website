@@ -9,19 +9,25 @@ body {
 
 .justify {
     margin: auto;
+    padding: 0.5em;
     width: 800px;
 }
 
+section.justify {
+    background-color: white;
+}
+
 p {
-    margin: 2em;
+    text-align: justify;
 }
 
 h2 {
-    padding: 0.75em;
+    
+    
 }
 
 h3 {
-    padding: 1em;
+    
 }
 
 header {
