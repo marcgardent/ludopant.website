@@ -10,7 +10,7 @@ body {
 .justify {
     margin: auto;
     padding: 0.5em;
-    width: 800px;
+    max-width: 800px;
 }
 
 section.justify {
