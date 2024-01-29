@@ -13,9 +13,7 @@ body {
     max-width: 800px;
 }
 
-section.justify {
-    background-color: white;
-}
+
 
 p {
     text-align: justify;
@@ -75,4 +73,24 @@ a.social-card:hover {
 
 .display-inline-block {
     display: inline-block;
+}
+
+
+.float-clear::after {
+    content: "";
+    display: block;
+    clear: both;
+  }
+
+
+.float-right {
+    float: right
+}
+
+.float-left {
+    float: left
+}
+
+img {
+    border: 1px solid red;
 }

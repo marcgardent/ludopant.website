@@ -3,8 +3,9 @@
 :root {
 
     /* light */
-    --light-background: white;
-    --light-background-radiant: linear-gradient(90deg, rgb(214, 250, 255), rgb(255, 253, 227));
+    /* --light-background-radiant: linear-gradient(90deg, rgb(214, 250, 255), rgb(255, 253, 227)); */
+    --light-background: white;    
+    --light-background-radiant: none; 
     --light-foreground-link: black;
     --light-foreground: black;
     --light-shadow: #998e83;
