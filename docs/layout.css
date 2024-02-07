@@ -31,19 +31,32 @@ h3 {
 header {
     width: 100%;
     text-align: center;
+    overflow: hidden;
+}
+
+.cover {
+
+    overflow: hidden;
+    width: 100%;
+    height: 75vh;
+
+    background-image: url(img/artworks/Celeste-Jules-Shallow-cover-e1s1.jpg);
+    background-position: center center;
+    background-size: cover;
+
 }
 
 footer {
     min-height: 256px;
     text-align: center;
     padding: 1em;
-    
+
 }
 
 .card-container {
     padding-left: 3em;
     text-align: center;
-    
+
     text-align: center;
 }
 
@@ -54,7 +67,7 @@ a.social-card {
 
 
 a.social-card:hover {
-    transform: scale(1.1); 
+    transform: scale(1.1);
 }
 
 .social-title {
@@ -80,7 +93,7 @@ a.social-card:hover {
     content: "";
     display: block;
     clear: both;
-  }
+}
 
 
 .float-right {
@@ -91,6 +104,3 @@ a.social-card:hover {
     float: left
 }
 
-img {
-    border: 1px solid red;
-}
