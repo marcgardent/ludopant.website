@@ -1,13 +1,15 @@
 <h4>{{dashboard.title}}</h4>
-<img style="width: 30%;display: inline-block" alt="{{dashboard.title}}"  src="{{dashboard.cover}}" />
-<div style="width: 60%;display: inline-block;vertical-align:top;padding: 0.5em">
-  <div>
-    <span  class="bulle"><b>Statut</b> : {{dashboard.status}}</span>
+<div style="display: flex; flex-direction: row;gap: 1em">
+  <div style="flex: 1">
+    <img style="width: 100%" alt="{{dashboard.title}}"  src="{{dashboard.cover}}" />
+  </div>
+<div style="flex: 2">
+    <p><b>Statut </b><span  class="bulle"> {{dashboard.status}}</span></p>
     <div *ngFor="let item of dashboard.details">
         <div class="progressbar-wrapper">
           <div>{{item.name}} {{ item.progress }}</div>
           <div [ngStyle]="{'width': item.progress}" class="progressbar" ></div>
         </div>
     </div>
-  </div>
 </div>
+<div>

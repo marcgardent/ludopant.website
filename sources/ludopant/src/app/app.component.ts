@@ -42,7 +42,7 @@ export class AppComponent {
     {
       title : "Ville Fantôme : la clef de nos espoirs [CJS-S1E3]",
       cover : "assets/img/items/CJS-S1E3.webp",
-      status : "A Planifier",
+      status : "À Planifier",
       details : [
         { name : "Scénographies", progress : "0%"},
         { name : "Storyboards", progress : "0%"},
@@ -54,7 +54,7 @@ export class AppComponent {
     {
       title : "Odyssey : Le Salaire de la peur [CJS-S1E4]",
       cover : "assets/img/items/CJS-S1E4.webp",
-      status : "A Planifier",
+      status : "À Planifier",
       details : [
         { name : "Scénographies", progress : "0%"},
         { name : "Storyboards", progress : "0%"},
@@ -66,7 +66,7 @@ export class AppComponent {
     {
       title : "La Résistance [CJS-S1E5]",
       cover : "assets/img/items/CJS-S1E5.webp",
-      status : "A Planifier",
+      status : "À Planifier",
       details : [
         { name : "Scénographies", progress : "0%"},
         { name : "Storyboards", progress : "0%"},
