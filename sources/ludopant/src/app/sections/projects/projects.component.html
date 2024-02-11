@@ -1,8 +1,9 @@
 <section class="justify">
   <h2>Le Projet</h2>
-  <h3>Publications</h3>
-
-  <app-dashboard />
+  <h3>Cycle "Céleste Et Jules : Des Étoiles Plein Les Yeux"</h3>
+  <div *ngFor="let dashboard of projects">
+    <app-dashboard [dashboard]="dashboard" />
+  </div>
 
   <h3>Auteurs</h3>
   <div class="card-container">
