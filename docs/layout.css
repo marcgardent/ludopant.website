@@ -19,14 +19,6 @@ p {
     text-align: justify;
 }
 
-h2 {
-    
-    
-}
-
-h3 {
-    
-}
 
 header {
     width: 100%;
@@ -104,3 +96,43 @@ a.social-card:hover {
     float: left
 }
 
+
+
+:root{
+    --progressbar-round: 5px
+}
+
+.progressbar-wrapper {
+    position: relative;
+    background-color: #a1ffa5;
+    border-radius: var(--progressbar-round);
+    width: 100%;
+    margin: 1em;
+    height: 2em;
+    line-height: 2em;
+    font-size: 0.8em;
+    vertical-align: center;
+}
+
+.progressbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background-color: gray;
+    border-bottom-left-radius: var(--progressbar-round);
+    border-top-left-radius: var(--progressbar-round);
+    mix-blend-mode: color-burn;
+}
+
+.progressbar.done {
+    border-radius: var(--progressbar-round);
+}
+
+span.bulle {
+    background-color: green;
+    padding: 0.5em 1em 0.5em 1em;
+    display: inline-block;
+    color: white;
+    border-radius: var(--progressbar-round);
+}

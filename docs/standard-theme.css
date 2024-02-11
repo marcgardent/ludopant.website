@@ -15,6 +15,10 @@
     --dark-background-radiant: linear-gradient(90deg, #360900, #002538);
     --dark-foreground-link: yellow;
     --dark-foreground: yellow;
+
+
+    --bar-progress: #c3ffc7;
+
 }
 
 body {
@@ -69,4 +73,3 @@ h2.dark {
         var(--noutlined) 0 var(--blur) var(--dark-background);
 }
 
- 
