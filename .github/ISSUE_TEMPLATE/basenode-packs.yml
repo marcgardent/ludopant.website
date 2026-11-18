@@ -1,0 +1,51 @@
+name: BaseNode Packs
+description: Report a bug, ask for a feature or ask a question about BaseNode Packs.
+title: "[BaseNode Packs] "
+labels: ["basenode-packs"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for writing about **BaseNode Packs** (node group packs built on base node, Blender 5.2 or later).
+        Tickets are public: do not paste licence keys or personal data.
+        Vous pouvez écrire en français.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of ticket
+      options:
+        - Bug
+        - Feature request
+        - Question
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happens, and what did you expect? For a bug, the steps to reproduce it.
+    validations:
+      required: true
+  - type: input
+    id: addon-version
+    attributes:
+      label: Add-on version
+      placeholder: "e.g. 0.3.0"
+  - type: input
+    id: blender-version
+    attributes:
+      label: Blender version
+      placeholder: "e.g. 4.5.2"
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Screenshots, logs or .blend file
+      description: Drag files here. A small .blend file that shows the problem helps a lot.
