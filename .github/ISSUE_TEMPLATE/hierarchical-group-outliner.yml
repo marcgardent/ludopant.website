@@ -6,8 +6,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for writing about **Hierarchical Group Outliner** (parent and child outliner for blender, Blender 4.2 or later).
+        Thanks for writing about **Hierarchical Group Outliner** (parent and child outliner for Blender, Blender 4.2 or later).
         Tickets are public: do not paste licence keys or personal data.
+        For a private matter (licence, purchase, confidential file), write to contact@ludopant.com instead.
         Vous pouvez écrire en français.
   - type: dropdown
     id: kind
