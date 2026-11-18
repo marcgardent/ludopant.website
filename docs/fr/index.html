@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ludopant — Add-ons Blender</title>
+<meta name="description" content="Ludopant édite des add-ons pour Blender : openclare PRO, Hierarchical Group Outliner et BaseNode Packs.">
+<link rel="icon" href="../logo/ludopant.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="en" href="https://ludopant.com/">
+<link rel="alternate" hreflang="fr" href="https://ludopant.com/fr/">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a href="./" aria-label="Ludopant, accueil"><img class="logo" src="../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="#produits">Produits</a>
+      <a href="#studio">Le studio</a>
+      <a href="#contact">Contact</a>
+      <a class="lang" href="../" hreflang="en" lang="en">EN</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Éditeur d'add-ons Blender</p>
+      <h1>Des outils pour produire plus vite dans Blender.</h1>
+      <p>Ludopant conçoit et maintient des add-ons professionnels pour les artistes 3D et les studios : retopologie, organisation des scènes, bibliothèques de nodes.</p>
+    </div>
+  </section>
+
+  <section class="products" id="produits">
+    <div class="wrap">
+
+      <article class="product" id="openclare-pro">
+        <div>
+          <span class="status">En construction</span>
+          <h2>openclare PRO</h2>
+          <p class="tagline">Du sculpt à l'asset prêt pour le moteur, avec la retopologie d'openclare au cœur.</p>
+          <ul>
+            <li>Retopologie quad automatique par le moteur open source openclare</li>
+            <li>Pont vers Multires : le détail du sculpt reprojeté sur les niveaux</li>
+            <li>UV, bakes (hauteur, normales, AO), export et LOD pour les moteurs de jeu</li>
+            <li>Traitement par lots, exécution sans interface, licence et support studio</li>
+          </ul>
+          <p class="meta">Blender 4.2 et plus · Linux, Windows, macOS · La version Community reste gratuite.</p>
+          <p class="tickets"><a class="btn" href="https://github.com/marcgardent/ludopant.website/issues/new?template=openclare-pro.yml">Ouvrir un ticket</a> <a href="https://github.com/marcgardent/ludopant.website/issues?q=is%3Aissue+label%3Aopenclare-pro">Tous les tickets</a></p>
+        </div>
+        <div class="visual">
+          <img src="../assets/img/openclare-gallery.webp" alt="Comparaison d'openclare, QuadriFlow et AutoRemesher sur plusieurs modèles" loading="lazy">
+        </div>
+      </article>
+
+      <article class="product" id="hierarchical-group-outliner">
+        <div>
+          <span class="status">En construction</span>
+          <h2>Hierarchical Group Outliner</h2>
+          <p class="tagline">Un outliner par parents et enfants, comme dans les autres logiciels 3D.</p>
+          <ul>
+            <li>L'arbre des objets de la scène rangés sous leur parent, sans collections</li>
+            <li>Grouper et dégrouper au clavier, entrer dans un groupe et remonter au parent</li>
+            <li>Focus sur une branche : sélection et affichage limités à ses descendants</li>
+            <li>Fil d'Ariane dans la vue 3D pour savoir où l'on se trouve</li>
+          </ul>
+          <p class="meta">Blender 4.2 et plus · Panneau latéral (N) &gt; Outliner.</p>
+          <p class="tickets"><a class="btn" href="https://github.com/marcgardent/ludopant.website/issues/new?template=hierarchical-group-outliner.yml">Ouvrir un ticket</a> <a href="https://github.com/marcgardent/ludopant.website/issues?q=is%3Aissue+label%3Ahierarchical-group-outliner">Tous les tickets</a></p>
+        </div>
+        <div class="visual placeholder" aria-hidden="true">
+<div class="tree">▾ <b>Véhicule</b>
+    ▾ Châssis
+        ▸ Roue AV
+        ▸ Roue AR
+    ▾ Cabine
+        ▸ Portière
+        ▸ Volant</div>
+        </div>
+      </article>
+
+      <article class="product" id="basenode-packs">
+        <div>
+          <span class="status">En construction</span>
+          <h2>BaseNode Packs</h2>
+          <p class="tagline">Des bibliothèques de nodes prêtes à l'emploi, écrites en texte et fiables.</p>
+          <ul>
+            <li>Groupes Geometry Nodes, shaders et compositing livrés en packs thématiques</li>
+            <li>SDF 2D, courbes, motifs, encrage, déformations</li>
+            <li>Chaque groupe testé contre Blender à chaque version</li>
+            <li>S'appuie sur Base Node, le format texte <code>.bn</code> pour les graphes de nodes</li>
+          </ul>
+          <p class="meta">Blender 5.2 et plus.</p>
+          <p class="tickets"><a class="btn" href="https://github.com/marcgardent/ludopant.website/issues/new?template=basenode-packs.yml">Ouvrir un ticket</a> <a href="https://github.com/marcgardent/ludopant.website/issues?q=is%3Aissue+label%3Abasenode-packs">Tous les tickets</a></p>
+        </div>
+        <div class="visual">
+          <img src="../assets/img/basenode-diorama.webp" alt="Diorama animé généré par un graphe de nodes Base Node" loading="lazy">
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="about" id="studio">
+    <div class="wrap">
+      <h2>Le studio</h2>
+      <p>Ludopant Creative Studio est un studio indépendant basé à Lyon. Après la bande dessinée <em>Céleste et Jules</em>, il se consacre aux outils pour Blender : des add-ons pensés pour la production, mesurés et documentés.</p>
+      <p>Les produits ci-dessus sont en cours de développement. Pour être prévenu de leur sortie ou pour une licence studio, écrivez à <a href="mailto:contact@ludopant.com">contact@ludopant.com</a>.</p>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="mentions-legales.html">Mentions légales</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
