@@ -1,0 +1,218 @@
+<p><img src="https://ludopant.com/hierarchy-outliner/img/hero.webp" alt="An entered group: dashed frame around its contents, breadcrumb Scene › Car › Body, role outlines, and the Outliner panel" width="1116"></p>
+
+<h2>Groups that behave like groups. Finally, in Blender.</h2>
+
+<p>In Maya, 3ds Max, Illustrator or Figma, a group is something you step into. You double-click it, work on its contents, and the rest of the scene stays out of your way. In Blender, parenting gives you the hierarchy but not the workflow: the Outliner is busy with collections and view layers, and nothing stops you from grabbing the wrong object.</p>
+
+<p><strong>Hierarchy Outliner</strong> brings that workflow to Blender. You get an outliner that shows parents and children only, and groups you can enter and leave from the 3D view. What you work on is outlined by role, and components work like symbols. Every move has a shortcut, and nothing is written to your file that you did not ask for.</p>
+
+<h3>Picture this</h3>
+<p>You select the parts of a car's body and press <kbd>Ctrl</kbd>+<kbd>G</kbd>: they are now a group, under an Empty Sphere at their common parent. You double-click the group. The rest of the scene turns to grey wireframe and can no longer be clicked. A dashed frame shows the group's bounds, and the breadcrumb <em>Scene › Car › Body</em> shows where you are. You add a bolt with <kbd>Shift</kbd>+<kbd>A</kbd>, and it lands inside the group. <kbd>Backspace</kbd> takes you back up a level.</p>
+
+<p><img src="https://ludopant.com/hierarchy-outliner/img/screenshots/01-group-focus.webp" alt="Hierarchy Outliner in the 3D view: the group Body is entered, its contents are outlined in blue inside a dashed frame with the breadcrumb Scene › Car › Body · Group Focus; the rest of the scene is grey wireframe; the Outliner panel lists the tree" width="1200"></p>
+
+<h2>What you get</h2>
+
+<h3>A parent-and-child outliner</h3>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/outliner.webp" alt="Outliner rows Car, Body, Base, Wheels with state squares and eyes" width="1104"></p>
+<ul>
+  <li>Sidebar (<kbd>N</kbd>) › <strong>Outliner</strong>: your scene as a tree of parents and children. No collections, no view layers.</li>
+  <li>Three columns, like Blender's own Outliner: state (blue = the outliner's active group, yellow = active object, orange = selected), hierarchy, and an eye to hide or show.</li>
+  <li><kbd>Click</kbd> selects, <kbd>Shift</kbd>+<kbd>Click</kbd> adds or removes, <kbd>Ctrl</kbd>+<kbd>Click</kbd> selects a whole branch, a double-click enters the group, <kbd>Right-click</kbd> opens the Actions menu.</li>
+  <li>The search keeps the parents of what it finds, so you always see where an object lives.</li>
+</ul>
+
+<h3>Group and ungroup</h3>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/group.webp" alt="Three loose shapes gathered inside an Empty Sphere" width="1104"></p>
+<ul>
+  <li><kbd>Ctrl</kbd>+<kbd>G</kbd> groups the selection under a new Empty Sphere, at the closest common parent, centred on the objects. Nothing moves on screen.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>G</kbd> dissolves the selected groups: their children go to the group's parent.</li>
+  <li><strong>Add to Group…</strong> opens a searchable list of every group, with its full path, like <kbd>M</kbd> for collections. <strong>Leave Group</strong> moves the selection up one level.</li>
+  <li>Prefer to keep <kbd>Ctrl</kbd>+<kbd>G</kbd> for collections? Switch to the T layout: <kbd>Ctrl</kbd>+<kbd>T</kbd> groups, <kbd>Alt</kbd>+<kbd>T</kbd> ungroups.</li>
+</ul>
+
+<h3>Enter and exit groups</h3>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/navigate.webp" alt="Levels Scene, Car, Body, Base: Enter goes down, Backspace goes up" width="1104"></p>
+<ul>
+  <li><strong>Double-click</strong> an object in the 3D view to enter the group that holds it, one level at a time. Double-click empty space to step out.</li>
+  <li><kbd>Enter</kbd> does the same with the active object. <kbd>Backspace</kbd> goes up one level and selects the group you left.</li>
+  <li>Inside a group, the targets are its direct children. Clicking a deeper object picks the child that contains it, the way Illustrator works.</li>
+</ul>
+
+<h3>Focus modes</h3>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/pie.webp" alt="The V pie menu: Group Focus, Group View, Off, Role Outlines" width="1104"></p>
+<p>Choose what the rest of the scene does while you work in a group, from the <kbd>V</kbd> pie menu or the panel:</p>
+<ul>
+  <li><strong>Group Focus</strong>: only the group can be selected; everything else turns to grey wireframe (viewport only, the render is unchanged).</li>
+  <li><strong>Group View</strong>: only the group is shown, in every 3D view. The outliner still lists the rest, greyed, so you can switch groups.</li>
+  <li><strong>Off</strong>: entering a group is only for navigating; nothing is limited.</li>
+</ul>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/screenshots/03-group-view.webp" alt="Group View: only the group Body is visible in the 3D view, with its frame and the breadcrumb Scene › Car › Body · Group View" width="1200"></p>
+
+<h3>Role outlines</h3>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/roles.webp" alt="Objects outlined by role: child, grandchild, instance, outside" width="1104"></p>
+<ul>
+  <li>While you are inside a group, every object is outlined in the colour of its role: child, grandchild, or outside. Component instances get their own pair of colours.</li>
+  <li>The outlines are drawn on top of the viewport. Object colours and shading stay as they are, and there is no mode to leave.</li>
+  <li>Six colours, all adjustable. Toggle the outlines from the <kbd>V</kbd> pie; they hide with the viewport overlays.</li>
+</ul>
+
+<h3>Group frame and breadcrumb</h3>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/frame.webp" alt="A dashed frame around the active group with a clickable breadcrumb" width="1104"></p>
+<ul>
+  <li>A dashed frame wraps everything the active group contains, following the objects' silhouettes as you see them.</li>
+  <li>The breadcrumb on its corner shows the path, for example <em>Scene › Car › Body · Group Focus</em>.</li>
+  <li>Double-click a step to jump there. <em>Scene</em> takes you back to the root.</li>
+</ul>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/screenshots/02-group-focus-car.webp" alt="Group Focus one level up: the group Car is entered, Body and Wheels are its children, grandchildren shown as wireframe, frame and breadcrumb Scene › Car · Group Focus" width="1200"></p>
+
+<h3>Components</h3>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/components.webp" alt="One component source feeding three synchronised instances" width="1104"></p>
+<ul>
+  <li>Turn a group into a <strong>component</strong> with <em>Make Instanceable</em>. Its contents move to the <em>Components</em> layer and an instance takes their place.</li>
+  <li>Every instance shows the same source: edit it once and they all follow.</li>
+  <li>Add an instance from <kbd>Shift</kbd>+<kbd>A</kbd> › <strong>Component</strong>, or with <em>New Instance</em>, which follows the mouse like <kbd>Shift</kbd>+<kbd>D</kbd>.</li>
+  <li>Double-click an instance twice (or press <kbd>Enter</kbd> twice) to edit its component in isolation. <kbd>Backspace</kbd> from the top, or <em>Done</em>, brings the scene back.</li>
+  <li><em>Detach</em> turns an instance back into real objects. The Components panel lists every component with its instance count.</li>
+</ul>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/screenshots/05-component-edit.webp" alt="Editing the Street Lamp component in isolation: the rest of the scene is hidden, the breadcrumb reads Component Street Lamp › Street Lamp, the panel shows a Done button" width="1200"></p>
+
+<h3>Groups that behave</h3>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/behave.webp" alt="A hidden group hides its contents; deleting a group removes everything inside" width="1104"></p>
+<ul>
+  <li><strong>Hide a group, hide its contents</strong>: with the eye, <kbd>H</kbd> or any other way. Children keep their own state and come back with the group. <kbd>Alt</kbd>+<kbd>H</kbd> reveals everything.</li>
+  <li><strong>Delete a group, delete its contents</strong>: <kbd>X</kbd> and <kbd>Del</kbd> remove an Empty with everything under it, with the same confirmations as Blender. <kbd>Shift</kbd>+<kbd>X</kbd> deletes it everywhere.</li>
+  <li><strong>New objects join the current group</strong>: anything you add (<kbd>Shift</kbd>+<kbd>A</kbd>, import, paste) lands next to the active object, inside the group you are in, like a new layer in a layer stack.</li>
+</ul>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/screenshots/07-groups-menu.webp" alt="The Groups menu (Ctrl+W): Group, Ungroup, Add to Group, Leave Group, Enter, Go Up, Exit to Root, Make Instanceable, New Instance, Detach" width="1200"></p>
+
+<h2>Nothing written to your file</h2>
+<p>Focus modes, ghosts, frames and outlines only change what the viewport shows. Switch back to Off and everything is exactly as it was: an object you had hidden or locked yourself stays hidden or locked. Collections and view layers are never touched, so your files stay clean for everyone else on the team.</p>
+<p><img src="https://ludopant.com/hierarchy-outliner/img/screenshots/04-scene-root.webp" alt="The demo scene at the root: a car, a tree, crates and two street lamp instances, with the Outliner panel showing the full tree" width="1200"></p>
+
+<h2>Shortcuts</h2>
+<p>In the 3D view, Object Mode. Each one can be turned off in the add-on preferences.</p>
+<table>
+  <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>G</kbd></td><td>Group</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>G</kbd></td><td>Ungroup</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd> / <kbd>Alt</kbd>+<kbd>T</kbd></td><td>Collections: Create New Collection / Remove from Collection (G layout)</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Groups menu</td></tr>
+    <tr><td><kbd>Enter</kbd></td><td>Enter the group of the active object, one level per press</td></tr>
+    <tr><td><kbd>Backspace</kbd></td><td>Go up one level</td></tr>
+    <tr><td>Double-click an object</td><td>Enter its group, one level per double-click</td></tr>
+    <tr><td>Double-click empty space</td><td>Go up one level</td></tr>
+    <tr><td><kbd>V</kbd></td><td>View pie: Group Focus (left), Group View (right), Off (down), Role Outlines (up)</td></tr>
+    <tr><td><kbd>Shift</kbd>+<kbd>A</kbd> › Component</td><td>Add a component instance at the 3D cursor, in the current group</td></tr>
+    <tr><td><kbd>H</kbd> / <kbd>Alt</kbd>+<kbd>H</kbd></td><td>Hide (with contents) / reveal all</td></tr>
+    <tr><td><kbd>X</kbd>, <kbd>Del</kbd> / <kbd>Shift</kbd>+<kbd>X</kbd>, <kbd>Shift</kbd>+<kbd>Del</kbd></td><td>Delete a group with its contents / delete it everywhere</td></tr>
+  </tbody>
+</table>
+
+<h2>Documentation</h2>
+
+<h3>Installation</h3>
+<ol>
+  <li>Download <code>hierarchy_outliner-1.27.1.zip</code> from your Superhive account. Do not unzip it.</li>
+  <li>In Blender 4.2 or later, drag the zip file into the Blender window and confirm. Or go to <em>Edit › Preferences › Get Extensions</em>, open the menu at the top right, choose <em>Install from Disk…</em> and select the zip.</li>
+  <li>Make sure <strong>Hierarchy Outliner</strong> is enabled in the list of extensions.</li>
+  <li>In the 3D view, press <kbd>N</kbd> to open the sidebar and click the <strong>Outliner</strong> tab.</li>
+</ol>
+<p>To update, install the new zip the same way: it replaces the previous version.</p>
+
+<h3>Getting started in one minute</h3>
+<ol>
+  <li>Select a few objects and press <kbd>Ctrl</kbd>+<kbd>G</kbd>: a group appears in the Outliner panel.</li>
+  <li>Double-click one of the grouped objects in the 3D view: you are inside the group, in Group Focus.</li>
+  <li>Click inside the group: you select its direct children. Double-click again to go one level deeper.</li>
+  <li>Press <kbd>V</kbd> to switch between Group Focus, Group View and Off.</li>
+  <li>Press <kbd>Backspace</kbd> to go back up, or click the home button in the panel to return to the root.</li>
+</ol>
+
+<h3>The Outliner panel</h3>
+<ul>
+  <li><strong>Top row</strong>: the group you are in, a button to go up (<em>Go Up</em>) and one to return to the root (<em>Exit to Root</em>). While a component is being edited, a <em>Done</em> button replaces them.</li>
+  <li><strong>Focus mode</strong>: three buttons, only one active: Off (×), Group Focus, Group View.</li>
+  <li><strong>The list</strong>: one row per object, children under their parent. The triangle folds a branch. Hidden objects stay in the list, greyed; a click makes them the active row without selecting them in the 3D view.</li>
+  <li><strong>The outliner's active group</strong> (blue square) is the last row you double-clicked. A simple click or a selection in the 3D view does not change it.</li>
+  <li><strong>Actions menu</strong> (right-click a row): for the 3D view selection, Group, Ungroup, Add to Group…, Leave Group. For the row itself, Add Selection Here, Make Instanceable, Edit Component, New Instance, Detach, Leave Group, Delete. Entries that do not apply are greyed.</li>
+</ul>
+
+<h3>Entering groups: the rules</h3>
+<ul>
+  <li>A double-click on an object activates the ancestor of that object that sits just under the active group (without an active group: its topmost ancestor). That ancestor becomes the active group and you are inside it. One level per double-click; a leaf object is only selected.</li>
+  <li><kbd>Enter</kbd> follows the same rule with the active object, which stays the target until you reach it.</li>
+  <li><kbd>Backspace</kbd> (Go Up) is an entry into the level above, with the same rules; the group you left becomes the active object. At the root, it leaves all groups.</li>
+  <li>On a component instance, the first double-click (or <kbd>Enter</kbd>) activates it, the second edits its component.</li>
+</ul>
+
+<h3>Add objects to a group</h3>
+<ul>
+  <li><strong>Add to Group…</strong> (Groups menu, Actions menu): pick any group from a searchable list, the active group first.</li>
+  <li><strong>Add Selection Here</strong>: double-click a group in the Outliner panel to make it the active group, select objects in the 3D view, then right-click the group › <em>Add Selection Here</em>. This also works on an empty Empty.</li>
+  <li><strong>Leave Group</strong>: the selection moves up one level, to the parent of its group.</li>
+  <li>In every case, nothing moves on screen.</li>
+</ul>
+
+<h3>Components: the workflow</h3>
+<ol>
+  <li>Build a group, then right-click it in the Outliner panel › <em>Make Instanceable</em>. Its branch moves to the <em>Components</em> layer (a collection excluded from the view layer) and an instance takes its place, at the same spot and under the same parent.</li>
+  <li>Add more instances with <em>New Instance</em> or <kbd>Shift</kbd>+<kbd>A</kbd> › <em>Component</em>.</li>
+  <li>To edit, double-click an instance twice. The rest of the scene is hidden in every 3D view and the view frames the source. Objects you add now go into the component.</li>
+  <li>To finish, press <kbd>Backspace</kbd> at the top of the component, double-click empty space, or click <em>Done</em>. The scene comes back as it was.</li>
+  <li>The <strong>Components</strong> panel lists every component with its instance count (×N). Use the pencil to edit, the bin to delete a component with all its instances (after confirmation), and double-click a name to rename it.</li>
+</ol>
+<p>Component sources appear neither in the 3D view, nor in renders, nor in the Outliner panel (except while editing). Deleting an instance keeps its source in the Components layer.</p>
+
+<h3>Settings</h3>
+<p>All settings are in the <strong>Feature Toggles</strong> panel (under Components) and in the add-on preferences; both show the same options.</p>
+<table>
+  <thead><tr><th>Setting</th><th>Choices</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>Inside a group, target</td><td>Children (direct children only) · All Children (any descendant)</td><td>Children</td></tr>
+    <tr><td>On Enter</td><td>Group Focus (switch from Off to Group Focus) · Keep Mode</td><td>Group Focus</td></tr>
+    <tr><td>Select All on Enter</td><td>On · Off</td><td>Off</td></tr>
+    <tr><td>Group Focus: the rest as grey wireframe</td><td>On · Off</td><td>On</td></tr>
+    <tr><td>New objects join the current group</td><td>On · Off</td><td>On</td></tr>
+    <tr><td>Role Outlines</td><td>On · Off, six colours</td><td>On</td></tr>
+    <tr><td>Group Frame</td><td>On · Off</td><td>On</td></tr>
+    <tr><td>Hiding a group hides its contents</td><td>On · Off</td><td>On</td></tr>
+    <tr><td>Group Keys</td><td>G · T · None</td><td>G</td></tr>
+    <tr><td>Delete a Group</td><td>Whole Group · Like Blender</td><td>Whole Group</td></tr>
+    <tr><td>Shortcuts</td><td>Enter / Backspace / double-click, <kbd>Ctrl</kbd>+<kbd>W</kbd> menu, <kbd>V</kbd> pie: each on or off</td><td>All on</td></tr>
+  </tbody>
+</table>
+
+<h2>FAQ</h2>
+
+<h3>Does it change my scene or my collections?</h3>
+<p>No. Groups are ordinary Empties with ordinary parenting, so your files open fine without the add-on. Focus modes, ghosts, outlines and frames are display only, and collections and view layers are never touched. The only things the add-on creates are what you ask for: the Empties of your groups and the Components layer.</p>
+
+<h3>Does it work with scenes I already have?</h3>
+<p>Yes. Any parent with children is a group as far as the add-on is concerned, whatever its type.</p>
+
+<h3>I use <kbd>Ctrl</kbd>+<kbd>G</kbd> for collections. What happens to it?</h3>
+<p>With the default G layout, <em>Create New Collection</em> moves to <kbd>Ctrl</kbd>+<kbd>T</kbd> and <em>Remove from Collection</em> to <kbd>Alt</kbd>+<kbd>T</kbd>. If you would rather keep Blender's keys, pick the T layout or None in the preferences. <kbd>Alt</kbd>+<kbd>G</kbd> always keeps <em>Clear Location</em>.</p>
+
+<h3>Does Group Focus or Group View affect renders?</h3>
+<p>No. The grey wireframe, hidden objects and outlines only affect the viewport. Selection limits are lifted as soon as you switch back to Off or leave the group.</p>
+
+<h3>Can I turn a feature off?</h3>
+<p>Yes. Every feature and every shortcut can be switched off on its own in Feature Toggles or the add-on preferences.</p>
+
+<h3>Which Blender versions are supported?</h3>
+<p>Blender 4.2 and later. The add-on is a Blender extension: install the zip from disk or drag and drop it.</p>
+
+<h3>Can I edit a component that comes from a linked library?</h3>
+<p>No. Linked collections cannot be edited from the file that links them; edit them in their own file.</p>
+
+<h2>Changelog</h2>
+<ul>
+  <li><strong>1.27.1</strong>: the group frame and the role outlines share the same Empty shapes and cache.</li>
+  <li><strong>1.27.0</strong>: clickable breadcrumb on the group frame; frame drawn in the Child colour.</li>
+  <li><strong>1.26.0</strong>: dashed frame around the active group.</li>
+  <li><strong>1.25.0</strong>: breadcrumb of the active group in the 3D view.</li>
+  <li><strong>1.24.3</strong>: a group is now an Empty Sphere.</li>
+  <li><strong>1.24.0</strong>: role outlines drawn on the GPU, replacing the former Colored mode.</li>
+</ul>
