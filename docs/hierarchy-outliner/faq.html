@@ -29,6 +29,8 @@
   border: 1px solid var(--line); border-radius: 8px; padding: 6px 14px; }
 .doc .tabs a:hover { color: var(--text); }
 .doc .tabs a[aria-current] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.doc .cover { width: min(1200px, calc(100vw - 32px)); margin: 0 0 40px 50%; transform: translateX(-50%); max-width: none; }
+.doc .cover img { width: 100%; border-radius: 14px; border: 1px solid var(--line); }
 </style>
 </head>
 <body>
@@ -48,6 +50,7 @@
 <main class="doc">
 <div class="wrap">
 <p class="crumb"><a href="../#products">Products</a> › Hierarchical Group Outliner</p>
+
 <h1>FAQ</h1>
 <ul class="tabs"><li><a href="index.html">Overview</a></li><li><a href="documentation.html">Documentation</a></li><li><a href="faq.html" aria-current="page">FAQ</a></li></ul>
 <h3>How do I get support?</h3>

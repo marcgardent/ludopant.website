@@ -1,6 +1,6 @@
 <h2>Installation</h2>
 <ol>
-  <li>Download <code>hierarchy_outliner-1.27.16.zip</code> from your Superhive account. Do not unzip it.</li>
+  <li>Download <code>hierarchy_outliner-1.27.17.zip</code> from your Superhive account. Do not unzip it.</li>
   <li>In Blender 4.2 or later, drag the zip file into the Blender window and confirm. Or go to <em>Edit › Preferences › Get Extensions</em>, open the menu at the top right, choose <em>Install from Disk…</em> and select the zip.</li>
   <li>Make sure <strong>Hierarchical Group Outliner</strong> is enabled in the list of extensions.</li>
   <li>In the 3D view, press <kbd>N</kbd> to open the sidebar and click the <strong>Outliner</strong> tab. The same panel is also in Properties › Scene, under the name <em>Hierarchical Group Outliner</em>.</li>
@@ -92,6 +92,7 @@
 
 <h2>Changelog</h2>
 <ul>
+  <li><strong>1.27.17</strong>: bug fixes. Large scenes no longer slow down (a scene of 3000 objects took two seconds per change). Detach works on a hidden or locked instance instead of emptying it. Ungroup no longer fails on nested groups. Making the entered group instanceable keeps the scene selectable. A component opened from inside another one returns to that one when done. Objects keep their shape when grouped under a parent scaled unevenly. Group works on an object also linked in another scene, and double-clicking a group of an excluded collection only selects it.</li>
   <li><strong>1.27.16</strong>: the instance violet is now really violet (hue 0.73 on the color's own values, it was still bluish). The group frame and breadcrumb are drawn in the same shade as the outlines, no longer darker. Inside a component being edited, every outline is violet.</li>
   <li><strong>1.27.15</strong>: Select All on Enter is on by default.</li>
   <li><strong>1.27.14</strong>: the three instance colors share one violet hue (0.73 in Blender's color picker).</li>

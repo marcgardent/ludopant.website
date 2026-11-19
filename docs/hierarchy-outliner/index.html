@@ -29,6 +29,8 @@
   border: 1px solid var(--line); border-radius: 8px; padding: 6px 14px; }
 .doc .tabs a:hover { color: var(--text); }
 .doc .tabs a[aria-current] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.doc .cover { width: min(1200px, calc(100vw - 32px)); margin: 0 0 40px 50%; transform: translateX(-50%); max-width: none; }
+.doc .cover img { width: 100%; border-radius: 14px; border: 1px solid var(--line); }
 </style>
 </head>
 <body>
@@ -48,9 +50,10 @@
 <main class="doc">
 <div class="wrap">
 <p class="crumb"><a href="../#products">Products</a> › Hierarchical Group Outliner</p>
+<span class="status ready">Production Ready</span>
 <h1>Hierarchical Group Outliner</h1>
 <ul class="tabs"><li><a href="index.html" aria-current="page">Overview</a></li><li><a href="documentation.html">Documentation</a></li><li><a href="faq.html">FAQ</a></li></ul>
-<p><picture><source srcset="img/dark/hero.svg" media="(prefers-color-scheme: dark)"><img src="img/hero.svg" alt="An entered group: dashed frame around its contents, breadcrumb Scene › Car › Body, role outlines, and the Outliner panel" width="1116"></picture></p>
+<p class="cover"><img src="img/cover.webp" alt="Hierarchical Group Outliner: the group Car entered in Blender's 3D view, with its dashed frame, breadcrumb and outlines, the Outliner panel, and a graph of the scene's levels" width="2000" height="1000"></p>
 
 <h2>Groups that behave like groups. Finally, in Blender.</h2>
 
