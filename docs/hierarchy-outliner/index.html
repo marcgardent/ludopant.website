@@ -3,30 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hierarchy Outliner</title>
+<title>Hierarchy Outliner — Ludopant</title>
+<meta name="description" content="Hierarchy Outliner, a Blender add-on: a parent-and-child outliner, groups you enter and leave, role outlines and components.">
+<link rel="icon" href="../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
 <style>
-:root { color-scheme: light; }
-* { box-sizing: border-box; }
-body { margin: 0; background: #fff; color: #222; font: 16px/1.6 Arial, Helvetica, sans-serif; }
-main { max-width: 860px; margin: 0 auto; padding: 32px 20px 64px; }
-h1, h2, h3 { line-height: 1.25; }
-h2 { margin-top: 2.2em; }
-h3 { margin-top: 1.8em; }
-img { display: block; max-width: 100%; height: auto; }
-p > img { margin: 0 auto; }
-img + ul, img + p { margin-top: 1em; }
-kbd { font: 0.85em monospace; padding: 1px 5px; border: 1px solid #bbb; border-bottom-width: 2px; border-radius: 4px; background: #f4f4f4; }
-table { border-collapse: collapse; width: 100%; }
-th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #ddd; vertical-align: top; }
-code { font-family: monospace; }
-.note { color: #666; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 12px; }
+.doc { padding: 40px 0 80px; }
+.doc .wrap { max-width: 880px; }
+.doc .crumb { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
+.doc .crumb a { color: var(--muted); }
+.doc h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 24px; }
+.doc h2 { font-size: 28px; letter-spacing: -.01em; margin: 56px 0 12px; line-height: 1.2; }
+.doc h3 { font-size: 20px; margin: 36px 0 10px; line-height: 1.3; }
+.doc p, .doc li { max-width: 72ch; }
+.doc img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+.doc img[src*="screenshots/"] { border-radius: 10px; border: 1px solid var(--line); }
+.doc kbd { font: 600 .82em ui-monospace, "SF Mono", Menlo, monospace; padding: 1px 6px; border: 1px solid var(--line);
+  border-bottom-width: 2px; border-radius: 5px; background: var(--surface); }
+.doc table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.doc th, .doc td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.doc th { color: var(--muted); font-weight: 600; }
+.doc code { font: .9em ui-monospace, "SF Mono", Menlo, monospace; }
 </style>
 </head>
 <body>
-<main>
-<p class="note"><a href="../">Ludopant</a> › Hierarchy Outliner</p>
+
+<header class="top">
+  <div class="wrap">
+    <a href="../" aria-label="Ludopant, home"><img class="logo" src="../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../#products">Products</a>
+      <a href="../#studio">Studio</a>
+      <a href="../#contact">Contact</a>
+      <a class="lang" href="../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc">
+<div class="wrap">
+<p class="crumb"><a href="../#products">Products</a> › Hierarchy Outliner</p>
 <h1>Hierarchy Outliner</h1>
-<p><img src="img/hero.webp" alt="An entered group: dashed frame around its contents, breadcrumb Scene › Car › Body, role outlines, and the Outliner panel" width="1116"></p>
+<p><picture><source srcset="img/dark/hero.svg" media="(prefers-color-scheme: dark)"><img src="img/hero.svg" alt="An entered group: dashed frame around its contents, breadcrumb Scene › Car › Body, role outlines, and the Outliner panel" width="1116"></picture></p>
 
 <h2>Groups that behave like groups. Finally, in Blender.</h2>
 
@@ -42,7 +60,7 @@ code { font-family: monospace; }
 <h2>What you get</h2>
 
 <h3>A parent-and-child outliner</h3>
-<p><img src="img/outliner.webp" alt="Outliner rows Car, Body, Base, Wheels with state squares and eyes" width="1104"></p>
+<p><picture><source srcset="img/dark/outliner.svg" media="(prefers-color-scheme: dark)"><img src="img/outliner.svg" alt="Outliner rows Car, Body, Base, Wheels with state squares and eyes" width="1104"></picture></p>
 <ul>
   <li>Sidebar (<kbd>N</kbd>) › <strong>Outliner</strong>: your scene as a tree of parents and children. No collections, no view layers.</li>
   <li>Three columns, like Blender's own Outliner: state (blue = the outliner's active group, yellow = active object, orange = selected), hierarchy, and an eye to hide or show.</li>
@@ -51,7 +69,7 @@ code { font-family: monospace; }
 </ul>
 
 <h3>Group and ungroup</h3>
-<p><img src="img/group.webp" alt="Three loose shapes gathered inside an Empty Sphere" width="1104"></p>
+<p><picture><source srcset="img/dark/group.svg" media="(prefers-color-scheme: dark)"><img src="img/group.svg" alt="Three loose shapes gathered inside an Empty Sphere" width="1104"></picture></p>
 <ul>
   <li><kbd>Ctrl</kbd>+<kbd>G</kbd> groups the selection under a new Empty Sphere, at the closest common parent, centred on the objects. Nothing moves on screen.</li>
   <li><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>G</kbd> dissolves the selected groups: their children go to the group's parent.</li>
@@ -60,7 +78,7 @@ code { font-family: monospace; }
 </ul>
 
 <h3>Enter and exit groups</h3>
-<p><img src="img/navigate.webp" alt="Levels Scene, Car, Body, Base: Enter goes down, Backspace goes up" width="1104"></p>
+<p><picture><source srcset="img/dark/navigate.svg" media="(prefers-color-scheme: dark)"><img src="img/navigate.svg" alt="Levels Scene, Car, Body, Base: Enter goes down, Backspace goes up" width="1104"></picture></p>
 <ul>
   <li><strong>Double-click</strong> an object in the 3D view to enter the group that holds it, one level at a time. Double-click empty space to step out.</li>
   <li><kbd>Enter</kbd> does the same with the active object. <kbd>Backspace</kbd> goes up one level and selects the group you left.</li>
@@ -68,7 +86,7 @@ code { font-family: monospace; }
 </ul>
 
 <h3>Focus modes</h3>
-<p><img src="img/pie.webp" alt="The V pie menu: Group Focus, Group View, Off, Role Outlines" width="1104"></p>
+<p><picture><source srcset="img/dark/pie.svg" media="(prefers-color-scheme: dark)"><img src="img/pie.svg" alt="The V pie menu: Group Focus, Group View, Off, Role Outlines" width="1104"></picture></p>
 <p>Choose what the rest of the scene does while you work in a group, from the <kbd>V</kbd> pie menu or the panel:</p>
 <ul>
   <li><strong>Group Focus</strong>: only the group can be selected; everything else turns to grey wireframe (viewport only, the render is unchanged).</li>
@@ -78,7 +96,7 @@ code { font-family: monospace; }
 <p><img src="img/screenshots/03-group-view.webp" alt="Group View: only the group Body is visible in the 3D view, with its frame and the breadcrumb Scene › Car › Body · Group View" width="1200"></p>
 
 <h3>Role outlines</h3>
-<p><img src="img/roles.webp" alt="Objects outlined by role: child, grandchild, instance, outside" width="1104"></p>
+<p><picture><source srcset="img/dark/roles.svg" media="(prefers-color-scheme: dark)"><img src="img/roles.svg" alt="Objects outlined by role: child, grandchild, instance, outside" width="1104"></picture></p>
 <ul>
   <li>While you are inside a group, every object is outlined in the colour of its role: child, grandchild, or outside. Component instances get their own pair of colours.</li>
   <li>The outlines are drawn on top of the viewport. Object colours and shading stay as they are, and there is no mode to leave.</li>
@@ -86,7 +104,7 @@ code { font-family: monospace; }
 </ul>
 
 <h3>Group frame and breadcrumb</h3>
-<p><img src="img/frame.webp" alt="A dashed frame around the active group with a clickable breadcrumb" width="1104"></p>
+<p><picture><source srcset="img/dark/frame.svg" media="(prefers-color-scheme: dark)"><img src="img/frame.svg" alt="A dashed frame around the active group with a clickable breadcrumb" width="1104"></picture></p>
 <ul>
   <li>A dashed frame wraps everything the active group contains, following the objects' silhouettes as you see them.</li>
   <li>The breadcrumb on its corner shows the path, for example <em>Scene › Car › Body · Group Focus</em>.</li>
@@ -95,7 +113,7 @@ code { font-family: monospace; }
 <p><img src="img/screenshots/02-group-focus-car.webp" alt="Group Focus one level up: the group Car is entered, Body and Wheels are its children, grandchildren shown as wireframe, frame and breadcrumb Scene › Car · Group Focus" width="1200"></p>
 
 <h3>Components</h3>
-<p><img src="img/components.webp" alt="One component source feeding three synchronised instances" width="1104"></p>
+<p><picture><source srcset="img/dark/components.svg" media="(prefers-color-scheme: dark)"><img src="img/components.svg" alt="One component source feeding three synchronised instances" width="1104"></picture></p>
 <ul>
   <li>Turn a group into a <strong>component</strong> with <em>Make Instanceable</em>. Its contents move to the <em>Components</em> layer and an instance takes their place.</li>
   <li>Every instance shows the same source: edit it once and they all follow.</li>
@@ -106,7 +124,7 @@ code { font-family: monospace; }
 <p><img src="img/screenshots/05-component-edit.webp" alt="Editing the Street Lamp component in isolation: the rest of the scene is hidden, the breadcrumb reads Component Street Lamp › Street Lamp, the panel shows a Done button" width="1200"></p>
 
 <h3>Groups that behave</h3>
-<p><img src="img/behave.webp" alt="A hidden group hides its contents; deleting a group removes everything inside" width="1104"></p>
+<p><picture><source srcset="img/dark/behave.svg" media="(prefers-color-scheme: dark)"><img src="img/behave.svg" alt="A hidden group hides its contents; deleting a group removes everything inside" width="1104"></picture></p>
 <ul>
   <li><strong>Hide a group, hide its contents</strong>: with the eye, <kbd>H</kbd> or any other way. Children keep their own state and come back with the group. <kbd>Alt</kbd>+<kbd>H</kbd> reveals everything.</li>
   <li><strong>Delete a group, delete its contents</strong>: <kbd>X</kbd> and <kbd>Del</kbd> remove an Empty with everything under it, with the same confirmations as Blender. <kbd>Shift</kbd>+<kbd>X</kbd> deletes it everywhere.</li>
@@ -245,6 +263,15 @@ code { font-family: monospace; }
   <li><strong>1.24.0</strong>: role outlines drawn on the GPU, replacing the former Colored mode.</li>
 </ul>
 
+</div>
 </main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+  </div>
+</footer>
+
 </body>
 </html>
