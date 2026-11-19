@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hierarchy Outliner — Documentation — Ludopant</title>
+<meta name="description" content="Install and use Hierarchy Outliner: Outliner panel, entering groups, components, settings, shortcuts.">
+<link rel="icon" href="../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.doc { padding: 40px 0 80px; }
+.doc .wrap { max-width: 880px; }
+.doc .crumb { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
+.doc .crumb a { color: var(--muted); }
+.doc h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 24px; }
+.doc h2 { font-size: 28px; letter-spacing: -.01em; margin: 56px 0 12px; line-height: 1.2; }
+.doc h3 { font-size: 20px; margin: 36px 0 10px; line-height: 1.3; }
+.doc p, .doc li { max-width: 72ch; }
+.doc img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+.doc img[src*="screenshots/"] { border-radius: 10px; border: 1px solid var(--line); }
+.doc kbd { font: 600 .82em ui-monospace, "SF Mono", Menlo, monospace; padding: 1px 6px; border: 1px solid var(--line);
+  border-bottom-width: 2px; border-radius: 5px; background: var(--surface); }
+.doc table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.doc th, .doc td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.doc th { color: var(--muted); font-weight: 600; }
+.doc code { font: .9em ui-monospace, "SF Mono", Menlo, monospace; }
+.doc .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 32px; padding: 0; list-style: none; }
+.doc .tabs a { display: inline-block; text-decoration: none; font-size: 15px; font-weight: 600; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 8px; padding: 6px 14px; }
+.doc .tabs a:hover { color: var(--text); }
+.doc .tabs a[aria-current] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a href="../" aria-label="Ludopant, home"><img class="logo" src="../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../#products">Products</a>
+      <a href="../#studio">Studio</a>
+      <a href="../#contact">Contact</a>
+      <a class="lang" href="../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc">
+<div class="wrap">
+<p class="crumb"><a href="../#products">Products</a> › Hierarchy Outliner</p>
+<h1>Documentation</h1>
+<ul class="tabs"><li><a href="index.html">Overview</a></li><li><a href="documentation.html" aria-current="page">Documentation</a></li><li><a href="faq.html">FAQ</a></li></ul>
+<h2>Installation</h2>
+<ol>
+  <li>Download <code>hierarchy_outliner-1.27.1.zip</code> from your Superhive account. Do not unzip it.</li>
+  <li>In Blender 4.2 or later, drag the zip file into the Blender window and confirm. Or go to <em>Edit › Preferences › Get Extensions</em>, open the menu at the top right, choose <em>Install from Disk…</em> and select the zip.</li>
+  <li>Make sure <strong>Hierarchy Outliner</strong> is enabled in the list of extensions.</li>
+  <li>In the 3D view, press <kbd>N</kbd> to open the sidebar and click the <strong>Outliner</strong> tab.</li>
+</ol>
+<p>To update, install the new zip the same way: it replaces the previous version.</p>
+
+<h2>Getting started in one minute</h2>
+<ol>
+  <li>Select a few objects and press <kbd>Ctrl</kbd>+<kbd>G</kbd>: a group appears in the Outliner panel.</li>
+  <li>Double-click one of the grouped objects in the 3D view: you are inside the group, in Group Focus.</li>
+  <li>Click inside the group: you select its direct children. Double-click again to go one level deeper.</li>
+  <li>Press <kbd>V</kbd> to switch between Group Focus, Group View and Off.</li>
+  <li>Press <kbd>Backspace</kbd> to go back up, or click the home button in the panel to return to the root.</li>
+</ol>
+
+<h2>The Outliner panel</h2>
+<ul>
+  <li><strong>Top row</strong>: the group you are in, a button to go up (<em>Go Up</em>) and one to return to the root (<em>Exit to Root</em>). While a component is being edited, a <em>Done</em> button replaces them.</li>
+  <li><strong>Focus mode</strong>: three buttons, only one active: Off (×), Group Focus, Group View.</li>
+  <li><strong>The list</strong>: one row per object, children under their parent. The triangle folds a branch. Hidden objects stay in the list, greyed; a click makes them the active row without selecting them in the 3D view.</li>
+  <li><strong>The outliner's active group</strong> (blue square) is the last row you double-clicked. A simple click or a selection in the 3D view does not change it.</li>
+  <li><strong>Actions menu</strong> (right-click a row): for the 3D view selection, Group, Ungroup, Add to Group…, Leave Group. For the row itself, Add Selection Here, Make Instanceable, Edit Component, New Instance, Detach, Leave Group, Delete. Entries that do not apply are greyed.</li>
+</ul>
+
+<h2>Entering groups: the rules</h2>
+<ul>
+  <li>A double-click on an object activates the ancestor of that object that sits just under the active group (without an active group: its topmost ancestor). That ancestor becomes the active group and you are inside it. One level per double-click; a leaf object is only selected.</li>
+  <li><kbd>Enter</kbd> follows the same rule with the active object, which stays the target until you reach it.</li>
+  <li><kbd>Backspace</kbd> (Go Up) is an entry into the level above, with the same rules; the group you left becomes the active object. At the root, it leaves all groups.</li>
+  <li>On a component instance, the first double-click (or <kbd>Enter</kbd>) activates it, the second edits its component.</li>
+</ul>
+
+<h2>Add objects to a group</h2>
+<ul>
+  <li><strong>Add to Group…</strong> (Groups menu, Actions menu): pick any group from a searchable list, the active group first.</li>
+  <li><strong>Add Selection Here</strong>: double-click a group in the Outliner panel to make it the active group, select objects in the 3D view, then right-click the group › <em>Add Selection Here</em>. This also works on an empty Empty.</li>
+  <li><strong>Leave Group</strong>: the selection moves up one level, to the parent of its group.</li>
+  <li>In every case, nothing moves on screen.</li>
+</ul>
+
+<h2>Components: the workflow</h2>
+<ol>
+  <li>Build a group, then right-click it in the Outliner panel › <em>Make Instanceable</em>. Its branch moves to the <em>Components</em> layer (a collection excluded from the view layer) and an instance takes its place, at the same spot and under the same parent.</li>
+  <li>Add more instances with <em>New Instance</em> or <kbd>Shift</kbd>+<kbd>A</kbd> › <em>Component</em>.</li>
+  <li>To edit, double-click an instance twice. The rest of the scene is hidden in every 3D view and the view frames the source. Objects you add now go into the component.</li>
+  <li>To finish, press <kbd>Backspace</kbd> at the top of the component, double-click empty space, or click <em>Done</em>. The scene comes back as it was.</li>
+  <li>The <strong>Components</strong> panel lists every component with its instance count (×N). Use the pencil to edit, the bin to delete a component with all its instances (after confirmation), and double-click a name to rename it.</li>
+</ol>
+<p>Component sources appear neither in the 3D view, nor in renders, nor in the Outliner panel (except while editing). Deleting an instance keeps its source in the Components layer.</p>
+
+<h2>Settings</h2>
+<p>All settings are in the <strong>Feature Toggles</strong> panel (under Components) and in the add-on preferences; both show the same options.</p>
+<table>
+  <thead><tr><th>Setting</th><th>Choices</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>Inside a group, target</td><td>Children (direct children only) · All Children (any descendant)</td><td>Children</td></tr>
+    <tr><td>On Enter</td><td>Group Focus (switch from Off to Group Focus) · Keep Mode</td><td>Group Focus</td></tr>
+    <tr><td>Select All on Enter</td><td>On · Off</td><td>Off</td></tr>
+    <tr><td>Group Focus: the rest as grey wireframe</td><td>On · Off</td><td>On</td></tr>
+    <tr><td>New objects join the current group</td><td>On · Off</td><td>On</td></tr>
+    <tr><td>Role Outlines</td><td>On · Off, six colours</td><td>On</td></tr>
+    <tr><td>Group Frame</td><td>On · Off</td><td>On</td></tr>
+    <tr><td>Hiding a group hides its contents</td><td>On · Off</td><td>On</td></tr>
+    <tr><td>Group Keys</td><td>G · T · None</td><td>G</td></tr>
+    <tr><td>Delete a Group</td><td>Whole Group · Like Blender</td><td>Whole Group</td></tr>
+    <tr><td>Shortcuts</td><td>Enter / Backspace / double-click, <kbd>Ctrl</kbd>+<kbd>W</kbd> menu, <kbd>V</kbd> pie: each on or off</td><td>All on</td></tr>
+  </tbody>
+</table>
+
+<h2>Shortcuts</h2>
+<p>In the 3D view, Object Mode. Each one can be turned off in the add-on preferences.</p>
+<table>
+  <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>G</kbd></td><td>Group</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>G</kbd></td><td>Ungroup</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd> / <kbd>Alt</kbd>+<kbd>T</kbd></td><td>Collections: Create New Collection / Remove from Collection (G layout)</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Groups menu</td></tr>
+    <tr><td><kbd>Enter</kbd></td><td>Enter the group of the active object, one level per press</td></tr>
+    <tr><td><kbd>Backspace</kbd></td><td>Go up one level</td></tr>
+    <tr><td>Double-click an object</td><td>Enter its group, one level per double-click</td></tr>
+    <tr><td>Double-click empty space</td><td>Go up one level</td></tr>
+    <tr><td><kbd>V</kbd></td><td>View pie: Group Focus (left), Group View (right), Off (down), Role Outlines (up)</td></tr>
+    <tr><td><kbd>Shift</kbd>+<kbd>A</kbd> › Component</td><td>Add a component instance at the 3D cursor, in the current group</td></tr>
+    <tr><td><kbd>H</kbd> / <kbd>Alt</kbd>+<kbd>H</kbd></td><td>Hide (with contents) / reveal all</td></tr>
+    <tr><td><kbd>X</kbd>, <kbd>Del</kbd> / <kbd>Shift</kbd>+<kbd>X</kbd>, <kbd>Shift</kbd>+<kbd>Del</kbd></td><td>Delete a group with its contents / delete it everywhere</td></tr>
+  </tbody>
+</table>
+
+<h2>Changelog</h2>
+<ul>
+  <li><strong>1.27.1</strong>: the group frame and the role outlines share the same Empty shapes and cache.</li>
+  <li><strong>1.27.0</strong>: clickable breadcrumb on the group frame; frame drawn in the Child colour.</li>
+  <li><strong>1.26.0</strong>: dashed frame around the active group.</li>
+  <li><strong>1.25.0</strong>: breadcrumb of the active group in the 3D view.</li>
+  <li><strong>1.24.3</strong>: a group is now an Empty Sphere.</li>
+  <li><strong>1.24.0</strong>: role outlines drawn on the GPU, replacing the former Colored mode.</li>
+</ul>
+
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
