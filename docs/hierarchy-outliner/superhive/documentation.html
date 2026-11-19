@@ -1,6 +1,6 @@
 <h2>Installation</h2>
 <ol>
-  <li>Download <code>hierarchy_outliner-1.27.2.zip</code> from your Superhive account. Do not unzip it.</li>
+  <li>Download <code>hierarchy_outliner-1.27.3.zip</code> from your Superhive account. Do not unzip it.</li>
   <li>In Blender 4.2 or later, drag the zip file into the Blender window and confirm. Or go to <em>Edit › Preferences › Get Extensions</em>, open the menu at the top right, choose <em>Install from Disk…</em> and select the zip.</li>
   <li>Make sure <strong>Hierarchy Outliner</strong> is enabled in the list of extensions.</li>
   <li>In the 3D view, press <kbd>N</kbd> to open the sidebar and click the <strong>Outliner</strong> tab.</li>
@@ -45,7 +45,8 @@
 <ol>
   <li>Build a group, then right-click it in the Outliner panel › <em>Make Instanceable</em>. Its branch moves to the <em>Components</em> layer (a collection excluded from the view layer) and an instance takes its place, at the same spot and under the same parent.</li>
   <li>Add more instances with <em>New Instance</em> or <kbd>Shift</kbd>+<kbd>A</kbd> › <em>Component</em>.</li>
-  <li>To edit, double-click an instance twice. The rest of the scene is hidden in every 3D view and the view frames the source. Objects you add now go into the component.</li>
+  <li>To edit, double-click an instance twice. The first double-click enters it like a group: frame, breadcrumb and outline. The second opens its component: the rest of the scene is hidden in every 3D view and the view frames the source. Objects you add now go into the component.</li>
+  <li>While you edit, the breadcrumb starts at the scene and goes through the instance, for example <em>Scene › Street Lamp.001 › Component Street Lamp › Street Lamp</em>. Double-click <em>Scene</em> or the instance to finish editing and go back there.</li>
   <li>To finish, press <kbd>Backspace</kbd> at the top of the component, double-click empty space, or click <em>Done</em>. The scene comes back as it was.</li>
   <li>The <strong>Components</strong> panel lists every component with its instance count (×N). Use the pencil to edit, the bin to delete a component with all its instances (after confirmation), and double-click a name to rename it.</li>
 </ol>
@@ -92,6 +93,7 @@
 
 <h2>Changelog</h2>
 <ul>
+  <li><strong>1.27.3</strong>: entering an instance shows its frame, breadcrumb and outline, like a group; while a component is edited, the breadcrumb starts at the scene and goes through the instance.</li>
   <li><strong>1.27.2</strong>: objects shown as wireframe or bounds, such as the Group Focus ghosts, no longer hide or stripe the role outlines.</li>
   <li><strong>1.27.1</strong>: the group frame and the role outlines share the same Empty shapes and cache.</li>
   <li><strong>1.27.0</strong>: clickable breadcrumb on the group frame; frame drawn in the Child colour.</li>
