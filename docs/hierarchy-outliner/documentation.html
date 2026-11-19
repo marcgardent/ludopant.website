@@ -52,7 +52,7 @@
 <ul class="tabs"><li><a href="index.html">Overview</a></li><li><a href="documentation.html" aria-current="page">Documentation</a></li><li><a href="faq.html">FAQ</a></li></ul>
 <h2>Installation</h2>
 <ol>
-  <li>Download <code>hierarchy_outliner-1.27.7.zip</code> from your Superhive account. Do not unzip it.</li>
+  <li>Download <code>hierarchy_outliner-1.27.8.zip</code> from your Superhive account. Do not unzip it.</li>
   <li>In Blender 4.2 or later, drag the zip file into the Blender window and confirm. Or go to <em>Edit › Preferences › Get Extensions</em>, open the menu at the top right, choose <em>Install from Disk…</em> and select the zip.</li>
   <li>Make sure <strong>Hierarchy Outliner</strong> is enabled in the list of extensions.</li>
   <li>In the 3D view, press <kbd>N</kbd> to open the sidebar and click the <strong>Outliner</strong> tab.</li>
@@ -112,7 +112,6 @@
     <tr><td>Inside a group, target</td><td>Children (direct children only) · All Children (any descendant)</td><td>Children</td></tr>
     <tr><td>On Enter</td><td>Group Focus (switch from Off to Group Focus) · Keep Mode</td><td>Group Focus</td></tr>
     <tr><td>Select All on Enter</td><td>On · Off</td><td>Off</td></tr>
-    <tr><td>Group Focus: the rest as grey wireframe</td><td>On · Off</td><td>On</td></tr>
     <tr><td>New objects join the current group</td><td>On · Off</td><td>On</td></tr>
     <tr><td>Role Outlines</td><td>On · Off, six colours</td><td>On</td></tr>
     <tr><td>Group Frame</td><td>On · Off</td><td>On</td></tr>
@@ -131,7 +130,7 @@
     <tr><td><kbd>Ctrl</kbd>+<kbd>G</kbd></td><td>Group</td></tr>
     <tr><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>G</kbd></td><td>Ungroup</td></tr>
     <tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd> / <kbd>Alt</kbd>+<kbd>T</kbd></td><td>Collections: Create New Collection / Remove from Collection (G layout)</td></tr>
-    <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Groups menu</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Groups menu (also Object › Groups, and on top of the right-click menu)</td></tr>
     <tr><td><kbd>Enter</kbd></td><td>Enter the group of the active object, one level per press</td></tr>
     <tr><td><kbd>Backspace</kbd></td><td>Go up one level</td></tr>
     <tr><td>Double-click an object</td><td>Enter its group, one level per double-click</td></tr>
@@ -145,6 +144,7 @@
 
 <h2>Changelog</h2>
 <ul>
+  <li><strong>1.27.8</strong>: the Groups menu (<kbd>Ctrl</kbd>+<kbd>W</kbd>) is also on top of the right-click menu of the 3D view. The Group Focus wireframe option is gone. The role outlines show what you can select, and the add-on no longer changes how your objects are displayed; objects left in wireframe by an earlier version get their display back.</li>
   <li><strong>1.27.7</strong>: a selected object keeps only Blender's selection outline; the role outline no longer covers it.</li>
   <li><strong>1.27.6</strong>: the add-on is named Hierarchical Group Outliner in Blender.</li>
   <li><strong>1.27.5</strong>: double-clicking an instance no longer picks the object behind it.</li>
