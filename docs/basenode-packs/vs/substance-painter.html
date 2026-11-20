@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base Node VS Substance Painter — Ludopant</title>
+<meta name="description" content="Substance Painter compared with Base Node and its packs for Blender: what Substance Painter does, how Base Node does it, and where Substance Painter is ahead.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/vs/substance-painter.html">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Base Node VS Substance Painter">
+<meta property="og:description" content="Substance Painter compared with Base Node and its packs for Blender: what Substance Painter does, how Base Node does it, and where Substance Painter is ahead.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/vs/substance-painter.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/vs/img/substance-painter.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Base Node VS Substance Painter">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Base Node VS Substance Painter">
+<meta name="twitter:description" content="Substance Painter compared with Base Node and its packs for Blender: what Substance Painter does, how Base Node does it, and where Substance Painter is ahead.">
+<meta name="twitter:image" content="https://ludopant.com/basenode-packs/vs/img/substance-painter.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Base Node VS Substance Painter",
+  "description": "Substance Painter compared with Base Node and its packs for Blender: what Substance Painter does, how Base Node does it, and where Substance Painter is ahead.",
+  "url": "https://ludopant.com/basenode-packs/vs/substance-painter.html",
+  "mainEntityOfPage": "https://ludopant.com/basenode-packs/vs/substance-painter.html",
+  "image": "https://ludopant.com/basenode-packs/vs/img/substance-painter.png",
+  "inLanguage": "en",
+  "dateModified": "2026-11-20",
+  "author": {
+    "@type": "Organization",
+    "name": "Ludopant",
+    "url": "https://ludopant.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ludopant",
+    "url": "https://ludopant.com/"
+  },
+  "about": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Adobe Substance 3D Painter",
+      "author": {
+        "@type": "Organization",
+        "name": "Adobe"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Base Node",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Blender"
+    }
+  ],
+  "citation": [
+    "https://www.adobe.com/products/substance3d/apps/painter.html",
+    "https://helpx.adobe.com/creative-cloud/faq/substance-3d-faq.html",
+    "https://helpx.adobe.com/substance-3d-painter/baking/how-to-bake-mesh-maps.html",
+    "https://helpx.adobe.com/substance-3d-painter/baking/mesh-map-settings.html",
+    "https://helpx.adobe.com/ae_en/substance-3d-painter/using/materials-smart-materials.html",
+    "https://helpx.adobe.com/substance-3d-painter/features/effects/generator.html",
+    "https://helpx.adobe.com/substance-3d-painter/interface/layer-stack.html",
+    "https://helpx.adobe.com/substance-3d-painter/interface/layer-stack/blending-modes.html",
+    "https://helpx.adobe.com/substance-3d-painter/painting/fill-projections/tri-planar-projection.html",
+    "https://helpx.adobe.com/substance-3d-painter/painting/presets/creating-particles-presets.html",
+    "https://helpx.adobe.com/substance-3d-painter/painting/tool-list.html",
+    "https://helpx.adobe.com/substance-3d-painter/getting-started/export/export-presets/default-presets.html",
+    "https://helpx.adobe.com/substance-3d-painter/getting-started/export/export-window/output-templates.html",
+    "https://helpx.adobe.com/substance-3d-painter/features/uv-tiles.html"
+  ]
+}
+</script>
+<style>
+.doc { padding: 40px 0 80px; }
+.doc .wrap { max-width: 980px; }
+.doc .crumb { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
+.doc .crumb a { color: var(--muted); }
+.doc h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 24px; }
+.doc h2 { font-size: 28px; letter-spacing: -.01em; margin: 56px 0 12px; line-height: 1.2; }
+.doc p, .doc li { max-width: 72ch; }
+.doc code { font: .88em ui-monospace, "SF Mono", Menlo, monospace; }
+.doc .lead { font-size: 19px; color: var(--muted); }
+.doc .cover { margin: 0 0 32px; }
+.doc .cover img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); }
+.vs-table table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.vs-table th, .vs-table td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.vs-table thead th { color: var(--muted); font-weight: 600; font-size: 14px; }
+.vs-table tbody th { font-weight: 600; width: 20%; }
+.cite { font-size: 11px; margin-left: 2px; color: var(--muted); }
+.cite a { color: var(--muted); text-decoration: none; }
+.mods { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.mod { font-size: 13px; border: 1px solid var(--line); border-radius: 6px; padding: 1px 7px; background: var(--surface); white-space: nowrap; }
+.mod .pk { color: var(--muted); }
+.st { display: inline-block; font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.st-covered { background: var(--ready-soft); color: var(--ready); }
+.st-partial { background: var(--accent-soft); color: var(--accent); }
+.st-not-covered { border: 1px solid var(--line); color: var(--muted); }
+.ahead li, .choose li { margin-bottom: 8px; }
+.choose { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 0; list-style: none; }
+.choose li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; margin: 0; max-width: none; }
+.choose h3 { margin: 0 0 6px; font-size: 18px; }
+.choose p { margin: 0; color: var(--muted); }
+.packs { list-style: none; padding: 0; }
+.packs li { border-top: 1px solid var(--line); padding: 14px 0; display: grid; gap: 2px; }
+.packs .pack-name { font-weight: 600; font-size: 18px; text-decoration: none; }
+.packs .pack-name:hover { color: var(--accent); }
+.packs .tagline { color: var(--muted); }
+.packs .meta { font-size: 14px; color: var(--muted); }
+.sources { font-size: 14px; color: var(--muted); padding-left: 24px; }
+.sources li { overflow-wrap: anywhere; margin-bottom: 4px; }
+.tm { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; margin-top: 48px; }
+.tools { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.tools li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; max-width: none; }
+.tools a.card { display: block; text-decoration: none; color: inherit; }
+.tools img { display: block; width: 100%; height: auto; }
+.tools .body { padding: 16px 20px 20px; }
+.tools h2 { font-size: 21px; margin: 0 0 6px; }
+.tools p { margin: 0 0 8px; color: var(--muted); font-size: 15px; }
+@media (max-width: 760px) {
+  .choose, .tools { grid-template-columns: 1fr; }
+  .vs-table thead { display: none; }
+  .vs-table table, .vs-table tbody, .vs-table tr, .vs-table th, .vs-table td { display: block; width: auto; }
+  .vs-table tr { border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .vs-table tbody th { width: auto; border: 0; padding: 0 0 6px; font-size: 16px; }
+  .vs-table td { border: 0; padding: 4px 0; }
+  .vs-table td::before { content: attr(data-label); display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .vs-table td[data-label="Status"]::before { display: none; }
+}
+</style>
+</head>
+<body>
+<!-- Generated by base-node-studio studio/ludopant_vs.py from studio/market/vs.toml: edit that, not this. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">Base Node Packs</a> › <a href="./">VS</a> › Substance Painter</p>
+<h1>Base Node VS Substance Painter</h1>
+<p class="cover"><img src="img/substance-painter.webp" alt="Base Node VS Substance Painter" width="1200" height="630"></p>
+
+<p class="lead"><strong>Adobe Substance 3D Painter</strong>, by Adobe. A 3D painting application that puts textures, materials and masks on meshes. It is sold by subscription in the Substance 3D Texturing and Collection plans; a Steam edition also exists.<sup class="cite">[<a href="#src-1">1</a>,<a href="#src-2">2</a>]</sup></p>
+<p>Base Node is a text language for Blender's node trees, with a free add-on and paid packs of tested node groups. Substance Painter is a separate application: you bake mesh maps, paint and stack layers, then export texture sets. Base Node does the procedural half inside Blender, with no bake and no export: Material Layers stacks materials by masks in shader nodes, and Smart Materials computes the mesh maps live and turns them into masks and wear. There are no brushes.</p>
+<p>Of the 7 capabilities below, Base Node covers 2, covers 3 in part and does not cover 2. The Substance Painter side of each row was checked on Adobe's pages on 2026-11-20; the numbers link to them.</p>
+
+<h2 id="comparison">What Substance Painter does, and how Base Node does it</h2>
+<div class="vs-table"><table>
+<thead><tr><th scope="col">What Substance Painter does</th><th scope="col">Substance Painter</th><th scope="col">Base Node + pack</th><th scope="col">Status</th></tr></thead>
+<tbody>
+<tr><th scope="row">Mesh maps</th><td data-label="Substance Painter">Painter bakes curvature, ambient occlusion, thickness, position, world-space normal and ID from high-poly meshes onto the low-poly mesh.<sup class="cite">[<a href="#src-3">3</a>,<a href="#src-4">4</a>]</sup></td><td data-label="Base Node">Curvature, ambient occlusion, thickness, position, islands and sky visibility computed live by Geometry Nodes and stored as attributes. No high-poly bake, no ID map.<p class="mods"><span class="mod"><code>mesh_maps</code> <a class="pk" href="../smart-materials/">Smart Materials</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Smart masks and generators</th><td data-label="Substance Painter">Smart materials and smart masks adapt to the baked maps. Generators read those maps.<sup class="cite">[<a href="#src-5">5</a>,<a href="#src-6">6</a>]</sup></td><td data-label="Base Node">Shader groups that turn the mesh maps into masks: levels, grunge, curvature, occlusion, edge wear, metal edge wear, dirt, dust, dripping rust, position gradient, 3D distance, light.<p class="mods"><span class="mod"><code>generators</code> <a class="pk" href="../smart-materials/">Smart Materials</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">A layer stack with masks</th><td data-label="Substance Painter">A stack of fill and paint layers. Each layer takes a mask and has its own blending mode and opacity per channel.<sup class="cite">[<a href="#src-7">7</a>,<a href="#src-8">8</a>]</sup></td><td data-label="Base Node">A layer is a bundle of PBR channels, stacked by mask, by height or by blend modes per channel, with a detail layer and normals blended by reoriented or whiteout mapping. No paint layers: masks come from maps, attributes or textures.<p class="mods"><span class="mod"><code>material_layers</code> <a class="pk" href="../material-layers/">Material Layers</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Triplanar projection</th><td data-label="Substance Painter">Fill layers have a tri-planar projection that hides seams across the mesh.<sup class="cite">[<a href="#src-9">9</a>]</sup></td><td data-label="Base Node">Triplanar and box mapping with sharpness and scale per axis, in object or world space, and triplanar normal maps blended by whiteout.<p class="mods"><span class="mod"><code>projections</code> <a class="pk" href="../material-layers/">Material Layers</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Wear, chips and drips</th><td data-label="Substance Painter">Particle brushes, made with PopcornFX, throw paint that collides with the mesh.<sup class="cite">[<a href="#src-10">10</a>]</sup></td><td data-label="Base Node">Wear made in the mesh by Geometry Nodes: chips off the edges, dents, rivets and stitches, rust streaked down the walls, runs of paint, dust in the corners. Made by rules, not painted.<p class="mods"><span class="mod"><code>mesh_effects</code> <a class="pk" href="../smart-materials/">Smart Materials</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Painting by hand</th><td data-label="Substance Painter">Brushes paint on the mesh through stencils; the Projection tool paints an image from the camera.<sup class="cite">[<a href="#src-11">11</a>]</sup></td><td data-label="Base Node">None. Blender's own Texture Paint mode is there, outside the packs.</td><td data-label="Status"><span class="st st-not-covered">Not covered</span></td></tr>
+<tr><th scope="row">Texture export for engines</th><td data-label="Substance Painter">Export presets write texture sets for Unity and Unreal Engine; a <code>$udim</code> tag writes UDIM tiles.<sup class="cite">[<a href="#src-12">12</a>,<a href="#src-13">13</a>]</sup></td><td data-label="Base Node">No export presets: the material stays a Blender shader, or leaves as MaterialX.</td><td data-label="Status"><span class="st st-not-covered">Not covered</span></td></tr>
+</tbody>
+</table></div>
+
+<h2 id="ahead">Where Substance Painter is ahead</h2>
+<ul class="ahead">
+<li>You paint on the mesh with brushes, through a stencil aligned to the screen.<sup class="cite">[<a href="#src-11">11</a>]</sup></li>
+<li>Particle brushes throw paint that collides with the mesh.<sup class="cite">[<a href="#src-10">10</a>]</sup></li>
+<li>UV Tiles projects give each UDIM tile its own set of textures.<sup class="cite">[<a href="#src-14">14</a>]</sup></li>
+<li>It bakes mesh maps from several high-poly meshes through a cage.<sup class="cite">[<a href="#src-4">4</a>]</sup></li>
+<li>Export presets write packed texture sets for Unity and Unreal Engine.<sup class="cite">[<a href="#src-12">12</a>]</sup></li>
+</ul>
+
+<h2 id="choose">When to choose which</h2>
+<ul class="choose">
+<li><h3>Choose Substance Painter when</h3><p>You paint by hand: brushes, stencils, projection, particle brushes, UDIM tiles, texture sets exported to a game engine.</p></li>
+<li><h3>Choose Base Node when</h3><p>Your models are rendered in Blender and the wear follows the mesh: layered materials, edge wear and dirt that update when the model changes, as node groups you can read and version.</p></li>
+</ul>
+
+<h2 id="packs">The packs</h2>
+<ul class="packs">
+<li><a class="pack-name" href="../material-layers/">Material Layers</a><span class="tagline">Layered PBR materials in shader nodes, stacked by masks and heights, projected without UVs.</span><span class="meta"><a href="../material-layers/">The pack</a> · <a href="../tutorials/rover-hull.html">Tutorial: Rover hull</a> · Coming soon on Superhive</span></li>
+<li><a class="pack-name" href="../smart-materials/">Smart Materials</a><span class="tagline">A texture painter's smart materials, live in Geometry Nodes and shaders.</span><span class="meta"><a href="../smart-materials/">The pack</a> · <a href="../tutorials/smart-crate.html">Tutorial: Smart crate</a> · Coming soon on Superhive</span></li>
+</ul>
+
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li id="src-1"><a href="https://www.adobe.com/products/substance3d/apps/painter.html">https://www.adobe.com/products/substance3d/apps/painter.html</a></li>
+<li id="src-2"><a href="https://helpx.adobe.com/creative-cloud/faq/substance-3d-faq.html">https://helpx.adobe.com/creative-cloud/faq/substance-3d-faq.html</a></li>
+<li id="src-3"><a href="https://helpx.adobe.com/substance-3d-painter/baking/how-to-bake-mesh-maps.html">https://helpx.adobe.com/substance-3d-painter/baking/how-to-bake-mesh-maps.html</a></li>
+<li id="src-4"><a href="https://helpx.adobe.com/substance-3d-painter/baking/mesh-map-settings.html">https://helpx.adobe.com/substance-3d-painter/baking/mesh-map-settings.html</a></li>
+<li id="src-5"><a href="https://helpx.adobe.com/ae_en/substance-3d-painter/using/materials-smart-materials.html">https://helpx.adobe.com/ae_en/substance-3d-painter/using/materials-smart-materials.html</a></li>
+<li id="src-6"><a href="https://helpx.adobe.com/substance-3d-painter/features/effects/generator.html">https://helpx.adobe.com/substance-3d-painter/features/effects/generator.html</a></li>
+<li id="src-7"><a href="https://helpx.adobe.com/substance-3d-painter/interface/layer-stack.html">https://helpx.adobe.com/substance-3d-painter/interface/layer-stack.html</a></li>
+<li id="src-8"><a href="https://helpx.adobe.com/substance-3d-painter/interface/layer-stack/blending-modes.html">https://helpx.adobe.com/substance-3d-painter/interface/layer-stack/blending-modes.html</a></li>
+<li id="src-9"><a href="https://helpx.adobe.com/substance-3d-painter/painting/fill-projections/tri-planar-projection.html">https://helpx.adobe.com/substance-3d-painter/painting/fill-projections/tri-planar-projection.html</a></li>
+<li id="src-10"><a href="https://helpx.adobe.com/substance-3d-painter/painting/presets/creating-particles-presets.html">https://helpx.adobe.com/substance-3d-painter/painting/presets/creating-particles-presets.html</a></li>
+<li id="src-11"><a href="https://helpx.adobe.com/substance-3d-painter/painting/tool-list.html">https://helpx.adobe.com/substance-3d-painter/painting/tool-list.html</a></li>
+<li id="src-12"><a href="https://helpx.adobe.com/substance-3d-painter/getting-started/export/export-presets/default-presets.html">https://helpx.adobe.com/substance-3d-painter/getting-started/export/export-presets/default-presets.html</a></li>
+<li id="src-13"><a href="https://helpx.adobe.com/substance-3d-painter/getting-started/export/export-window/output-templates.html">https://helpx.adobe.com/substance-3d-painter/getting-started/export/export-window/output-templates.html</a></li>
+<li id="src-14"><a href="https://helpx.adobe.com/substance-3d-painter/features/uv-tiles.html">https://helpx.adobe.com/substance-3d-painter/features/uv-tiles.html</a></li>
+</ol>
+
+<p class="tm">Adobe Substance 3D Painter is a trademark of Adobe, or of its owner. Other product names are trademarks of their owners. Ludopant and Base Node are not affiliated with or endorsed by them; the names are used only to compare. <a href="./">All comparisons</a>.</p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
