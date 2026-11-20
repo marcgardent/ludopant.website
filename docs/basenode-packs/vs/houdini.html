@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base Node VS Houdini — Ludopant</title>
+<meta name="description" content="Houdini compared with Base Node and its packs for Blender: what Houdini does, how Base Node does it, and where Houdini is ahead.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/vs/houdini.html">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Base Node VS Houdini">
+<meta property="og:description" content="Houdini compared with Base Node and its packs for Blender: what Houdini does, how Base Node does it, and where Houdini is ahead.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/vs/houdini.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/vs/img/houdini.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Base Node VS Houdini">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Base Node VS Houdini">
+<meta name="twitter:description" content="Houdini compared with Base Node and its packs for Blender: what Houdini does, how Base Node does it, and where Houdini is ahead.">
+<meta name="twitter:image" content="https://ludopant.com/basenode-packs/vs/img/houdini.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Base Node VS Houdini",
+  "description": "Houdini compared with Base Node and its packs for Blender: what Houdini does, how Base Node does it, and where Houdini is ahead.",
+  "url": "https://ludopant.com/basenode-packs/vs/houdini.html",
+  "mainEntityOfPage": "https://ludopant.com/basenode-packs/vs/houdini.html",
+  "image": "https://ludopant.com/basenode-packs/vs/img/houdini.png",
+  "inLanguage": "en",
+  "dateModified": "2026-11-20",
+  "author": {
+    "@type": "Organization",
+    "name": "Ludopant",
+    "url": "https://ludopant.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ludopant",
+    "url": "https://ludopant.com/"
+  },
+  "about": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Houdini",
+      "author": {
+        "@type": "Organization",
+        "name": "SideFX"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Base Node",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Blender"
+    }
+  ],
+  "citation": [
+    "https://www.sidefx.com/products/compare/",
+    "https://www.sidefx.com/docs/houdini/ref/utils/hexpand.html",
+    "https://www.sidefx.com/docs/houdini/hom/hou/OpNode.html",
+    "https://www.sidefx.com/docs/houdini/vex/index.html",
+    "https://www.sidefx.com/docs/houdini/labs/index.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/labs--trim_texture.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/labs--flowmap-2.0.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/labs--road_generator.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/labs--lod_create-2.0.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/labs--edge_damage-2.1.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/heightfield_erode.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/heightfield_maskbyfeature.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/lsystem.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/index.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/polybevel.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/boolean.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/scatter.html",
+    "https://www.sidefx.com/docs/houdini/nodes/sop/copytopoints.html",
+    "https://www.sidefx.com/docs/houdini/nodes/cop/sdfshape.html",
+    "https://www.sidefx.com/docs/houdini/model/volumes.html",
+    "https://www.sidefx.com/docs/houdini/fluid/index.html",
+    "https://www.sidefx.com/docs/houdini/pyro/index.html",
+    "https://www.sidefx.com/docs/houdini/vellum/index.html",
+    "https://www.sidefx.com/docs/houdini/mpm/index.html",
+    "https://www.sidefx.com/docs/houdini/character/kinefx/index.html",
+    "https://www.sidefx.com/docs/houdini/tops/index.html",
+    "https://www.sidefx.com/products/houdini-engine/",
+    "https://www.sidefx.com/docs/houdini/solaris/index.html"
+  ]
+}
+</script>
+<style>
+.doc { padding: 40px 0 80px; }
+.doc .wrap { max-width: 980px; }
+.doc .crumb { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
+.doc .crumb a { color: var(--muted); }
+.doc h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 24px; }
+.doc h2 { font-size: 28px; letter-spacing: -.01em; margin: 56px 0 12px; line-height: 1.2; }
+.doc p, .doc li { max-width: 72ch; }
+.doc code { font: .88em ui-monospace, "SF Mono", Menlo, monospace; }
+.doc .lead { font-size: 19px; color: var(--muted); }
+.doc .cover { margin: 0 0 32px; }
+.doc .cover img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); }
+.vs-table table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.vs-table th, .vs-table td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.vs-table thead th { color: var(--muted); font-weight: 600; font-size: 14px; }
+.vs-table tbody th { font-weight: 600; width: 20%; }
+.cite { font-size: 11px; margin-left: 2px; color: var(--muted); }
+.cite a { color: var(--muted); text-decoration: none; }
+.mods { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.mod { font-size: 13px; border: 1px solid var(--line); border-radius: 6px; padding: 1px 7px; background: var(--surface); white-space: nowrap; }
+.mod .pk { color: var(--muted); }
+.st { display: inline-block; font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.st-covered { background: var(--ready-soft); color: var(--ready); }
+.st-partial { background: var(--accent-soft); color: var(--accent); }
+.st-not-covered { border: 1px solid var(--line); color: var(--muted); }
+.ahead li, .choose li { margin-bottom: 8px; }
+.choose { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 0; list-style: none; }
+.choose li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; margin: 0; max-width: none; }
+.choose h3 { margin: 0 0 6px; font-size: 18px; }
+.choose p { margin: 0; color: var(--muted); }
+.packs { list-style: none; padding: 0; }
+.packs li { border-top: 1px solid var(--line); padding: 14px 0; display: grid; gap: 2px; }
+.packs .pack-name { font-weight: 600; font-size: 18px; text-decoration: none; }
+.packs .pack-name:hover { color: var(--accent); }
+.packs .tagline { color: var(--muted); }
+.packs .meta { font-size: 14px; color: var(--muted); }
+.sources { font-size: 14px; color: var(--muted); padding-left: 24px; }
+.sources li { overflow-wrap: anywhere; margin-bottom: 4px; }
+.tm { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; margin-top: 48px; }
+.tools { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.tools li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; max-width: none; }
+.tools a.card { display: block; text-decoration: none; color: inherit; }
+.tools img { display: block; width: 100%; height: auto; }
+.tools .body { padding: 16px 20px 20px; }
+.tools h2 { font-size: 21px; margin: 0 0 6px; }
+.tools p { margin: 0 0 8px; color: var(--muted); font-size: 15px; }
+@media (max-width: 760px) {
+  .choose, .tools { grid-template-columns: 1fr; }
+  .vs-table thead { display: none; }
+  .vs-table table, .vs-table tbody, .vs-table tr, .vs-table th, .vs-table td { display: block; width: auto; }
+  .vs-table tr { border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .vs-table tbody th { width: auto; border: 0; padding: 0 0 6px; font-size: 16px; }
+  .vs-table td { border: 0; padding: 4px 0; }
+  .vs-table td::before { content: attr(data-label); display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .vs-table td[data-label="Status"]::before { display: none; }
+}
+</style>
+</head>
+<body>
+<!-- Generated by base-node-studio studio/ludopant_vs.py from studio/market/vs.toml: edit that, not this. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">Base Node Packs</a> › <a href="./">VS</a> › Houdini</p>
+<h1>Base Node VS Houdini</h1>
+<p class="cover"><img src="img/houdini.webp" alt="Base Node VS Houdini" width="1200" height="630"></p>
+
+<p class="lead"><strong>Houdini</strong>, by SideFX. A procedural, node-based 3D application. Apprentice is free for non-commercial use; Indie, Core and FX are commercial.<sup class="cite">[<a href="#src-1">1</a>]</sup></p>
+<p>Base Node is a text language for Blender's node trees, with a free add-on and paid packs of tested node groups. Houdini is a separate application built on procedural nodes, with solvers, a render farm manager and engines plug-ins. Base Node brings a part of its geometry toolset to Blender's Geometry Nodes, as <code>.bn</code> text: terrains and erosion, L-systems and fracture in Procedural Toolkit, Labs-style game tools in Game Art Tools, and PolyExtrude and PolyBevel in Modeling Tools.</p>
+<p>Of the 12 capabilities below, Base Node covers 8, covers 2 in part and does not cover 2. The Houdini side of each row was checked on SideFX's pages on 2026-11-20; the numbers link to them.</p>
+
+<h2 id="comparison">What Houdini does, and how Base Node does it</h2>
+<div class="vs-table"><table>
+<thead><tr><th scope="col">What Houdini does</th><th scope="col">Houdini</th><th scope="col">Base Node + pack</th><th scope="col">Status</th></tr></thead>
+<tbody>
+<tr><th scope="row">The network as text</th><td data-label="Houdini">hexpand unpacks a <code>.hip</code> into editable files and hcollapse packs it back. <code>hou.Node.asCode()</code> prints Python that rebuilds a node. Wrangles run VEX.<sup class="cite">[<a href="#src-2">2</a>,<a href="#src-3">3</a>,<a href="#src-4">4</a>]</sup></td><td data-label="Base Node">A <code>.bn</code> file is the node tree, read and written both ways, formatted, and readable in a diff.</td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Game tools</th><td data-label="Houdini">SideFX Labs, free, has Trim Texture, Flowmap, Road Generator, LOD Create and Auto UV.<sup class="cite">[<a href="#src-5">5</a>,<a href="#src-6">6</a>,<a href="#src-7">7</a>,<a href="#src-8">8</a>,<a href="#src-9">9</a>]</sup></td><td data-label="Base Node">Flowmaps, trim sheets, roads laid on a terrain, lightmap UVs, vertex colours baked from fields, and LOD by distance.<p class="mods"><span class="mod"><code>flowmaps</code> <a class="pk" href="../game-art/">Game Art Tools</a></span> <span class="mod"><code>trim_sheets</code> <a class="pk" href="../game-art/">Game Art Tools</a></span> <span class="mod"><code>roads</code> <a class="pk" href="../game-art/">Game Art Tools</a></span> <span class="mod"><code>game_export</code> <a class="pk" href="../game-art/">Game Art Tools</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Edge damage and wear</th><td data-label="Houdini">Labs Edge Damage chips the edges of a mesh.<sup class="cite">[<a href="#src-10">10</a>]</sup></td><td data-label="Base Node">Chips, dents, rivets, stitches, streaks of rust and dust made in the mesh, each stored for a shader to read.<p class="mods"><span class="mod"><code>mesh_effects</code> <a class="pk" href="../smart-materials/">Smart Materials</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Terrain and erosion</th><td data-label="Houdini">HeightField Noise, HeightField Erode (hydraulic and thermal), Terrace and Mask by Feature.<sup class="cite">[<a href="#src-11">11</a>,<a href="#src-12">12</a>]</sup></td><td data-label="Base Node">A heightfield of layered noise on a grid mesh, exact terraces, thermal and hydraulic erosion with water, sediment and flow maps, and a slope mask.<p class="mods"><span class="mod"><code>terrain</code> <a class="pk" href="../procedural/">Procedural Toolkit</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">L-systems</th><td data-label="Houdini">The L-System SOP rewrites strings by rules; brackets start branches.<sup class="cite">[<a href="#src-13">13</a>]</sup></td><td data-label="Base Node">A bracketed L-system grown in a Repeat zone, with phyllotaxis, length decay, jitter, tropism, tubes and leaves.<p class="mods"><span class="mod"><code>lsystem</code> <a class="pk" href="../procedural/">Procedural Toolkit</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Fracture</th><td data-label="Houdini">Voronoi Fracture splits geometry into cells; RBD Material Fracture fractures by material (concrete, glass, wood).<sup class="cite">[<a href="#src-14">14</a>]</sup></td><td data-label="Base Node">Voronoi fracture of a closed mesh, one Manifold Boolean per cell, with a gap, shrink and explode. No fracture by material, no constraints.<p class="mods"><span class="mod"><code>fracture</code> <a class="pk" href="../procedural/">Procedural Toolkit</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">PolyExtrude, PolyBevel, Boolean groups</th><td data-label="Houdini">PolyExtrude and PolyBevel edit faces and edges. Boolean outputs groups such as the A-B seam.<sup class="cite">[<a href="#src-15">15</a>,<a href="#src-16">16</a>]</sup></td><td data-label="Base Node">Insets and extrusions by region, bevels on a profile, corners chamfered, holes filled, a boolean that marks its cut faces and seam, panel lines.<p class="mods"><span class="mod"><code>poly_extrude</code> <a class="pk" href="../modeling/">Modeling Tools</a></span> <span class="mod"><code>poly_bevel</code> <a class="pk" href="../modeling/">Modeling Tools</a></span> <span class="mod"><code>modeling</code> <a class="pk" href="../modeling/">Modeling Tools</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Scattering</th><td data-label="Houdini">Scatter places points by a density attribute and relaxes them.<sup class="cite">[<a href="#src-17">17</a>]</sup></td><td data-label="Base Node">Points by density with Poisson-disk spacing, masks by slope, altitude, attributes and distance, layers kept apart.<p class="mods"><span class="mod"><code>scatter</code> <a class="pk" href="../scatter/">Scatter &amp; Biomes</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Copies on points</th><td data-label="Houdini">Copy to Points copies geometry onto points, set by attributes such as pscale.<sup class="cite">[<a href="#src-18">18</a>]</sup></td><td data-label="Base Node">Cloners and effectors on top of Blender's Instance on Points.<p class="mods"><span class="mod"><code>cloners</code> <a class="pk" href="../motion-graphics/">Motion Graphics</a></span> <span class="mod"><code>effectors</code> <a class="pk" href="../motion-graphics/">Motion Graphics</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">2D signed distance fields</th><td data-label="Houdini">Copernicus has SDF Shape and SDF Blend nodes; VDB from Polygons builds 3D SDF volumes.<sup class="cite">[<a href="#src-19">19</a>,<a href="#src-20">20</a>]</sup></td><td data-label="Base Node">2D signed distance fields and their booleans on geometry. No 3D SDF volumes.<p class="mods"><span class="mod"><code>sdf2d</code> <span class="pk">free</span></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Simulation</th><td data-label="Houdini">FLIP fluids, Pyro, Vellum and MPM solvers.<sup class="cite">[<a href="#src-21">21</a>,<a href="#src-22">22</a>,<a href="#src-23">23</a>,<a href="#src-24">24</a>]</sup></td><td data-label="Base Node">None. Blender's own physics and simulation zones are separate.</td><td data-label="Status"><span class="st st-not-covered">Not covered</span></td></tr>
+<tr><th scope="row">Procedural rigging</th><td data-label="Houdini">KineFX rigs characters at geometry level; APEX graphs evaluate the rigs.<sup class="cite">[<a href="#src-25">25</a>]</sup></td><td data-label="Base Node">None. Blender's node systems cannot build an armature.</td><td data-label="Status"><span class="st st-not-covered">Not covered</span></td></tr>
+</tbody>
+</table></div>
+
+<h2 id="ahead">Where Houdini is ahead</h2>
+<ul class="ahead">
+<li>FLIP fluids, Pyro smoke and fire, Vellum cloth and hair, and an MPM solver for snow and soil.<sup class="cite">[<a href="#src-21">21</a>,<a href="#src-23">23</a>,<a href="#src-24">24</a>]</sup></li>
+<li>PDG/TOPs splits work into items and runs them on a machine or a farm.<sup class="cite">[<a href="#src-26">26</a>]</sup></li>
+<li>Houdini Engine runs digital assets with their parameters inside Unreal, Unity, Maya and 3ds Max.<sup class="cite">[<a href="#src-27">27</a>]</sup></li>
+<li>Solaris builds USD scenes, and Karma renders them.<sup class="cite">[<a href="#src-28">28</a>]</sup></li>
+<li>KineFX and APEX rig and animate characters procedurally.<sup class="cite">[<a href="#src-25">25</a>]</sup></li>
+<li>Volumes and VDB for clouds, smoke and SDF modelling.<sup class="cite">[<a href="#src-20">20</a>]</sup></li>
+</ul>
+
+<h2 id="choose">When to choose which</h2>
+<ul class="choose">
+<li><h3>Choose Houdini when</h3><p>You need simulations (FLIP, Pyro, Vellum, MPM), PDG to run work on a farm, Houdini Engine in Unreal or Unity, or a pipeline built on USD and Solaris.</p></li>
+<li><h3>Choose Base Node when</h3><p>You work in Blender and want terrains, trees, fracture, game-level tools and procedural modelling there, as node groups you can read, review and change, with no second application.</p></li>
+</ul>
+
+<h2 id="packs">The packs</h2>
+<ul class="packs">
+<li><a class="pack-name" href="../procedural/">Procedural Toolkit</a><span class="tagline">Terrains, Voronoi fracture and L-system trees in Geometry Nodes.</span><span class="meta"><a href="../procedural/">The pack</a> · <a href="../tutorials/valley.html">Tutorial: The valley</a> · Coming soon on Superhive</span></li>
+<li><a class="pack-name" href="../game-art/">Game Art Tools</a><span class="tagline">Flowmaps, trim sheets, roads and engine-ready meshes in Geometry Nodes.</span><span class="meta"><a href="../game-art/">The pack</a> · <a href="../tutorials/game-level.html">Tutorial: A game level</a> · Coming soon on Superhive</span></li>
+<li><a class="pack-name" href="../modeling/">Modeling Tools</a><span class="tagline">Bevels, extrusions, insets and panel lines for Geometry Nodes, every result grouped.</span><span class="meta"><a href="../modeling/">The pack</a> · <a href="../tutorials/refuge.html">Tutorial: The refuge</a> · Coming soon on Superhive</span></li>
+<li><a class="pack-name" href="../smart-materials/">Smart Materials</a><span class="tagline">A texture painter's smart materials, live in Geometry Nodes and shaders.</span><span class="meta"><a href="../smart-materials/">The pack</a> · <a href="../tutorials/smart-crate.html">Tutorial: Smart crate</a> · Coming soon on Superhive</span></li>
+<li><a class="pack-name" href="../scatter/">Scatter &amp; Biomes</a><span class="tagline">Rule-based scattering and layered biomes for Geometry Nodes.</span><span class="meta"><a href="../scatter/">The pack</a> · <a href="../tutorials/forest-edge.html">Tutorial: Forest edge</a> · Coming soon on Superhive</span></li>
+<li><a class="pack-name" href="../motion-graphics/">Motion Graphics</a><span class="tagline">Cloners, effectors and falloffs for motion design in Geometry Nodes.</span><span class="meta"><a href="../motion-graphics/">The pack</a> · <a href="../tutorials/clone-wall.html">Tutorial: The clone wall</a> · Coming soon on Superhive</span></li>
+</ul>
+
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li id="src-1"><a href="https://www.sidefx.com/products/compare/">https://www.sidefx.com/products/compare/</a></li>
+<li id="src-2"><a href="https://www.sidefx.com/docs/houdini/ref/utils/hexpand.html">https://www.sidefx.com/docs/houdini/ref/utils/hexpand.html</a></li>
+<li id="src-3"><a href="https://www.sidefx.com/docs/houdini/hom/hou/OpNode.html">https://www.sidefx.com/docs/houdini/hom/hou/OpNode.html</a></li>
+<li id="src-4"><a href="https://www.sidefx.com/docs/houdini/vex/index.html">https://www.sidefx.com/docs/houdini/vex/index.html</a></li>
+<li id="src-5"><a href="https://www.sidefx.com/docs/houdini/labs/index.html">https://www.sidefx.com/docs/houdini/labs/index.html</a></li>
+<li id="src-6"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/labs--trim_texture.html">https://www.sidefx.com/docs/houdini/nodes/sop/labs--trim_texture.html</a></li>
+<li id="src-7"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/labs--flowmap-2.0.html">https://www.sidefx.com/docs/houdini/nodes/sop/labs--flowmap-2.0.html</a></li>
+<li id="src-8"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/labs--road_generator.html">https://www.sidefx.com/docs/houdini/nodes/sop/labs--road_generator.html</a></li>
+<li id="src-9"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/labs--lod_create-2.0.html">https://www.sidefx.com/docs/houdini/nodes/sop/labs--lod_create-2.0.html</a></li>
+<li id="src-10"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/labs--edge_damage-2.1.html">https://www.sidefx.com/docs/houdini/nodes/sop/labs--edge_damage-2.1.html</a></li>
+<li id="src-11"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/heightfield_erode.html">https://www.sidefx.com/docs/houdini/nodes/sop/heightfield_erode.html</a></li>
+<li id="src-12"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/heightfield_maskbyfeature.html">https://www.sidefx.com/docs/houdini/nodes/sop/heightfield_maskbyfeature.html</a></li>
+<li id="src-13"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/lsystem.html">https://www.sidefx.com/docs/houdini/nodes/sop/lsystem.html</a></li>
+<li id="src-14"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/index.html">https://www.sidefx.com/docs/houdini/nodes/sop/index.html</a></li>
+<li id="src-15"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/polybevel.html">https://www.sidefx.com/docs/houdini/nodes/sop/polybevel.html</a></li>
+<li id="src-16"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/boolean.html">https://www.sidefx.com/docs/houdini/nodes/sop/boolean.html</a></li>
+<li id="src-17"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/scatter.html">https://www.sidefx.com/docs/houdini/nodes/sop/scatter.html</a></li>
+<li id="src-18"><a href="https://www.sidefx.com/docs/houdini/nodes/sop/copytopoints.html">https://www.sidefx.com/docs/houdini/nodes/sop/copytopoints.html</a></li>
+<li id="src-19"><a href="https://www.sidefx.com/docs/houdini/nodes/cop/sdfshape.html">https://www.sidefx.com/docs/houdini/nodes/cop/sdfshape.html</a></li>
+<li id="src-20"><a href="https://www.sidefx.com/docs/houdini/model/volumes.html">https://www.sidefx.com/docs/houdini/model/volumes.html</a></li>
+<li id="src-21"><a href="https://www.sidefx.com/docs/houdini/fluid/index.html">https://www.sidefx.com/docs/houdini/fluid/index.html</a></li>
+<li id="src-22"><a href="https://www.sidefx.com/docs/houdini/pyro/index.html">https://www.sidefx.com/docs/houdini/pyro/index.html</a></li>
+<li id="src-23"><a href="https://www.sidefx.com/docs/houdini/vellum/index.html">https://www.sidefx.com/docs/houdini/vellum/index.html</a></li>
+<li id="src-24"><a href="https://www.sidefx.com/docs/houdini/mpm/index.html">https://www.sidefx.com/docs/houdini/mpm/index.html</a></li>
+<li id="src-25"><a href="https://www.sidefx.com/docs/houdini/character/kinefx/index.html">https://www.sidefx.com/docs/houdini/character/kinefx/index.html</a></li>
+<li id="src-26"><a href="https://www.sidefx.com/docs/houdini/tops/index.html">https://www.sidefx.com/docs/houdini/tops/index.html</a></li>
+<li id="src-27"><a href="https://www.sidefx.com/products/houdini-engine/">https://www.sidefx.com/products/houdini-engine/</a></li>
+<li id="src-28"><a href="https://www.sidefx.com/docs/houdini/solaris/index.html">https://www.sidefx.com/docs/houdini/solaris/index.html</a></li>
+</ol>
+
+<p class="tm">Houdini is a trademark of SideFX, or of its owner. Other product names are trademarks of their owners. Ludopant and Base Node are not affiliated with or endorsed by them; the names are used only to compare. <a href="./">All comparisons</a>.</p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

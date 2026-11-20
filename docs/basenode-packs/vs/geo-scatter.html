@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base Node VS Geo-Scatter — Ludopant</title>
+<meta name="description" content="Geo-Scatter compared with Base Node and its packs for Blender: what Geo-Scatter does, how Base Node does it, and where Geo-Scatter is ahead.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/vs/geo-scatter.html">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Base Node VS Geo-Scatter">
+<meta property="og:description" content="Geo-Scatter compared with Base Node and its packs for Blender: what Geo-Scatter does, how Base Node does it, and where Geo-Scatter is ahead.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/vs/geo-scatter.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/vs/img/geo-scatter.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Base Node VS Geo-Scatter">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Base Node VS Geo-Scatter">
+<meta name="twitter:description" content="Geo-Scatter compared with Base Node and its packs for Blender: what Geo-Scatter does, how Base Node does it, and where Geo-Scatter is ahead.">
+<meta name="twitter:image" content="https://ludopant.com/basenode-packs/vs/img/geo-scatter.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Base Node VS Geo-Scatter",
+  "description": "Geo-Scatter compared with Base Node and its packs for Blender: what Geo-Scatter does, how Base Node does it, and where Geo-Scatter is ahead.",
+  "url": "https://ludopant.com/basenode-packs/vs/geo-scatter.html",
+  "mainEntityOfPage": "https://ludopant.com/basenode-packs/vs/geo-scatter.html",
+  "image": "https://ludopant.com/basenode-packs/vs/img/geo-scatter.png",
+  "inLanguage": "en",
+  "dateModified": "2026-11-20",
+  "author": {
+    "@type": "Organization",
+    "name": "Ludopant",
+    "url": "https://ludopant.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ludopant",
+    "url": "https://ludopant.com/"
+  },
+  "about": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Geo-Scatter",
+      "author": {
+        "@type": "Organization",
+        "name": "BD3D Digital Design"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Base Node",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Blender"
+    }
+  ],
+  "citation": [
+    "https://superhivemarket.com/products/scatter",
+    "https://www.geoscatter.com/",
+    "https://www.geoscatter.com/biomes.html",
+    "https://www.geoscatter.com/docs-distribution.html",
+    "https://www.geoscatter.com/docs-cullingmask.html",
+    "https://www.geoscatter.com/docs-abiotic.html",
+    "https://www.geoscatter.com/docs-proximity.html",
+    "https://www.geoscatter.com/docs-ecosystem.html",
+    "https://www.geoscatter.com/docs-scale.html",
+    "https://www.geoscatter.com/docs-rotation.html",
+    "https://www.geoscatter.com/docs-instancing.html",
+    "https://www.geoscatter.com/docs-optimization.html",
+    "https://www.geoscatter.com/docs-manualmode.html",
+    "https://www.geoscatter.com/documentation.html"
+  ]
+}
+</script>
+<style>
+.doc { padding: 40px 0 80px; }
+.doc .wrap { max-width: 980px; }
+.doc .crumb { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
+.doc .crumb a { color: var(--muted); }
+.doc h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 24px; }
+.doc h2 { font-size: 28px; letter-spacing: -.01em; margin: 56px 0 12px; line-height: 1.2; }
+.doc p, .doc li { max-width: 72ch; }
+.doc code { font: .88em ui-monospace, "SF Mono", Menlo, monospace; }
+.doc .lead { font-size: 19px; color: var(--muted); }
+.doc .cover { margin: 0 0 32px; }
+.doc .cover img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); }
+.vs-table table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.vs-table th, .vs-table td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.vs-table thead th { color: var(--muted); font-weight: 600; font-size: 14px; }
+.vs-table tbody th { font-weight: 600; width: 20%; }
+.cite { font-size: 11px; margin-left: 2px; color: var(--muted); }
+.cite a { color: var(--muted); text-decoration: none; }
+.mods { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.mod { font-size: 13px; border: 1px solid var(--line); border-radius: 6px; padding: 1px 7px; background: var(--surface); white-space: nowrap; }
+.mod .pk { color: var(--muted); }
+.st { display: inline-block; font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.st-covered { background: var(--ready-soft); color: var(--ready); }
+.st-partial { background: var(--accent-soft); color: var(--accent); }
+.st-not-covered { border: 1px solid var(--line); color: var(--muted); }
+.ahead li, .choose li { margin-bottom: 8px; }
+.choose { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 0; list-style: none; }
+.choose li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; margin: 0; max-width: none; }
+.choose h3 { margin: 0 0 6px; font-size: 18px; }
+.choose p { margin: 0; color: var(--muted); }
+.packs { list-style: none; padding: 0; }
+.packs li { border-top: 1px solid var(--line); padding: 14px 0; display: grid; gap: 2px; }
+.packs .pack-name { font-weight: 600; font-size: 18px; text-decoration: none; }
+.packs .pack-name:hover { color: var(--accent); }
+.packs .tagline { color: var(--muted); }
+.packs .meta { font-size: 14px; color: var(--muted); }
+.sources { font-size: 14px; color: var(--muted); padding-left: 24px; }
+.sources li { overflow-wrap: anywhere; margin-bottom: 4px; }
+.tm { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; margin-top: 48px; }
+.tools { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.tools li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; max-width: none; }
+.tools a.card { display: block; text-decoration: none; color: inherit; }
+.tools img { display: block; width: 100%; height: auto; }
+.tools .body { padding: 16px 20px 20px; }
+.tools h2 { font-size: 21px; margin: 0 0 6px; }
+.tools p { margin: 0 0 8px; color: var(--muted); font-size: 15px; }
+@media (max-width: 760px) {
+  .choose, .tools { grid-template-columns: 1fr; }
+  .vs-table thead { display: none; }
+  .vs-table table, .vs-table tbody, .vs-table tr, .vs-table th, .vs-table td { display: block; width: auto; }
+  .vs-table tr { border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .vs-table tbody th { width: auto; border: 0; padding: 0 0 6px; font-size: 16px; }
+  .vs-table td { border: 0; padding: 4px 0; }
+  .vs-table td::before { content: attr(data-label); display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .vs-table td[data-label="Status"]::before { display: none; }
+}
+</style>
+</head>
+<body>
+<!-- Generated by base-node-studio studio/ludopant_vs.py from studio/market/vs.toml: edit that, not this. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">Base Node Packs</a> › <a href="./">VS</a> › Geo-Scatter</p>
+<h1>Base Node VS Geo-Scatter</h1>
+<p class="cover"><img src="img/geo-scatter.webp" alt="Base Node VS Geo-Scatter" width="1200" height="630"></p>
+
+<p class="lead"><strong>Geo-Scatter</strong>, by BD3D Digital Design. A paid scattering add-on for Blender: each scatter is a Geometry Nodes scatter object, set up from its panels. The free Biome-Reader reads and scatters its biomes.<sup class="cite">[<a href="#src-1">1</a>,<a href="#src-2">2</a>,<a href="#src-3">3</a>]</sup></p>
+<p>Base Node is a text language for Blender's node trees, with a free add-on and paid packs of tested node groups. Geo-Scatter is itself a Blender add-on, with panels, brushes and a biome library. Base Node's Scatter &amp; Biomes works one level down: the scatter is a set of Geometry Nodes groups you write and read as <code>.bn</code> text, with its rules in plain sight. Both scatter inside Blender; they differ in how you drive them.</p>
+<p>Of the 5 capabilities below, Base Node covers 1, covers 4 in part and does not cover 0. The Geo-Scatter side of each row was checked on BD3D Digital Design's pages on 2026-11-20; the numbers link to them.</p>
+
+<h2 id="comparison">What Geo-Scatter does, and how Base Node does it</h2>
+<div class="vs-table"><table>
+<thead><tr><th scope="col">What Geo-Scatter does</th><th scope="col">Geo-Scatter</th><th scope="col">Base Node + pack</th><th scope="col">Status</th></tr></thead>
+<tbody>
+<tr><th scope="row">Distribution</th><td data-label="Geo-Scatter">Random, per vertex, face or edge, volume, clump, Bezier area or spline, empties, physics and manual brushes; Limit Collision sets a spacing.<sup class="cite">[<a href="#src-4">4</a>]</sup></td><td data-label="Base Node">Points by density per square metre with Poisson-disk spacing, weighted by an attribute or a vertex group. No volume, clump, physics or manual mode.<p class="mods"><span class="mod"><code>scatter</code> <a class="pk" href="../scatter/">Scatter &amp; Biomes</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Masks and rules</th><td data-label="Geo-Scatter">Culling by vertex group, vertex colour, image, Bezier area or volume; slope and elevation filters; proximity repel; affinity and repulsion between scatters.<sup class="cite">[<a href="#src-5">5</a>,<a href="#src-6">6</a>,<a href="#src-7">7</a>,<a href="#src-8">8</a>]</sup></td><td data-label="Base Node">Slope range, altitude band, named attributes, clearance from paths, curves or points, noise patches, soft at their edges; a later layer kept a radius off an earlier one. No image mask, no affinity.<p class="mods"><span class="mod"><code>scatter</code> <a class="pk" href="../scatter/">Scatter &amp; Biomes</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Instances</th><td data-label="Geo-Scatter">Random scale and rotation, alignment to the normal or a tangent, instances picked at random or by probability, clusters or maps.<sup class="cite">[<a href="#src-9">9</a>,<a href="#src-10">10</a>,<a href="#src-11">11</a>]</sup></td><td data-label="Base Node">Aligned to the normal or up, spun, tilted and scaled at random for a seed, smaller at the mask's edge; variants picked from a collection.<p class="mods"><span class="mod"><code>scatter</code> <a class="pk" href="../scatter/">Scatter &amp; Biomes</a></span> <span class="mod"><code>biomes</code> <a class="pk" href="../scatter/">Scatter &amp; Biomes</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Camera culling and LOD</th><td data-label="Geo-Scatter">Culling by frustum, distance and occlusion; display as bounding box, convex hull, placeholder, point cloud or voxels; camera LOD.<sup class="cite">[<a href="#src-12">12</a>]</sup></td><td data-label="Base Node">Frustum culling from a camera's projection or a field of view, LOD by distance with a proxy, thinning and culling far away. No occlusion culling, no display modes.<p class="mods"><span class="mod"><code>biomes</code> <a class="pk" href="../scatter/">Scatter &amp; Biomes</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Biomes</th><td data-label="Geo-Scatter">Biomes are one-click environment presets, in free and paid packs from asset makers.<sup class="cite">[<a href="#src-3">3</a>]</sup></td><td data-label="Base Node">A biome is several scatter layers in one graph, each with its density, spacing, slope and altitude rules. You bring the assets: no biome library.<p class="mods"><span class="mod"><code>biomes</code> <a class="pk" href="../scatter/">Scatter &amp; Biomes</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+</tbody>
+</table></div>
+
+<h2 id="ahead">Where Geo-Scatter is ahead</h2>
+<ul class="ahead">
+<li>Manual mode paints, erases, moves and turns instances with about 30 viewport brushes.<sup class="cite">[<a href="#src-13">13</a>]</sup></li>
+<li>Physics mode places instances with a rigid-body simulation.<sup class="cite">[<a href="#src-4">4</a>]</sup></li>
+<li>Biomes build a full environment from vendor asset packs in one click.<sup class="cite">[<a href="#src-3">3</a>]</sup></li>
+<li>Display modes, a camera LOD of up to 5 levels and count limits keep the viewport fast.<sup class="cite">[<a href="#src-12">12</a>]</sup></li>
+<li>Panels for every feature, with documentation, example files and videos.<sup class="cite">[<a href="#src-14">14</a>]</sup></li>
+</ul>
+
+<h2 id="choose">When to choose which</h2>
+<ul class="choose">
+<li><h3>Choose Geo-Scatter when</h3><p>You want panels and presets, manual brushes to paint instances, physics placement and ready-made biomes from asset vendors.</p></li>
+<li><h3>Choose Base Node when</h3><p>You want the rules themselves: a scatter you can read, diff and change in text, layers that keep their distance from each other, camera culling and LOD in the same graph.</p></li>
+</ul>
+
+<h2 id="packs">The packs</h2>
+<ul class="packs">
+<li><a class="pack-name" href="../scatter/">Scatter &amp; Biomes</a><span class="tagline">Rule-based scattering and layered biomes for Geometry Nodes.</span><span class="meta"><a href="../scatter/">The pack</a> · <a href="../tutorials/forest-edge.html">Tutorial: Forest edge</a> · Coming soon on Superhive</span></li>
+</ul>
+
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li id="src-1"><a href="https://superhivemarket.com/products/scatter">https://superhivemarket.com/products/scatter</a></li>
+<li id="src-2"><a href="https://www.geoscatter.com/">https://www.geoscatter.com/</a></li>
+<li id="src-3"><a href="https://www.geoscatter.com/biomes.html">https://www.geoscatter.com/biomes.html</a></li>
+<li id="src-4"><a href="https://www.geoscatter.com/docs-distribution.html">https://www.geoscatter.com/docs-distribution.html</a></li>
+<li id="src-5"><a href="https://www.geoscatter.com/docs-cullingmask.html">https://www.geoscatter.com/docs-cullingmask.html</a></li>
+<li id="src-6"><a href="https://www.geoscatter.com/docs-abiotic.html">https://www.geoscatter.com/docs-abiotic.html</a></li>
+<li id="src-7"><a href="https://www.geoscatter.com/docs-proximity.html">https://www.geoscatter.com/docs-proximity.html</a></li>
+<li id="src-8"><a href="https://www.geoscatter.com/docs-ecosystem.html">https://www.geoscatter.com/docs-ecosystem.html</a></li>
+<li id="src-9"><a href="https://www.geoscatter.com/docs-scale.html">https://www.geoscatter.com/docs-scale.html</a></li>
+<li id="src-10"><a href="https://www.geoscatter.com/docs-rotation.html">https://www.geoscatter.com/docs-rotation.html</a></li>
+<li id="src-11"><a href="https://www.geoscatter.com/docs-instancing.html">https://www.geoscatter.com/docs-instancing.html</a></li>
+<li id="src-12"><a href="https://www.geoscatter.com/docs-optimization.html">https://www.geoscatter.com/docs-optimization.html</a></li>
+<li id="src-13"><a href="https://www.geoscatter.com/docs-manualmode.html">https://www.geoscatter.com/docs-manualmode.html</a></li>
+<li id="src-14"><a href="https://www.geoscatter.com/documentation.html">https://www.geoscatter.com/documentation.html</a></li>
+</ol>
+
+<p class="tm">Geo-Scatter is a trademark of BD3D Digital Design, or of its owner. Other product names are trademarks of their owners. Ludopant and Base Node are not affiliated with or endorsed by them; the names are used only to compare. <a href="./">All comparisons</a>.</p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base Node VS Nuke — Ludopant</title>
+<meta name="description" content="Nuke compared with Base Node and its packs for Blender: what Nuke does, how Base Node does it, and where Nuke is ahead.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/vs/nuke.html">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Base Node VS Nuke">
+<meta property="og:description" content="Nuke compared with Base Node and its packs for Blender: what Nuke does, how Base Node does it, and where Nuke is ahead.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/vs/nuke.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/vs/img/nuke.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Base Node VS Nuke">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Base Node VS Nuke">
+<meta name="twitter:description" content="Nuke compared with Base Node and its packs for Blender: what Nuke does, how Base Node does it, and where Nuke is ahead.">
+<meta name="twitter:image" content="https://ludopant.com/basenode-packs/vs/img/nuke.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Base Node VS Nuke",
+  "description": "Nuke compared with Base Node and its packs for Blender: what Nuke does, how Base Node does it, and where Nuke is ahead.",
+  "url": "https://ludopant.com/basenode-packs/vs/nuke.html",
+  "mainEntityOfPage": "https://ludopant.com/basenode-packs/vs/nuke.html",
+  "image": "https://ludopant.com/basenode-packs/vs/img/nuke.png",
+  "inLanguage": "en",
+  "dateModified": "2026-11-20",
+  "author": {
+    "@type": "Organization",
+    "name": "Ludopant",
+    "url": "https://ludopant.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ludopant",
+    "url": "https://ludopant.com/"
+  },
+  "about": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Nuke, NukeX, Nuke Studio",
+      "author": {
+        "@type": "Organization",
+        "name": "Foundry"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Base Node",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Blender"
+    }
+  ],
+  "citation": [
+    "https://www.foundry.com/products/nuke-family",
+    "https://www.foundry.com/products/nuke-family/non-commercial",
+    "https://learn.foundry.com/nuke/content/getting_started/managing_scripts/managing_scripts.html",
+    "https://learn.foundry.com/nuke/content/comp_environment/configuring_nuke/command_line_operations.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/merge.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/keymix.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/color_nodes/grade.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/color_nodes/colorcorrect.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/color_nodes/log2lin.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/keyer_nodes/ibkgizmo.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/keyer_nodes/keylight.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/keyer_nodes/primatte.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/filter_nodes/glow.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/lightwrap.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/transform_nodes/stmap.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/transform_nodes/reformat.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/transform_nodes/sphericaltransform.html",
+    "https://learn.foundry.com/nuke/content/comp_environment/caravr_nuke/caravr_nuke.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/grain.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/furnacecore_nodes/f_regrain.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/filter_nodes/denoise.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/image_nodes/image_nodes.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/draw_nodes.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/3d_nodes/relight.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/3d_nodes/positiontopoints.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/rotopaint.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/dissolve.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/timedissolve.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/merge_nodes.html",
+    "https://learn.foundry.com/nuke/content/comp_environment/nukex/nukex_intro.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/time_nodes/kronos.html",
+    "https://learn.foundry.com/nuke/content/comp_environment/deep/deep_compositing.html",
+    "https://learn.foundry.com/nuke/content/comp_environment/3d_compositing/setting_up_scene.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/3d_nodes/cameratracker.html",
+    "https://learn.foundry.com/nuke/content/reference_guide/air_nodes/copycat.html",
+    "https://learn.foundry.com/nuke/content/comp_environment/smartpaint/smartvector.html"
+  ]
+}
+</script>
+<style>
+.doc { padding: 40px 0 80px; }
+.doc .wrap { max-width: 980px; }
+.doc .crumb { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
+.doc .crumb a { color: var(--muted); }
+.doc h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 24px; }
+.doc h2 { font-size: 28px; letter-spacing: -.01em; margin: 56px 0 12px; line-height: 1.2; }
+.doc p, .doc li { max-width: 72ch; }
+.doc code { font: .88em ui-monospace, "SF Mono", Menlo, monospace; }
+.doc .lead { font-size: 19px; color: var(--muted); }
+.doc .cover { margin: 0 0 32px; }
+.doc .cover img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); }
+.vs-table table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.vs-table th, .vs-table td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.vs-table thead th { color: var(--muted); font-weight: 600; font-size: 14px; }
+.vs-table tbody th { font-weight: 600; width: 20%; }
+.cite { font-size: 11px; margin-left: 2px; color: var(--muted); }
+.cite a { color: var(--muted); text-decoration: none; }
+.mods { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.mod { font-size: 13px; border: 1px solid var(--line); border-radius: 6px; padding: 1px 7px; background: var(--surface); white-space: nowrap; }
+.mod .pk { color: var(--muted); }
+.st { display: inline-block; font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.st-covered { background: var(--ready-soft); color: var(--ready); }
+.st-partial { background: var(--accent-soft); color: var(--accent); }
+.st-not-covered { border: 1px solid var(--line); color: var(--muted); }
+.ahead li, .choose li { margin-bottom: 8px; }
+.choose { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 0; list-style: none; }
+.choose li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; margin: 0; max-width: none; }
+.choose h3 { margin: 0 0 6px; font-size: 18px; }
+.choose p { margin: 0; color: var(--muted); }
+.packs { list-style: none; padding: 0; }
+.packs li { border-top: 1px solid var(--line); padding: 14px 0; display: grid; gap: 2px; }
+.packs .pack-name { font-weight: 600; font-size: 18px; text-decoration: none; }
+.packs .pack-name:hover { color: var(--accent); }
+.packs .tagline { color: var(--muted); }
+.packs .meta { font-size: 14px; color: var(--muted); }
+.sources { font-size: 14px; color: var(--muted); padding-left: 24px; }
+.sources li { overflow-wrap: anywhere; margin-bottom: 4px; }
+.tm { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; margin-top: 48px; }
+.tools { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.tools li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; max-width: none; }
+.tools a.card { display: block; text-decoration: none; color: inherit; }
+.tools img { display: block; width: 100%; height: auto; }
+.tools .body { padding: 16px 20px 20px; }
+.tools h2 { font-size: 21px; margin: 0 0 6px; }
+.tools p { margin: 0 0 8px; color: var(--muted); font-size: 15px; }
+@media (max-width: 760px) {
+  .choose, .tools { grid-template-columns: 1fr; }
+  .vs-table thead { display: none; }
+  .vs-table table, .vs-table tbody, .vs-table tr, .vs-table th, .vs-table td { display: block; width: auto; }
+  .vs-table tr { border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .vs-table tbody th { width: auto; border: 0; padding: 0 0 6px; font-size: 16px; }
+  .vs-table td { border: 0; padding: 4px 0; }
+  .vs-table td::before { content: attr(data-label); display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .vs-table td[data-label="Status"]::before { display: none; }
+}
+</style>
+</head>
+<body>
+<!-- Generated by base-node-studio studio/ludopant_vs.py from studio/market/vs.toml: edit that, not this. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">Base Node Packs</a> › <a href="./">VS</a> › Nuke</p>
+<h1>Base Node VS Nuke</h1>
+<p class="cover"><img src="img/nuke.webp" alt="Base Node VS Nuke" width="1200" height="630"></p>
+
+<p class="lead"><strong>Nuke, NukeX, Nuke Studio</strong>, by Foundry. Node-based compositing software for film and episodic work. NukeX adds camera tracking, clean-up and machine-learning tools, and Nuke Studio adds a timeline. All are commercial; Nuke Non-commercial is free for personal use, limited to HD output.<sup class="cite">[<a href="#src-1">1</a>,<a href="#src-2">2</a>]</sup></p>
+<p>Base Node is a text language for Blender's node trees, with a free add-on and paid packs of tested node groups. Nuke is a separate compositing application with its own viewer, roto tools and pipeline. Base Node takes the other road: its modules are node groups for Blender's own compositor, written as <code>.bn</code> text, so the shot is rendered and finished in one file. Compositing Pro follows Nuke's keying, light, grain, render-pass and 360° tools; Motion Compositing adds the transitions and stylize effects Nuke leaves to other tools.</p>
+<p>Of the 14 capabilities below, Base Node covers 7, covers 5 in part and does not cover 2. The Nuke side of each row was checked on Foundry's pages on 2026-11-20; the numbers link to them.</p>
+
+<h2 id="comparison">What Nuke does, and how Base Node does it</h2>
+<div class="vs-table"><table>
+<thead><tr><th scope="col">What Nuke does</th><th scope="col">Nuke</th><th scope="col">Base Node + pack</th><th scope="col">Status</th></tr></thead>
+<tbody>
+<tr><th scope="row">The node graph as a text file</th><td data-label="Nuke">Nuke saves scripts as <code>.nk</code> files. <code>nuke -x script.nk</code> renders every active Write node from the command line.<sup class="cite">[<a href="#src-3">3</a>,<a href="#src-4">4</a>]</sup></td><td data-label="Base Node">A <code>.bn</code> file is the node tree as text: the add-on reads it into Blender and writes it back, a formatter keeps it canonical, and git shows a change as a few lines.</td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Merge operations on premultiplied images</th><td data-label="Nuke">The Merge node layers A over B with about 30 operations (over, under, in, out, atop, xor, plus, multiply, screen…). KeyMix copies A onto B through a mask.<sup class="cite">[<a href="#src-5">5</a>,<a href="#src-6">6</a>]</sup></td><td data-label="Base Node">Porter-Duff over, under, in, out, atop, xor, stencil, mask, and plus, minus, multiply, screen, divide, difference, hypot; premult, unpremult and keymix.<p class="mods"><span class="mod"><code>merge</code> <span class="pk">free</span></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Grade, ColorCorrect, log and linear</th><td data-label="Nuke">Grade sets black and white points. ColorCorrect works on shadows, midtones and highlights. Log2Lin converts between Cineon log and linear.<sup class="cite">[<a href="#src-7">7</a>,<a href="#src-8">8</a>,<a href="#src-9">9</a>]</sup></td><td data-label="Base Node">Grade and ColorCorrect after Nuke's, saturation by Rec. 709, Rec. 2020 or ACEScg luma, hue shift, exposure in stops, soft clip, Cineon log2lin and lin2log.<p class="mods"><span class="mod"><code>grade</code> <span class="pk">free</span></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Keying and despill</th><td data-label="Nuke">IBKColour builds a clean plate and IBKGizmo pulls the key from it. Keylight and Primatte are colour-difference keyers with spill suppression.<sup class="cite">[<a href="#src-10">10</a>,<a href="#src-11">11</a>,<a href="#src-12">12</a>]</sup></td><td data-label="Base Node">IBK gizmo and IBK colour, despill by average or by limit with its spill map, matte clean, soft erode, choke, edge matte, core and edge merge, edge extend. Nothing like Keylight or Primatte.<p class="mods"><span class="mod"><code>keying</code> <a class="pk" href="../compositing-pro/">Compositing Pro</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Glow and light wrap</th><td data-label="Nuke">Glow adds a blurred halo around bright areas. LightWrap blends background light into the edges of a foreground.<sup class="cite">[<a href="#src-13">13</a>,<a href="#src-14">14</a>]</sup></td><td data-label="Base Node">Glow of blurs of doubling size over a tolerance, light wrap by plus or screen, exponential glow, anamorphic streak, glow around a matte's edges.<p class="mods"><span class="mod"><code>light</code> <a class="pk" href="../compositing-pro/">Compositing Pro</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">STMap and Reformat</th><td data-label="Nuke">STMap moves pixels by two channels that give the source position of each output pixel. Reformat changes an image's resolution.<sup class="cite">[<a href="#src-15">15</a>,<a href="#src-16">16</a>]</sup></td><td data-label="Base Node">The identity UV ramp, an STMap applied with its alpha as coverage, tile with mirror, mirror, and reformat by fit, fill or distort, each as its STMap and its image.<p class="mods"><span class="mod"><code>stmap</code> <span class="pk">free</span></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">360° projections</th><td data-label="Nuke">SphericalTransform converts between LatLong, Cubemap, Rectilinear, Fisheye and MirrorBall. CaraVR ships with NukeX and Nuke Studio.<sup class="cite">[<a href="#src-17">17</a>,<a href="#src-18">18</a>]</sup></td><td data-label="Base Node">Latlong to a camera view and back, latlong rotation, 3 × 2 cubemap, equidistant fisheye and little planet, each as an STMap. No mirror ball, no stitching, none of CaraVR's other tools.<p class="mods"><span class="mod"><code>vr360</code> <a class="pk" href="../compositing-pro/">Compositing Pro</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Grain, regrain, denoise</th><td data-label="Nuke">Grain adds grain with film-stock presets. F_ReGrain (NukeX) samples grain from one image and puts it on another. Denoise removes noise.<sup class="cite">[<a href="#src-19">19</a>,<a href="#src-20">20</a>,<a href="#src-21">21</a>]</sup></td><td data-label="Base Node">Grain per channel with the Kodak stocks of Nuke's presets, regrain by the high pass of a grain plate, and a simple degrain by bilateral blur, far from a real denoiser.<p class="mods"><span class="mod"><code>grain</code> <a class="pk" href="../compositing-pro/">Compositing Pro</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Test patterns and checks</th><td data-label="Nuke">Nuke draws test images with ColorBars, ColorWheel, CheckerBoard, Constant, Ramp, Radial, Rectangle and Grid.<sup class="cite">[<a href="#src-22">22</a>,<a href="#src-23">23</a>]</sup></td><td data-label="Base Node">The same generators, plus checks of an image: false colour by stops, clip check, NaN and infinity check, zebra, alpha over a checker, difference as heat.<p class="mods"><span class="mod"><code>qc</code> <span class="pk">free</span></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Render passes and relighting</th><td data-label="Nuke">Relight lights a 2D image with 3D lights from its normal and position passes. PositionToPoints turns a position pass into a point cloud.<sup class="cite">[<a href="#src-24">24</a>,<a href="#src-25">25</a>]</sup></td><td data-label="Base Node">The beauty rebuilt from Cycles' light passes, position, box, normal and depth mattes, depth fog, and a light added after the render. No point cloud, no 3D lights.<p class="mods"><span class="mod"><code>passes</code> <a class="pk" href="../compositing-pro/">Compositing Pro</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Roto masks</th><td data-label="Nuke">Roto and RotoPaint draw Bezier and B-spline shapes with per-point feather and keyframes, and paint, clone and reveal.<sup class="cite">[<a href="#src-26">26</a>]</sup></td><td data-label="Base Node">Masks drawn by signed distance fields: disk, box, polygon, star, outline, letterbox, animated by their parameters. Spline masks stay in Blender's own Mask editor; no paint.<p class="mods"><span class="mod"><code>mask2d</code> <span class="pk">free</span></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Transitions</th><td data-label="Nuke">Dissolve blends two inputs, TimeDissolve over a frame range. Nuke has no wipe node.<sup class="cite">[<a href="#src-27">27</a>,<a href="#src-28">28</a>,<a href="#src-29">29</a>]</sup></td><td data-label="Base Node">Linear, radial, clock, iris and gradient wipes, cross dissolve, dissolve by noise cells, dip to a colour and push, driven by a progress or the frame.<p class="mods"><span class="mod"><code>transitions</code> <a class="pk" href="../motion-compositing/">Motion Compositing</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Optical flow, retiming, machine learning</th><td data-label="Nuke">NukeX adds the Smart Vector toolset, the Kronos retimer, CopyCat and CameraTracker.<sup class="cite">[<a href="#src-30">30</a>,<a href="#src-31">31</a>]</sup></td><td data-label="Base Node">None of it. Blender's compositor sees one frame at a time and has no optical flow.</td><td data-label="Status"><span class="st st-not-covered">Not covered</span></td></tr>
+<tr><th scope="row">Deep compositing and a 3D system</th><td data-label="Nuke">Nuke merges deep images, with several depth samples per pixel, and has a 3D scene system.<sup class="cite">[<a href="#src-32">32</a>,<a href="#src-33">33</a>]</sup></td><td data-label="Base Node">No deep images. Depth is a pass like the others; 3D stays in Blender's scene.</td><td data-label="Status"><span class="st st-not-covered">Not covered</span></td></tr>
+</tbody>
+</table></div>
+
+<h2 id="ahead">Where Nuke is ahead</h2>
+<ul class="ahead">
+<li>RotoPaint animates spline shapes and paints, clones and reveals pixels in the Viewer.<sup class="cite">[<a href="#src-26">26</a>]</sup></li>
+<li>Deep compositing moves elements in depth without a new render.<sup class="cite">[<a href="#src-32">32</a>]</sup></li>
+<li>CameraTracker (NukeX) solves the camera of live footage into an animated 3D camera.<sup class="cite">[<a href="#src-34">34</a>]</sup></li>
+<li>CopyCat (NukeX) trains a neural network on a few frames and applies the effect to the whole shot.<sup class="cite">[<a href="#src-35">35</a>]</sup></li>
+<li>Kronos and Smart Vector use optical flow to retime footage and carry paint across frames.<sup class="cite">[<a href="#src-31">31</a>,<a href="#src-36">36</a>]</sup></li>
+<li>Nuke Studio adds a timeline for conform, editorial, playback and export.<sup class="cite">[<a href="#src-1">1</a>]</sup></li>
+</ul>
+
+<h2 id="choose">When to choose which</h2>
+<ul class="choose">
+<li><h3>Choose Nuke when</h3><p>You composite live-action plates: roto, paint, camera tracking, deep images, optical-flow retiming and a studio pipeline that already speaks Nuke.</p></li>
+<li><h3>Choose Base Node when</h3><p>Your shots are rendered in Blender and you want Nuke's keyer, grade, glow, grain and pass tools in Blender's compositor, in a file you can read and diff, without a second application.</p></li>
+</ul>
+
+<h2 id="packs">The packs</h2>
+<ul class="packs">
+<li><a class="pack-name" href="../compositing-pro/">Compositing Pro</a><span class="tagline">Keying, glows, grain, render passes and 360° for the Blender compositor.</span><span class="meta"><a href="../compositing-pro/">The pack</a> · <a href="../tutorials/final-shot.html">Tutorial: The final shot</a> · Coming soon on Superhive</span></li>
+<li><a class="pack-name" href="../motion-compositing/">Motion Compositing</a><span class="tagline">Transitions, wipes and stylize effects for motion design in the Blender compositor.</span><span class="meta"><a href="../motion-compositing/">The pack</a> · <a href="../tutorials/promo-cut.html">Tutorial: The promo cut</a> · Coming soon on Superhive</span></li>
+</ul>
+
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li id="src-1"><a href="https://www.foundry.com/products/nuke-family">https://www.foundry.com/products/nuke-family</a></li>
+<li id="src-2"><a href="https://www.foundry.com/products/nuke-family/non-commercial">https://www.foundry.com/products/nuke-family/non-commercial</a></li>
+<li id="src-3"><a href="https://learn.foundry.com/nuke/content/getting_started/managing_scripts/managing_scripts.html">https://learn.foundry.com/nuke/content/getting_started/managing_scripts/managing_scripts.html</a></li>
+<li id="src-4"><a href="https://learn.foundry.com/nuke/content/comp_environment/configuring_nuke/command_line_operations.html">https://learn.foundry.com/nuke/content/comp_environment/configuring_nuke/command_line_operations.html</a></li>
+<li id="src-5"><a href="https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/merge.html">https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/merge.html</a></li>
+<li id="src-6"><a href="https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/keymix.html">https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/keymix.html</a></li>
+<li id="src-7"><a href="https://learn.foundry.com/nuke/content/reference_guide/color_nodes/grade.html">https://learn.foundry.com/nuke/content/reference_guide/color_nodes/grade.html</a></li>
+<li id="src-8"><a href="https://learn.foundry.com/nuke/content/reference_guide/color_nodes/colorcorrect.html">https://learn.foundry.com/nuke/content/reference_guide/color_nodes/colorcorrect.html</a></li>
+<li id="src-9"><a href="https://learn.foundry.com/nuke/content/reference_guide/color_nodes/log2lin.html">https://learn.foundry.com/nuke/content/reference_guide/color_nodes/log2lin.html</a></li>
+<li id="src-10"><a href="https://learn.foundry.com/nuke/content/reference_guide/keyer_nodes/ibkgizmo.html">https://learn.foundry.com/nuke/content/reference_guide/keyer_nodes/ibkgizmo.html</a></li>
+<li id="src-11"><a href="https://learn.foundry.com/nuke/content/reference_guide/keyer_nodes/keylight.html">https://learn.foundry.com/nuke/content/reference_guide/keyer_nodes/keylight.html</a></li>
+<li id="src-12"><a href="https://learn.foundry.com/nuke/content/reference_guide/keyer_nodes/primatte.html">https://learn.foundry.com/nuke/content/reference_guide/keyer_nodes/primatte.html</a></li>
+<li id="src-13"><a href="https://learn.foundry.com/nuke/content/reference_guide/filter_nodes/glow.html">https://learn.foundry.com/nuke/content/reference_guide/filter_nodes/glow.html</a></li>
+<li id="src-14"><a href="https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/lightwrap.html">https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/lightwrap.html</a></li>
+<li id="src-15"><a href="https://learn.foundry.com/nuke/content/reference_guide/transform_nodes/stmap.html">https://learn.foundry.com/nuke/content/reference_guide/transform_nodes/stmap.html</a></li>
+<li id="src-16"><a href="https://learn.foundry.com/nuke/content/reference_guide/transform_nodes/reformat.html">https://learn.foundry.com/nuke/content/reference_guide/transform_nodes/reformat.html</a></li>
+<li id="src-17"><a href="https://learn.foundry.com/nuke/content/reference_guide/transform_nodes/sphericaltransform.html">https://learn.foundry.com/nuke/content/reference_guide/transform_nodes/sphericaltransform.html</a></li>
+<li id="src-18"><a href="https://learn.foundry.com/nuke/content/comp_environment/caravr_nuke/caravr_nuke.html">https://learn.foundry.com/nuke/content/comp_environment/caravr_nuke/caravr_nuke.html</a></li>
+<li id="src-19"><a href="https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/grain.html">https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/grain.html</a></li>
+<li id="src-20"><a href="https://learn.foundry.com/nuke/content/reference_guide/furnacecore_nodes/f_regrain.html">https://learn.foundry.com/nuke/content/reference_guide/furnacecore_nodes/f_regrain.html</a></li>
+<li id="src-21"><a href="https://learn.foundry.com/nuke/content/reference_guide/filter_nodes/denoise.html">https://learn.foundry.com/nuke/content/reference_guide/filter_nodes/denoise.html</a></li>
+<li id="src-22"><a href="https://learn.foundry.com/nuke/content/reference_guide/image_nodes/image_nodes.html">https://learn.foundry.com/nuke/content/reference_guide/image_nodes/image_nodes.html</a></li>
+<li id="src-23"><a href="https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/draw_nodes.html">https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/draw_nodes.html</a></li>
+<li id="src-24"><a href="https://learn.foundry.com/nuke/content/reference_guide/3d_nodes/relight.html">https://learn.foundry.com/nuke/content/reference_guide/3d_nodes/relight.html</a></li>
+<li id="src-25"><a href="https://learn.foundry.com/nuke/content/reference_guide/3d_nodes/positiontopoints.html">https://learn.foundry.com/nuke/content/reference_guide/3d_nodes/positiontopoints.html</a></li>
+<li id="src-26"><a href="https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/rotopaint.html">https://learn.foundry.com/nuke/content/reference_guide/draw_nodes/rotopaint.html</a></li>
+<li id="src-27"><a href="https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/dissolve.html">https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/dissolve.html</a></li>
+<li id="src-28"><a href="https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/timedissolve.html">https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/timedissolve.html</a></li>
+<li id="src-29"><a href="https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/merge_nodes.html">https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/merge_nodes.html</a></li>
+<li id="src-30"><a href="https://learn.foundry.com/nuke/content/comp_environment/nukex/nukex_intro.html">https://learn.foundry.com/nuke/content/comp_environment/nukex/nukex_intro.html</a></li>
+<li id="src-31"><a href="https://learn.foundry.com/nuke/content/reference_guide/time_nodes/kronos.html">https://learn.foundry.com/nuke/content/reference_guide/time_nodes/kronos.html</a></li>
+<li id="src-32"><a href="https://learn.foundry.com/nuke/content/comp_environment/deep/deep_compositing.html">https://learn.foundry.com/nuke/content/comp_environment/deep/deep_compositing.html</a></li>
+<li id="src-33"><a href="https://learn.foundry.com/nuke/content/comp_environment/3d_compositing/setting_up_scene.html">https://learn.foundry.com/nuke/content/comp_environment/3d_compositing/setting_up_scene.html</a></li>
+<li id="src-34"><a href="https://learn.foundry.com/nuke/content/reference_guide/3d_nodes/cameratracker.html">https://learn.foundry.com/nuke/content/reference_guide/3d_nodes/cameratracker.html</a></li>
+<li id="src-35"><a href="https://learn.foundry.com/nuke/content/reference_guide/air_nodes/copycat.html">https://learn.foundry.com/nuke/content/reference_guide/air_nodes/copycat.html</a></li>
+<li id="src-36"><a href="https://learn.foundry.com/nuke/content/comp_environment/smartpaint/smartvector.html">https://learn.foundry.com/nuke/content/comp_environment/smartpaint/smartvector.html</a></li>
+</ol>
+
+<p class="tm">Nuke, NukeX, Nuke Studio is a trademark of Foundry, or of its owner. Other product names are trademarks of their owners. Ludopant and Base Node are not affiliated with or endorsed by them; the names are used only to compare. <a href="./">All comparisons</a>.</p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
