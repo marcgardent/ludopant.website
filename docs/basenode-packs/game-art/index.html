@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game Art Tools — BaseNode Packs — Ludopant</title>
+<meta name="description" content="Game Art Tools, a pack of 4 Base Node modules for Blender 5.2+: flowmaps, trim sheets, roads and engine-ready meshes in Geometry Nodes.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/game-art/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Game Art Tools — BaseNode Packs — Ludopant">
+<meta property="og:description" content="Game Art Tools, a pack of 4 Base Node modules for Blender 5.2+: flowmaps, trim sheets, roads and engine-ready meshes in Geometry Nodes.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/game-art/">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/game-level-step7.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › Game Art Tools</p>
+<p class="store">Coming soon on Superhive</p>
+<h1>Game Art Tools</h1>
+<p class="lead">Flowmaps, trim sheets, roads and engine-ready meshes in Geometry Nodes.</p>
+<p class="cover"><img src="../tutorials/img/game-level-step7.png" alt="Game Art Tools: Flowmaps, trim sheets, roads and engine-ready meshes in Geometry Nodes"></p>
+<dl class="facts">
+<dt>For</dt><dd>Game environment artists</dd>
+<dt>Modelled on</dt><dd>Houdini Labs</dd>
+<dt>Modules</dt><dd>4</dd>
+<dt>Blender</dt><dd>5.2 and later, tested at each release</dd>
+<dt>Store</dt><dd>Coming soon on Superhive</dd>
+</dl>
+<p>Flowmaps derived from slope, drawn along curves and turned around obstacles, stored as the color attribute engines read in the frame of the UV map, with the two-phase shader that pans a texture by them; trim sheets that map the strips of a mesh to the row their width calls for, and strips along curves; roads along curves with lanes, shoulders and banking, laid on a terrain, mapped in metres, with a mask for blending and clearing scatter and the ground flattened under them; lightmap UVs packed without overlap, vertex colors baked for engines, and level of detail by distance.</p>
+
+<h2>The modules</h2>
+<p>A module is a <code>.bn</code> file of node groups. Once the pack is installed, a graph calls it with <code>use</code>, and Blender builds its groups.</p>
+<table>
+<tr><th>Module</th><th>What it gives</th></tr>
+<tr><td><code>flowmaps</code></td><td>Flowmaps for game engines: a flow field on a mesh derived from its slope, drawn along curves, deflected around obstacles, smoothed, and read back from a painted flowmap; stored as a color attribute in the UV frame of each face corner, RG 0 to 1 with 0.5 at rest and B the strength; and the shader side that pans a texture by the flowmap with the two-phase blend</td></tr>
+<tr><td><code>game_export</code></td><td>Meshes ready for a game engine: a second UV map for lightmaps, unwrapped at sharp edges and packed into the unit square without overlap; fields or mesh maps baked into a vertex color; and level of detail by distance, the mesh collapsed by vertex clustering in cells that double with each step away from a viewer</td></tr>
+<tr><td><code>roads</code></td><td>Roads for game levels: a road mesh along each spline of a curve, its carriageway of lanes between shoulders that drop away, banked by an angle and into its turns, laid on a terrain mesh along its centre or at every point, smoothed along its length, mapped across its width and along its length in metres; its mask, lanes and distances stored for blending and for clearing scatter; and the terrain under it masked or flattened to it</td></tr>
+<tr><td><code>trim_sheets</code></td><td>Trim sheets for game art: the rows of an atlas, from the top, each a ratio of the one above; the faces or strips of a mesh mapped to the row their width calls for at the sheet's texel density, along their long side, with a random offset and mirror per strip or per face; and strips along curves, flat or upright, mapped along their length; UVs on the face corners and the row on the faces</td></tr>
+</table>
+
+<h2>Free in Base Node, and what the pack adds</h2>
+<p>Free and open source, on <a href="https://marcgardent.github.io/base-node-language/">the Base Node site</a>: the language, the Blender add-on, the formatter and parsers, and the free modules of the standard library. The pack adds the modules above, their showcase files and this tutorial.</p>
+<table>
+<tr><th>Capability</th><th>Blender's own nodes</th><th>With the pack</th></tr>
+<tr><td>Game-art tools (trim sheets, flowmaps, roads)</td><td>No</td><td>Covered — Flowmaps in the frame of the UV map, roads laid on a terrain, lightmap UVs and LOD for engines<br><span class="mods"><code>flowmaps</code> <code>trim_sheets</code> <code>roads</code> <code>game_export</code></span></td></tr>
+</table>
+
+<h2>Tutorial</h2>
+<a class="tuto-card" href="../tutorials/game-level.html">
+  <img src="../tutorials/img/game-level-step7.png" alt="" loading="lazy">
+  <span class="body"><strong>A game level</strong><span>Build a small game level in Blender with the Game Art Tools pack: a banked road laid on rolling ground, houses mapped to a trim sheet, a stream on a flowmap, then lightmap UVs, baked vertex colors and LOD for the engine, in .bn.</span><span class="count">7 steps</span></span>
+</a>
+
+<h2>Compared</h2>
+<ul>
+<li><a href="../vs/houdini.html">Base Node VS Houdini</a></li>
+</ul>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

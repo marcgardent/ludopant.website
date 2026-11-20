@@ -1,0 +1,1481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The refuge — Modeling Tools tutorial — Ludopant</title>
+<meta name="description" content="Model a small hard-surface mountain refuge in Blender from a box, with the Modeling Tools pack: bevels, insets, extrusions, a boolean and panel lines, each tool selecting what the one before stored, in .bn.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/tutorials/refuge.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="The refuge — Modeling Tools tutorial — Ludopant">
+<meta property="og:description" content="Model a small hard-surface mountain refuge in Blender from a box, with the Modeling Tools pack: bevels, insets, extrusions, a boolean and panel lines, each tool selecting what the one before stored, in .bn.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/tutorials/refuge.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/refuge-side.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-view.js"></script>
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-file.js"></script>
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs tuto">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › <a href="../modeling/">Modeling Tools</a> › Tutorial: The refuge</p>
+<h1>The refuge</h1>
+    <p class="lead">
+      A radio relay hut on a mountain pass: a steel box on a concrete plinth, a window, a door, vents, a hipped roof with a mast, a round hatch, grooves.
+      It starts as a box, and every step is one modelling tool more, in Geometry Nodes.
+    </p>
+    <figure>
+      <img src="img/refuge-side.png" width="1000" height="750" alt="An orange steel hut on a concrete plinth: a dark window, a grey door outlined by a groove, nine square vents, a round white hatch, a groove under the eaves, a dark hipped roof with a pale fascia and a mast">
+      <figcaption>Where we are going. Seven steps, each one a few lines more.</figcaption>
+    </figure>
+
+    <h2 id="learn">You will learn</h2>
+    <ul>
+      <li><strong>The craft.</strong> Hard-surface modelling without a modifier stack: bevel, chamfer, inset, extrude faces one by one or as regions, cut with a boolean, groove panel lines.</li>
+      <li><strong>The idea.</strong> Each tool stores what it made as an attribute (the front, the sides, the strips, the cut, the seam) and the next tool takes it as its selection. The material reads the same attributes.</li>
+      <li><strong>The .bn.</strong> A pipe of tools with <code>|&gt;</code>, attributes read back as fields with <code>NamedAttribute</code>, and how a step grows: one frame more, and the pipe goes on from where it stopped.</li>
+    </ul>
+
+    <h2 id="before">Before you start</h2>
+    <p>
+      You need Blender 5, the <a href="https://marcgardent.github.io/base-node-language/#blender">Base Node add-on</a>, and the <a href="../modeling/">Modeling Tools</a> pack: it carries the three modules this tutorial uses.
+      The steps are free to read and copy; the modules are not, and without the pack a step does not build.
+    </p>
+    <table>
+      <tr><th>Module</th><th>What it gives</th><th>What it stores</th></tr>
+      <tr><td><code>poly_bevel</code></td><td><code>poly_bevel</code>: every edge of a closed mesh bevelled. <code>chamfer_corners</code>: the selected points cut off.</td><td><code>bevel_face</code>, <code>bevel_edge</code>, <code>bevel_corner</code>; <code>chamfer_corner</code></td></tr>
+      <tr><td><code>poly_extrude</code></td><td><code>poly_extrude</code>: faces inset, then pushed along their normals, one by one or as regions, turned, tapered.</td><td><code>poly_front</code>, <code>poly_side</code>, <code>poly_layer</code></td></tr>
+      <tr><td><code>modeling</code></td><td><code>boolean_cut</code>: a mesh cut by another. <code>panel_lines</code>: a groove along edges. <code>poly_solidify</code>, not used here.</td><td><code>bool_cut</code>, <code>bool_seam</code>; <code>panel_groove</code></td></tr>
+    </table>
+    <p>
+      This page assumes you have read <a href="https://marcgardent.github.io/base-node-language/tutorials/lunar-ground.html">Lunar ground</a>, or know the basics of a <code>.bn</code> file: a graph, its nodes as calls, fields.
+      Every block below is a complete <code>.bn</code> file, its code beside the nodes it builds. Two ways to try a step:
+    </p>
+    <ul>
+      <li><strong>Drag it.</strong> Drag the file icon of its block, or its title, onto empty space in Blender's 3D Viewport, and keep <em>Instantiate the Example</em>: a new object carries <code>refuge</code> at the 3D cursor. A click on the file icon downloads the file instead.</li>
+      <li><strong>Paste it.</strong> Press the copy button of its block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>, on any mesh object: the graph makes its own refuge and ignores the mesh it is given.</li>
+    </ul>
+    <p>
+      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/refuge/render.py"><code>render.py</code></a>.
+    </p>
+
+    <h2 id="idea">Tools that leave notes</h2>
+    <p>
+      In a modelling package you select faces by hand, then run a tool on them. Geometry Nodes has no hand: a selection is a field, a rule that says yes or no for each face.
+      Writing that rule is easy for the box (“the faces that look forward”), hard for what a tool just made (“the faces the last extrusion pushed out”).
+    </p>
+    <p>
+      So each tool of the pack writes it down. <code>poly_extrude</code> marks the faces it pushed out <code>poly_front</code>, and the faces of the walls it raised <code>poly_side</code>.
+      The next tool reads <code>poly_front</code> back and works on those faces. That is the whole tutorial, seven times.
+      The notes stay on the mesh until you remove them: a tool adds its own and keeps the ones before.
+    </p>
+
+    <h2 id="step-1"><span class="n">1.</span> A box on a plinth</h2>
+    <p>
+      Two <code>Cube</code>s. The plinth is a plain slab. The box gets vertices: 13 along X, 9 along Y, 11 along Z, so its faces are 25 cm apart.
+      A window will be a region of these faces, a vent one face: the grid is where the openings can go.
+    </p>
+    <p class="file">step1_box.bn: <code>refuge</code>, <code>refuge_paint</code></p>
+    <bn-view graph="refuge" height="480"><script type="text/bn">
+// @module refuge_step1
+// @title The refuge, step 1: a box on a plinth
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+shader graph refuge_paint(paint: Color = (0.62, 0.16, 0.05)) -> Shader {
+  "Painted steel, one colour for now"
+  return PrincipledBSDF(base_color: paint, metallic: 0.3, roughness: 0.45)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A box on a plinth"
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+  }
+  hut = box
+    |> SetMaterial(material: RefugePaint)
+  base = plinth
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-view>
+    <ul>
+      <li><code>|&gt;</code> passes what is on its left as the first input of the call on its right: <code>Cube(…).mesh |&gt; TransformGeometry(…)</code> moves the cube up so it stands on the plinth.</li>
+      <li><code>refuge_paint</code> is a shader group: its inputs are the knobs you turn, on its node in the material. One colour for now.</li>
+      <li><code>"Box" #blue { … }</code> is a frame: the nodes inside it are boxed together in the editor, under that label. Each step will add one.</li>
+    </ul>
+    <figure>
+      <img src="img/refuge-step1.png" width="1000" height="750" loading="lazy" alt="An orange box on a grey concrete slab">
+      <figcaption>Step 1. A box, a slab, sharp edges.</figcaption>
+    </figure>
+
+    <h2 id="step-2"><span class="n">2.</span> Edges and corners</h2>
+    <p>
+      Nothing made of steel has a sharp edge. One line, <code>|&gt; poly_bevel(width: 0.06)</code>, cuts every edge of the box 6 cm wide; another, <code>|&gt; chamfer_corners(width: 0.12)</code>, cuts the eight corners off the plinth.
+    </p>
+    <p class="file">step2_bevel.bn: <code>refuge</code>, <code>refuge_paint</code></p>
+    <bn-view graph="refuge" height="480"><script type="text/bn">
+// @module refuge_step2
+// @title The refuge, step 2: edges and corners
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use poly_bevel
+
+shader graph refuge_paint(paint: Color = (0.62, 0.16, 0.05)) -> Shader {
+  "Painted steel; the strips and the corners the bevel made shown pale, to see them"
+  strip = max(
+    Attribute(attribute_name: "bevel_edge").factor,
+    Attribute(attribute_name: "bevel_corner").factor)
+  color = Mix(factor: strip, a: paint, b: (0.85, 0.84, 0.8, 1.0), data_type: RGBA)
+  return PrincipledBSDF(base_color: color, metallic: 0.3, roughness: 0.45)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A box on a plinth, its edges and corners chamfered"
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  hut = box
+    |> SetMaterial(material: RefugePaint)
+  base = plinth
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-view>
+    <p>
+      <code>poly_bevel</code> works face by face: it shrinks each face of the box by <code>width</code>, lays a strip along each edge between two faces, and closes each corner with a patch.
+      Then it marks them: <code>bevel_face</code> on the faces, <code>bevel_edge</code> on the strips, <code>bevel_corner</code> on the patches.
+    </p>
+    <p>
+      For this one picture, the material paints the strips and the patches pale, so you can see them. The flat edges between two faces of the grid are bevelled too: they stay flat and you never see them, except here.
+      What is left orange is <code>bevel_face</code>, the 25 cm faces, smaller now. Step 4 uses them.
+    </p>
+    <figure>
+      <img src="img/refuge-step2.png" width="1000" height="750" loading="lazy" alt="The box covered in a pale grid, orange squares between the lines, its edges chamfered; the slab under it with its corners cut off">
+      <figcaption>Step 2. The strips and the patches of <code>poly_bevel</code>, shown pale. The plinth has lost its corners.</figcaption>
+    </figure>
+    <ul>
+      <li><code>segments</code> is 1 here: a flat chamfer. More segments round the edge, but on a grid like this one the patches where a flat edge meets a rounded one bulge a little; a chamfer stays clean.</li>
+      <li><code>chamfer_corners</code> rebuilds every face of its mesh and keeps none of its attributes. That is fine on the plinth, which stores nothing. On a mesh that does, run it first.</li>
+    </ul>
+
+    <h2 id="step-3"><span class="n">3.</span> A window and a door</h2>
+    <p>
+      Two calls to <code>poly_extrude</code> on the front wall. Each insets a region of faces from its border and pushes it in: a negative <code>distance</code> goes into the wall.
+    </p>
+    <p class="file">step3_openings.bn: <code>refuge</code>, <code>refuge_paint</code></p>
+    <bn-view graph="refuge" height="480"><script type="text/bn">
+// @module refuge_step3
+// @title The refuge, step 3: a window and a door
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use poly_bevel
+use poly_extrude
+
+shader graph refuge_paint(
+    paint: Color = (0.62, 0.16, 0.05),
+    door_color: Color = (0.07, 0.09, 0.1),
+    glow: Float = 0.0 in 0.0..10.0
+) -> Shader {
+  "Painted steel, the door darker, the window dark glass that glows with glow"
+  door = Attribute(attribute_name: "door").factor
+  glass = Attribute(attribute_name: "glass").factor
+  walls = Mix(factor: door, a: paint, b: door_color, data_type: RGBA)
+  glazed = Mix(factor: glass, a: walls, b: (0.02, 0.03, 0.04, 1.0), data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: glazed,
+    metallic: 0.3,
+    roughness: 0.45 - glass * 0.42,
+    emission_color: (1.0, 0.62, 0.28, 1.0),
+    emission_strength: glass * glow)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A hut on a plinth: a window, a door"
+  // What the tools store, read back as fields; p and n, the position and the normal
+  front = NamedAttribute(name: "poly_front", data_type: BOOLEAN).attribute
+  p = Position()
+  n = Normal().normal
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  "Openings" #teal {
+    // On the front wall: a window 1 m square, a door 1 m by 2 m, each a region of faces
+    window = n.y < -0.99 and p.x > -1.2 and p.x < -0.3 and p.z > 1.3 and p.z < 2.2
+    doorway = n.y < -0.99 and p.x > 0.3 and p.x < 1.2 and p.z < 2.2
+    opened = box
+      |> poly_extrude(selection: window, distance: -0.12, inset: 0.08, individual: false)
+      |> StoreNamedAttribute(name: "glass", value: front, domain: FACE)
+      // Marks pile up: take the window's away, so that front is the door's alone
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: doorway, distance: -0.08, inset: 0.06, individual: false)
+      |> StoreNamedAttribute(name: "door", value: front, domain: FACE)
+  }
+  hut = opened
+    |> SetMaterial(material: RefugePaint)
+  base = plinth
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>The selection.</strong> <code>n.y &lt; -0.99</code> keeps the faces that look forward, along −Y. The bounds on <code>p.x</code> and <code>p.z</code> keep a rectangle of them.</li>
+      <li><strong>A region.</strong> <code>individual: false</code> takes the selected faces as one piece: the window is 4 × 4 faces with the strips between them, inset 8 cm from the border of the piece, not each face from its own.</li>
+      <li><strong>The note.</strong> <code>front</code> reads <code>poly_front</code>, the faces the extrusion pushed in: the glass. <code>StoreNamedAttribute</code> keeps it as <code>glass</code>.</li>
+      <li><strong>A clean slate.</strong> <code>RemoveNamedAttribute</code> takes away every note whose name starts with <code>poly_</code> (<code>pattern_mode: Wildcard</code>).</li>
+      <li><strong>The door</strong> is the same, 4 × 8 faces, and keeps its front as <code>door</code>.</li>
+    </ol>
+    <p>
+      Why copy <code>poly_front</code> to <code>glass</code>, then remove it? Notes pile up: the door's <code>poly_extrude</code> would keep the window's <code>poly_front</code> and add its own, and <code>door</code> would take the window too.
+      So keep what you need under your own name, then wipe the tools' notes before the next tool whose notes you read.
+    </p>
+    <p>
+      The bounds sit between a line of the grid and the middle of a face, for instance <code>p.x &gt; -1.2</code> for a line at −1.25: the strip on the line stays out, the face next to it is in.
+      The material reads <code>glass</code> and <code>door</code> with an <code>Attribute</code> node, the shader's way to read what the geometry stored.
+    </p>
+    <figure>
+      <img src="img/refuge-step3.png" width="1000" height="750" loading="lazy" alt="The orange box with a square window of dark glass and a tall grey door, both set into the wall">
+      <figcaption>Step 3. The window is 12 cm deep in the wall, the door 8 cm.</figcaption>
+    </figure>
+
+    <h2 id="step-4"><span class="n">4.</span> Vents, one face at a time</h2>
+    <p>
+      On the right wall, nine vents. The same tool, two differences: <code>individual</code> is left on, so each face is inset and pushed on its own; and the selection reads a note from step 2.
+    </p>
+    <p class="file">step4_vents.bn: <code>refuge</code>, <code>refuge_paint</code></p>
+    <bn-view graph="refuge" height="480"><script type="text/bn">
+// @module refuge_step4
+// @title The refuge, step 4: vents, one face at a time
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use poly_bevel
+use poly_extrude
+
+shader graph refuge_paint(
+    paint: Color = (0.62, 0.16, 0.05),
+    door_color: Color = (0.07, 0.09, 0.1),
+    steel: Color = (0.06, 0.065, 0.07),
+    glow: Float = 0.0 in 0.0..10.0
+) -> Shader {
+  "Painted steel, the door darker, the vents bare steel, the window dark glass that glows with glow"
+  door = Attribute(attribute_name: "door").factor
+  glass = Attribute(attribute_name: "glass").factor
+  louvre = Attribute(attribute_name: "louvre").factor
+  walls = Mix(factor: door, a: paint, b: door_color, data_type: RGBA)
+  vents = Mix(factor: louvre, a: walls, b: steel, data_type: RGBA)
+  glazed = Mix(factor: glass, a: vents, b: (0.02, 0.03, 0.04, 1.0), data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: glazed,
+    metallic: 0.3,
+    roughness: 0.45 - glass * 0.42,
+    emission_color: (1.0, 0.62, 0.28, 1.0),
+    emission_strength: glass * glow)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A hut on a plinth: a window, a door, vents"
+  // What the tools store, read back as fields; p and n, the position and the normal
+  front = NamedAttribute(name: "poly_front", data_type: BOOLEAN).attribute
+  side = NamedAttribute(name: "poly_side", data_type: BOOLEAN).attribute
+  cell = NamedAttribute(name: "bevel_face", data_type: BOOLEAN).attribute
+  p = Position()
+  n = Normal().normal
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  "Openings" #teal {
+    // On the front wall: a window 1 m square, a door 1 m by 2 m, each a region of faces
+    window = n.y < -0.99 and p.x > -1.2 and p.x < -0.3 and p.z > 1.3 and p.z < 2.2
+    doorway = n.y < -0.99 and p.x > 0.3 and p.x < 1.2 and p.z < 2.2
+    opened = box
+      |> poly_extrude(selection: window, distance: -0.12, inset: 0.08, individual: false)
+      |> StoreNamedAttribute(name: "glass", value: front, domain: FACE)
+      // Marks pile up: take the window's away, so that front is the door's alone
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: doorway, distance: -0.08, inset: 0.06, individual: false)
+      |> StoreNamedAttribute(name: "door", value: front, domain: FACE)
+  }
+  "Vents" #violet {
+    // On the right wall, nine faces of the box, each pushed in on its own
+    grille = cell and n.x > 0.99 and p.y > -1.0 and p.y < -0.3 and p.z > 0.55 and p.z < 1.2
+    vented = opened
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: grille, distance: -0.04, inset: 0.03)
+      |> StoreNamedAttribute(name: "louvre", value: front or side, domain: FACE)
+  }
+  hut = vented
+    |> SetMaterial(material: RefugePaint)
+  base = plinth
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-view>
+    <ul>
+      <li><code>cell</code> reads <code>bevel_face</code>. Without it the selection takes the strips and the patches between the faces too, and each becomes a vent of its own.</li>
+      <li><code>front or side</code>: the vent's back and its four walls, kept as <code>louvre</code>. The material paints them bare steel. The window and the door are not in it: their notes were removed just before. <code>bevel_face</code> stays, its name does not start with <code>poly_</code>.</li>
+    </ul>
+    <figure>
+      <img src="img/refuge-step4.png" width="1000" height="750" loading="lazy" alt="Nine small square vents, three by three, in the lower front corner of the right wall">
+      <figcaption>Step 4. Nine faces, nine vents.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> take <code>cell and</code> out of <code>grille</code>. The strips and the patches join in: a grille of 25 vents, small and large.</p>
+
+    <h2 id="step-5"><span class="n">5.</span> A roof, extrusion after extrusion</h2>
+    <p>
+      Three extrusions of the top, each one on the front of the one before. That is where the notes pay: <code>selection: front</code> means “what the last tool pushed out”.
+    </p>
+    <p class="file">step5_roof.bn: <code>refuge</code>, <code>refuge_paint</code></p>
+    <bn-view graph="refuge" height="480"><script type="text/bn">
+// @module refuge_step5
+// @title The refuge, step 5: a roof, extrusion after extrusion
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use poly_bevel
+use poly_extrude
+
+shader graph refuge_paint(
+    paint: Color = (0.62, 0.16, 0.05),
+    door_color: Color = (0.07, 0.09, 0.1),
+    steel: Color = (0.06, 0.065, 0.07),
+    trim: Color = (0.75, 0.74, 0.7),
+    glow: Float = 0.0 in 0.0..10.0
+) -> Shader {
+  "Painted steel, from what the tools stored: the door darker, the vents and the roof bare steel, the fascia pale, the window dark glass that glows with glow"
+  door = Attribute(attribute_name: "door").factor
+  glass = Attribute(attribute_name: "glass").factor
+  louvre = Attribute(attribute_name: "louvre").factor
+  roof = Attribute(attribute_name: "roof").factor
+  fascia = Attribute(attribute_name: "fascia").factor
+  walls = Mix(factor: door, a: paint, b: door_color, data_type: RGBA)
+  vents = Mix(factor: louvre, a: walls, b: steel, data_type: RGBA)
+  roofed = Mix(factor: roof, a: vents, b: steel, data_type: RGBA)
+  trimmed = Mix(factor: fascia, a: roofed, b: trim, data_type: RGBA)
+  glazed = Mix(factor: glass, a: trimmed, b: (0.02, 0.03, 0.04, 1.0), data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: glazed,
+    metallic: 0.3 + roof * 0.5,
+    roughness: 0.45 - glass * 0.42 - roof * 0.1,
+    emission_color: (1.0, 0.62, 0.28, 1.0),
+    emission_strength: glass * glow)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A hut on a plinth: a window, a door, vents, a roof and a mast"
+  // What the tools store, read back as fields; p and n, the position and the normal
+  front = NamedAttribute(name: "poly_front", data_type: BOOLEAN).attribute
+  side = NamedAttribute(name: "poly_side", data_type: BOOLEAN).attribute
+  cell = NamedAttribute(name: "bevel_face", data_type: BOOLEAN).attribute
+  p = Position()
+  n = Normal().normal
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  "Openings" #teal {
+    // On the front wall: a window 1 m square, a door 1 m by 2 m, each a region of faces
+    window = n.y < -0.99 and p.x > -1.2 and p.x < -0.3 and p.z > 1.3 and p.z < 2.2
+    doorway = n.y < -0.99 and p.x > 0.3 and p.x < 1.2 and p.z < 2.2
+    opened = box
+      |> poly_extrude(selection: window, distance: -0.12, inset: 0.08, individual: false)
+      |> StoreNamedAttribute(name: "glass", value: front, domain: FACE)
+      // Marks pile up: take the window's away, so that front is the door's alone
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: doorway, distance: -0.08, inset: 0.06, individual: false)
+      |> StoreNamedAttribute(name: "door", value: front, domain: FACE)
+  }
+  "Vents" #violet {
+    // On the right wall, nine faces of the box, each pushed in on its own
+    grille = cell and n.x > 0.99 and p.y > -1.0 and p.y < -0.3 and p.z > 0.55 and p.z < 1.2
+    vented = opened
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: grille, distance: -0.04, inset: 0.03)
+      |> StoreNamedAttribute(name: "louvre", value: front or side, domain: FACE)
+  }
+  "Roof" #orange {
+    // The top grown out flat (the soffit), pushed up (the fascia), then up and in (the roof)
+    roofed = vented
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(
+        selection: n.z > 0.99 and p.z > 2.7,
+        distance: 0.0,
+        taper: 1.1,
+        individual: false)
+      // Drop the sides so far: the front stays to be pushed, and side is the next one's alone
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.16, individual: false)
+      |> StoreNamedAttribute(name: "fascia", value: side, domain: FACE)
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.55, taper: 0.4, individual: false)
+      |> StoreNamedAttribute(name: "roof", value: front or side, domain: FACE)
+    mast = Cylinder(vertices: 16, radius: 0.05, depth: 1.5).mesh
+      |> TransformGeometry(translation: (0.3, 0.2, 4.0))
+  }
+  hut = roofed
+    |> SetMaterial(material: RefugePaint)
+  base = plinth + mast
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>The soffit.</strong> The top, as a region (<code>n.z &gt; 0.99</code>, and high up, not the sills of the openings). <code>distance: 0.0</code> pushes it nowhere and <code>taper: 1.1</code> scales it to 110 %: the new sides are flat, a ledge that overhangs the walls. The notes of the openings and the vents are removed first, as in step 3.</li>
+      <li><strong>The fascia.</strong> That front pushed up 16 cm. Its sides are a band round the roof, kept as <code>fascia</code>. Removing <code>poly_side</code> alone before it keeps the soffit's front to push, and leaves out the soffit's sides.</li>
+      <li><strong>The roof.</strong> That front pushed up 55 cm and scaled to 40 %: four slopes and a flat top, kept as <code>roof</code>, again after removing the sides before it.</li>
+    </ol>
+    <p>
+      The same name, <code>front</code>, gives three different selections. A field is not a value: it is read again by each node that uses it, on the mesh that node is given.
+      Each <code>poly_extrude</code> gets the mesh of the one before, with that one's <code>poly_front</code>: it pushed the whole front of the one before, so that front is now its own.
+    </p>
+    <p>
+      The mast is a plain <code>Cylinder</code>, standing in the roof; it joins the plinth for its material.
+    </p>
+    <figure>
+      <img src="img/refuge-step5.png" width="1000" height="750" loading="lazy" alt="The hut now under a dark hipped roof with a pale band round its edge, a thin mast on top">
+      <figcaption>Step 5. A soffit, a fascia, four slopes: three extrusions of the same top.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> on the third extrusion, set <code>taper: 0.0</code> and <code>distance: 1.0</code>: the flat top shrinks to a point, a pyramid.</p>
+
+    <h2 id="step-6"><span class="n">6.</span> A boolean hatch</h2>
+    <p>
+      A round hatch in the right wall: a cylinder, laid on its side with half of its depth in the wall, taken away from the hut with <code>boolean_cut</code>.
+    </p>
+    <p class="file">step6_hatch.bn: <code>refuge</code>, <code>refuge_paint</code></p>
+    <bn-view graph="refuge" height="480"><script type="text/bn">
+// @module refuge_step6
+// @title The refuge, step 6: a boolean hatch
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use modeling
+use poly_bevel
+use poly_extrude
+
+shader graph refuge_paint(
+    paint: Color = (0.62, 0.16, 0.05),
+    door_color: Color = (0.07, 0.09, 0.1),
+    steel: Color = (0.06, 0.065, 0.07),
+    trim: Color = (0.75, 0.74, 0.7),
+    glow: Float = 0.0 in 0.0..10.0
+) -> Shader {
+  "Painted steel, from what the tools stored: the door darker, the vents and the roof bare steel, the fascia and the hatch pale, the window dark glass that glows with glow"
+  door = Attribute(attribute_name: "door").factor
+  glass = Attribute(attribute_name: "glass").factor
+  louvre = Attribute(attribute_name: "louvre").factor
+  roof = Attribute(attribute_name: "roof").factor
+  fascia = Attribute(attribute_name: "fascia").factor
+  hatch = Attribute(attribute_name: "bool_cut").factor
+  walls = Mix(factor: door, a: paint, b: door_color, data_type: RGBA)
+  vents = Mix(factor: louvre, a: walls, b: steel, data_type: RGBA)
+  roofed = Mix(factor: roof, a: vents, b: steel, data_type: RGBA)
+  trimmed = Mix(factor: max(fascia, hatch), a: roofed, b: trim, data_type: RGBA)
+  glazed = Mix(factor: glass, a: trimmed, b: (0.02, 0.03, 0.04, 1.0), data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: glazed,
+    metallic: 0.3 + roof * 0.5,
+    roughness: 0.45 - glass * 0.42 - roof * 0.1,
+    emission_color: (1.0, 0.62, 0.28, 1.0),
+    emission_strength: glass * glow)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A hut on a plinth: a window, a door, vents, a roof and a mast, a round hatch"
+  // What the tools store, read back as fields; p and n, the position and the normal
+  front = NamedAttribute(name: "poly_front", data_type: BOOLEAN).attribute
+  side = NamedAttribute(name: "poly_side", data_type: BOOLEAN).attribute
+  cell = NamedAttribute(name: "bevel_face", data_type: BOOLEAN).attribute
+  p = Position()
+  n = Normal().normal
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  "Openings" #teal {
+    // On the front wall: a window 1 m square, a door 1 m by 2 m, each a region of faces
+    window = n.y < -0.99 and p.x > -1.2 and p.x < -0.3 and p.z > 1.3 and p.z < 2.2
+    doorway = n.y < -0.99 and p.x > 0.3 and p.x < 1.2 and p.z < 2.2
+    opened = box
+      |> poly_extrude(selection: window, distance: -0.12, inset: 0.08, individual: false)
+      |> StoreNamedAttribute(name: "glass", value: front, domain: FACE)
+      // Marks pile up: take the window's away, so that front is the door's alone
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: doorway, distance: -0.08, inset: 0.06, individual: false)
+      |> StoreNamedAttribute(name: "door", value: front, domain: FACE)
+  }
+  "Vents" #violet {
+    // On the right wall, nine faces of the box, each pushed in on its own
+    grille = cell and n.x > 0.99 and p.y > -1.0 and p.y < -0.3 and p.z > 0.55 and p.z < 1.2
+    vented = opened
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: grille, distance: -0.04, inset: 0.03)
+      |> StoreNamedAttribute(name: "louvre", value: front or side, domain: FACE)
+  }
+  "Roof" #orange {
+    // The top grown out flat (the soffit), pushed up (the fascia), then up and in (the roof)
+    roofed = vented
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(
+        selection: n.z > 0.99 and p.z > 2.7,
+        distance: 0.0,
+        taper: 1.1,
+        individual: false)
+      // Drop the sides so far: the front stays to be pushed, and side is the next one's alone
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.16, individual: false)
+      |> StoreNamedAttribute(name: "fascia", value: side, domain: FACE)
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.55, taper: 0.4, individual: false)
+      |> StoreNamedAttribute(name: "roof", value: front or side, domain: FACE)
+    mast = Cylinder(vertices: 16, radius: 0.05, depth: 1.5).mesh
+      |> TransformGeometry(translation: (0.3, 0.2, 4.0))
+  }
+  "Hatch" #red {
+    // A disc 64 cm across sunk 15 cm into the right wall
+    cutter = Cylinder(vertices: 48, radius: 0.32, depth: 0.3).mesh
+      |> TransformGeometry(translation: (1.5, 0.42, 1.88), rotation: (0.0, 1.5707964, 0.0))
+    holed = roofed
+      |> boolean_cut(cutter)
+  }
+  hut = holed
+    |> SetMaterial(material: RefugePaint)
+  base = plinth + mast
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-view>
+    <p>
+      Blender's Mesh Boolean gives back one mesh and the edges where the two met, but not which faces came from the cutter.
+      <code>boolean_cut</code> does. It marks those faces <code>bool_cut</code>, here the bottom of the hatch and its round wall, and the edges where they meet the hut's own faces <code>bool_seam</code>.
+    </p>
+    <p>
+      The material reads <code>bool_cut</code> as it is and paints the hatch like the fascia. No copy this time: nothing after it writes <code>bool_cut</code> again.
+    </p>
+    <figure>
+      <img src="img/refuge-step6.png" width="1000" height="750" loading="lazy" alt="A round white hatch, sunk into the right wall above the vents">
+      <figcaption>Step 6. The hatch, 64 cm across and 15 cm deep.</figcaption>
+    </figure>
+
+    <h2 id="step-7"><span class="n">7.</span> Grooves</h2>
+    <p>
+      Last tool, <code>panel_lines</code>: a groove 4 cm wide and 3 cm deep along the edges it is given. Its selection gathers three notes:
+    </p>
+    <p class="file">step7_grooves.bn: <code>refuge</code>, <code>refuge_paint</code></p>
+    <bn-view graph="refuge" height="480"><script type="text/bn">
+// @module refuge_step7
+// @title The refuge, step 7: grooves
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use modeling
+use poly_bevel
+use poly_extrude
+
+shader graph refuge_paint(
+    paint: Color = (0.62, 0.16, 0.05),
+    door_color: Color = (0.07, 0.09, 0.1),
+    steel: Color = (0.06, 0.065, 0.07),
+    trim: Color = (0.75, 0.74, 0.7),
+    glow: Float = 0.0 in 0.0..10.0
+) -> Shader {
+  "Painted steel, from what the tools stored: the door darker, the vents and the roof bare steel, the fascia and the hatch pale, the window dark glass that glows with glow, the grooves dark"
+  door = Attribute(attribute_name: "door").factor
+  glass = Attribute(attribute_name: "glass").factor
+  louvre = Attribute(attribute_name: "louvre").factor
+  roof = Attribute(attribute_name: "roof").factor
+  fascia = Attribute(attribute_name: "fascia").factor
+  hatch = Attribute(attribute_name: "bool_cut").factor
+  groove = Attribute(attribute_name: "panel_groove").factor
+  walls = Mix(factor: door, a: paint, b: door_color, data_type: RGBA)
+  vents = Mix(factor: louvre, a: walls, b: steel, data_type: RGBA)
+  roofed = Mix(factor: roof, a: vents, b: steel, data_type: RGBA)
+  trimmed = Mix(factor: max(fascia, hatch), a: roofed, b: trim, data_type: RGBA)
+  glazed = Mix(factor: glass, a: trimmed, b: (0.02, 0.03, 0.04, 1.0), data_type: RGBA)
+  grooved = Mix(factor: groove, a: glazed, b: (0.01, 0.01, 0.01, 1.0), data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: grooved,
+    metallic: 0.3 + roof * 0.5,
+    roughness: 0.45 - glass * 0.42 - roof * 0.1 + groove * 0.4,
+    emission_color: (1.0, 0.62, 0.28, 1.0),
+    emission_strength: glass * glow)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A hut on a plinth: a window, a door, vents, a roof and a mast, a round hatch, grooves around the hatch and the door and round the walls"
+  // What the tools store, read back as fields; p and n, the position and the normal
+  front = NamedAttribute(name: "poly_front", data_type: BOOLEAN).attribute
+  side = NamedAttribute(name: "poly_side", data_type: BOOLEAN).attribute
+  cell = NamedAttribute(name: "bevel_face", data_type: BOOLEAN).attribute
+  p = Position()
+  n = Normal().normal
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  "Openings" #teal {
+    // On the front wall: a window 1 m square, a door 1 m by 2 m, each a region of faces
+    window = n.y < -0.99 and p.x > -1.2 and p.x < -0.3 and p.z > 1.3 and p.z < 2.2
+    doorway = n.y < -0.99 and p.x > 0.3 and p.x < 1.2 and p.z < 2.2
+    opened = box
+      |> poly_extrude(selection: window, distance: -0.12, inset: 0.08, individual: false)
+      |> StoreNamedAttribute(name: "glass", value: front, domain: FACE)
+      // Marks pile up: take the window's away, so that front is the door's alone
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: doorway, distance: -0.08, inset: 0.06, individual: false)
+      |> StoreNamedAttribute(name: "door", value: front, domain: FACE)
+  }
+  "Vents" #violet {
+    // On the right wall, nine faces of the box, each pushed in on its own
+    grille = cell and n.x > 0.99 and p.y > -1.0 and p.y < -0.3 and p.z > 0.55 and p.z < 1.2
+    vented = opened
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: grille, distance: -0.04, inset: 0.03)
+      |> StoreNamedAttribute(name: "louvre", value: front or side, domain: FACE)
+  }
+  "Roof" #orange {
+    // The top grown out flat (the soffit), pushed up (the fascia), then up and in (the roof)
+    roofed = vented
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(
+        selection: n.z > 0.99 and p.z > 2.7,
+        distance: 0.0,
+        taper: 1.1,
+        individual: false)
+      // Drop the sides so far: the front stays to be pushed, and side is the next one's alone
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.16, individual: false)
+      |> StoreNamedAttribute(name: "fascia", value: side, domain: FACE)
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.55, taper: 0.4, individual: false)
+      |> StoreNamedAttribute(name: "roof", value: front or side, domain: FACE)
+    mast = Cylinder(vertices: 16, radius: 0.05, depth: 1.5).mesh
+      |> TransformGeometry(translation: (0.3, 0.2, 4.0))
+  }
+  "Hatch" #red {
+    // A disc 64 cm across sunk 15 cm into the right wall
+    cutter = Cylinder(vertices: 48, radius: 0.32, depth: 0.3).mesh
+      |> TransformGeometry(translation: (1.5, 0.42, 1.88), rotation: (0.0, 1.5707964, 0.0))
+    holed = roofed
+      |> boolean_cut(cutter)
+  }
+  "Grooves" #yellow {
+    // Along the seam of the hatch; around the door, the edges between its faces and the others;
+    // and two belts round the walls, along the bottom edges of two rows of faces
+    seam = NamedAttribute(name: "bool_seam", data_type: BOOLEAN).attribute
+    door = NamedAttribute(name: "door", data_type: INT).attribute
+    belts = abs(p.z - 0.31) < 0.001 or abs(p.z - 2.31) < 0.001
+    grooved = holed
+      |> panel_lines(
+        selection: seam or FaceGroupBoundaries(face_group_id: door) or belts,
+        width: 0.04,
+        depth: 0.03)
+  }
+  hut = grooved
+    |> SetMaterial(material: RefugePaint)
+  base = plinth + mast
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-view>
+    <ul>
+      <li><code>seam</code>, the <code>bool_seam</code> of step 6: a gasket round the hatch.</li>
+      <li><code>FaceGroupBoundaries(face_group_id: door)</code>, the edges between the door, from step 3, and the faces round it: a gap round the door leaf. It reads <code>door</code> as an integer, 1 on the door and 0 elsewhere, two groups with a border between them.</li>
+      <li><code>belts</code>: two loops of edges round the walls, 31 cm and 2.31 m above the ground. Each is the bottom edge of a row of <code>bevel_face</code>, 6 cm above a line of the grid: the first row, and the row over the door and the window. Nothing else lies at those heights.</li>
+    </ul>
+    <p>
+      A groove needs edges that close a panel: a loop, a seam, the border of a region. Where a line stops short, the groove narrows to nothing.
+      <code>panel_lines</code> marks the walls of each groove <code>panel_groove</code>, and the material paints them almost black.
+    </p>
+    <figure>
+      <img src="img/refuge-step7.png" width="1000" height="750" loading="lazy" alt="The finished hut: dark grooves round the door, round the hatch, and in two lines round the walls, under the eaves and at the foot">
+      <figcaption>Step 7. The grooves catch shadow; a hut becomes a machine.</figcaption>
+    </figure>
+
+    <h2 id="tune">The knobs</h2>
+    <p>
+      Every tool has its inputs; the material its colours. A few to start with:
+    </p>
+    <table>
+      <tr><th>Where</th><th>Input</th><th>What it does</th></tr>
+      <tr><td><code>refuge_paint</code></td><td><code>paint</code>, <code>door_color</code>, <code>steel</code>, <code>trim</code></td><td>The colours, on the group node in the material.</td></tr>
+      <tr><td><code>refuge_paint</code></td><td><code>glow</code></td><td>Light behind the glass. 0 by day.</td></tr>
+      <tr><td><code>poly_bevel</code></td><td><code>width</code>, <code>segments</code>, <code>profile</code></td><td>How wide the bevel, in how many strips, from flat (0) through round (0.5) to square (1).</td></tr>
+      <tr><td><code>poly_extrude</code></td><td><code>distance</code>, <code>inset</code>, <code>taper</code></td><td>How far each opening goes, how wide its frame, how the roof narrows.</td></tr>
+      <tr><td><code>panel_lines</code></td><td><code>width</code>, <code>depth</code></td><td>The size of the grooves.</td></tr>
+    </table>
+    <p class="try"><strong>Try:</strong> on step 7, set <code>glow</code> of <code>refuge_paint</code> to 4: someone is in. Then set <code>depth</code> of <code>panel_lines</code> to 0.06: the grooves hold more shadow.</p>
+    <p>
+      To move an opening, change the bounds of its selection; keep them between a line of the grid and the middle of a face. A finer grid, more vertices on the <code>Cube</code>, lets you place them closer.
+    </p>
+
+    <h2 id="files">Take it to Blender</h2>
+    <p>
+      The finished refuge, in one file. Drag the card onto empty space in Blender's 3D Viewport and keep <em>Instantiate the Example</em>: a new object carries <code>refuge</code>. A click on the card downloads the file.
+    </p>
+    <bn-file><script type="text/bn">
+// @module refuge_step7
+// @title The refuge, step 7: grooves
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use modeling
+use poly_bevel
+use poly_extrude
+
+shader graph refuge_paint(
+    paint: Color = (0.62, 0.16, 0.05),
+    door_color: Color = (0.07, 0.09, 0.1),
+    steel: Color = (0.06, 0.065, 0.07),
+    trim: Color = (0.75, 0.74, 0.7),
+    glow: Float = 0.0 in 0.0..10.0
+) -> Shader {
+  "Painted steel, from what the tools stored: the door darker, the vents and the roof bare steel, the fascia and the hatch pale, the window dark glass that glows with glow, the grooves dark"
+  door = Attribute(attribute_name: "door").factor
+  glass = Attribute(attribute_name: "glass").factor
+  louvre = Attribute(attribute_name: "louvre").factor
+  roof = Attribute(attribute_name: "roof").factor
+  fascia = Attribute(attribute_name: "fascia").factor
+  hatch = Attribute(attribute_name: "bool_cut").factor
+  groove = Attribute(attribute_name: "panel_groove").factor
+  walls = Mix(factor: door, a: paint, b: door_color, data_type: RGBA)
+  vents = Mix(factor: louvre, a: walls, b: steel, data_type: RGBA)
+  roofed = Mix(factor: roof, a: vents, b: steel, data_type: RGBA)
+  trimmed = Mix(factor: max(fascia, hatch), a: roofed, b: trim, data_type: RGBA)
+  glazed = Mix(factor: glass, a: trimmed, b: (0.02, 0.03, 0.04, 1.0), data_type: RGBA)
+  grooved = Mix(factor: groove, a: glazed, b: (0.01, 0.01, 0.01, 1.0), data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: grooved,
+    metallic: 0.3 + roof * 0.5,
+    roughness: 0.45 - glass * 0.42 - roof * 0.1 + groove * 0.4,
+    emission_color: (1.0, 0.62, 0.28, 1.0),
+    emission_strength: glass * glow)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A hut on a plinth: a window, a door, vents, a roof and a mast, a round hatch, grooves around the hatch and the door and round the walls"
+  // What the tools store, read back as fields; p and n, the position and the normal
+  front = NamedAttribute(name: "poly_front", data_type: BOOLEAN).attribute
+  side = NamedAttribute(name: "poly_side", data_type: BOOLEAN).attribute
+  cell = NamedAttribute(name: "bevel_face", data_type: BOOLEAN).attribute
+  p = Position()
+  n = Normal().normal
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  "Openings" #teal {
+    // On the front wall: a window 1 m square, a door 1 m by 2 m, each a region of faces
+    window = n.y < -0.99 and p.x > -1.2 and p.x < -0.3 and p.z > 1.3 and p.z < 2.2
+    doorway = n.y < -0.99 and p.x > 0.3 and p.x < 1.2 and p.z < 2.2
+    opened = box
+      |> poly_extrude(selection: window, distance: -0.12, inset: 0.08, individual: false)
+      |> StoreNamedAttribute(name: "glass", value: front, domain: FACE)
+      // Marks pile up: take the window's away, so that front is the door's alone
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: doorway, distance: -0.08, inset: 0.06, individual: false)
+      |> StoreNamedAttribute(name: "door", value: front, domain: FACE)
+  }
+  "Vents" #violet {
+    // On the right wall, nine faces of the box, each pushed in on its own
+    grille = cell and n.x > 0.99 and p.y > -1.0 and p.y < -0.3 and p.z > 0.55 and p.z < 1.2
+    vented = opened
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: grille, distance: -0.04, inset: 0.03)
+      |> StoreNamedAttribute(name: "louvre", value: front or side, domain: FACE)
+  }
+  "Roof" #orange {
+    // The top grown out flat (the soffit), pushed up (the fascia), then up and in (the roof)
+    roofed = vented
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(
+        selection: n.z > 0.99 and p.z > 2.7,
+        distance: 0.0,
+        taper: 1.1,
+        individual: false)
+      // Drop the sides so far: the front stays to be pushed, and side is the next one's alone
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.16, individual: false)
+      |> StoreNamedAttribute(name: "fascia", value: side, domain: FACE)
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.55, taper: 0.4, individual: false)
+      |> StoreNamedAttribute(name: "roof", value: front or side, domain: FACE)
+    mast = Cylinder(vertices: 16, radius: 0.05, depth: 1.5).mesh
+      |> TransformGeometry(translation: (0.3, 0.2, 4.0))
+  }
+  "Hatch" #red {
+    // A disc 64 cm across sunk 15 cm into the right wall
+    cutter = Cylinder(vertices: 48, radius: 0.32, depth: 0.3).mesh
+      |> TransformGeometry(translation: (1.5, 0.42, 1.88), rotation: (0.0, 1.5707964, 0.0))
+    holed = roofed
+      |> boolean_cut(cutter)
+  }
+  "Grooves" #yellow {
+    // Along the seam of the hatch; around the door, the edges between its faces and the others;
+    // and two belts round the walls, along the bottom edges of two rows of faces
+    seam = NamedAttribute(name: "bool_seam", data_type: BOOLEAN).attribute
+    door = NamedAttribute(name: "door", data_type: INT).attribute
+    belts = abs(p.z - 0.31) < 0.001 or abs(p.z - 2.31) < 0.001
+    grooved = holed
+      |> panel_lines(
+        selection: seam or FaceGroupBoundaries(face_group_id: door) or belts,
+        width: 0.04,
+        depth: 0.03)
+  }
+  hut = grooved
+    |> SetMaterial(material: RefugePaint)
+  base = plinth + mast
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-file>
+    <p>The steps before it, to start again from any of them:</p>
+    <div class="cards">
+      <bn-file><script type="text/bn">
+// @module refuge_step1
+// @title The refuge, step 1: a box on a plinth
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+shader graph refuge_paint(paint: Color = (0.62, 0.16, 0.05)) -> Shader {
+  "Painted steel, one colour for now"
+  return PrincipledBSDF(base_color: paint, metallic: 0.3, roughness: 0.45)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A box on a plinth"
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+  }
+  hut = box
+    |> SetMaterial(material: RefugePaint)
+  base = plinth
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module refuge_step2
+// @title The refuge, step 2: edges and corners
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use poly_bevel
+
+shader graph refuge_paint(paint: Color = (0.62, 0.16, 0.05)) -> Shader {
+  "Painted steel; the strips and the corners the bevel made shown pale, to see them"
+  strip = max(
+    Attribute(attribute_name: "bevel_edge").factor,
+    Attribute(attribute_name: "bevel_corner").factor)
+  color = Mix(factor: strip, a: paint, b: (0.85, 0.84, 0.8, 1.0), data_type: RGBA)
+  return PrincipledBSDF(base_color: color, metallic: 0.3, roughness: 0.45)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A box on a plinth, its edges and corners chamfered"
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  hut = box
+    |> SetMaterial(material: RefugePaint)
+  base = plinth
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module refuge_step3
+// @title The refuge, step 3: a window and a door
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use poly_bevel
+use poly_extrude
+
+shader graph refuge_paint(
+    paint: Color = (0.62, 0.16, 0.05),
+    door_color: Color = (0.07, 0.09, 0.1),
+    glow: Float = 0.0 in 0.0..10.0
+) -> Shader {
+  "Painted steel, the door darker, the window dark glass that glows with glow"
+  door = Attribute(attribute_name: "door").factor
+  glass = Attribute(attribute_name: "glass").factor
+  walls = Mix(factor: door, a: paint, b: door_color, data_type: RGBA)
+  glazed = Mix(factor: glass, a: walls, b: (0.02, 0.03, 0.04, 1.0), data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: glazed,
+    metallic: 0.3,
+    roughness: 0.45 - glass * 0.42,
+    emission_color: (1.0, 0.62, 0.28, 1.0),
+    emission_strength: glass * glow)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A hut on a plinth: a window, a door"
+  // What the tools store, read back as fields; p and n, the position and the normal
+  front = NamedAttribute(name: "poly_front", data_type: BOOLEAN).attribute
+  p = Position()
+  n = Normal().normal
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  "Openings" #teal {
+    // On the front wall: a window 1 m square, a door 1 m by 2 m, each a region of faces
+    window = n.y < -0.99 and p.x > -1.2 and p.x < -0.3 and p.z > 1.3 and p.z < 2.2
+    doorway = n.y < -0.99 and p.x > 0.3 and p.x < 1.2 and p.z < 2.2
+    opened = box
+      |> poly_extrude(selection: window, distance: -0.12, inset: 0.08, individual: false)
+      |> StoreNamedAttribute(name: "glass", value: front, domain: FACE)
+      // Marks pile up: take the window's away, so that front is the door's alone
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: doorway, distance: -0.08, inset: 0.06, individual: false)
+      |> StoreNamedAttribute(name: "door", value: front, domain: FACE)
+  }
+  hut = opened
+    |> SetMaterial(material: RefugePaint)
+  base = plinth
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module refuge_step4
+// @title The refuge, step 4: vents, one face at a time
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use poly_bevel
+use poly_extrude
+
+shader graph refuge_paint(
+    paint: Color = (0.62, 0.16, 0.05),
+    door_color: Color = (0.07, 0.09, 0.1),
+    steel: Color = (0.06, 0.065, 0.07),
+    glow: Float = 0.0 in 0.0..10.0
+) -> Shader {
+  "Painted steel, the door darker, the vents bare steel, the window dark glass that glows with glow"
+  door = Attribute(attribute_name: "door").factor
+  glass = Attribute(attribute_name: "glass").factor
+  louvre = Attribute(attribute_name: "louvre").factor
+  walls = Mix(factor: door, a: paint, b: door_color, data_type: RGBA)
+  vents = Mix(factor: louvre, a: walls, b: steel, data_type: RGBA)
+  glazed = Mix(factor: glass, a: vents, b: (0.02, 0.03, 0.04, 1.0), data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: glazed,
+    metallic: 0.3,
+    roughness: 0.45 - glass * 0.42,
+    emission_color: (1.0, 0.62, 0.28, 1.0),
+    emission_strength: glass * glow)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A hut on a plinth: a window, a door, vents"
+  // What the tools store, read back as fields; p and n, the position and the normal
+  front = NamedAttribute(name: "poly_front", data_type: BOOLEAN).attribute
+  side = NamedAttribute(name: "poly_side", data_type: BOOLEAN).attribute
+  cell = NamedAttribute(name: "bevel_face", data_type: BOOLEAN).attribute
+  p = Position()
+  n = Normal().normal
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  "Openings" #teal {
+    // On the front wall: a window 1 m square, a door 1 m by 2 m, each a region of faces
+    window = n.y < -0.99 and p.x > -1.2 and p.x < -0.3 and p.z > 1.3 and p.z < 2.2
+    doorway = n.y < -0.99 and p.x > 0.3 and p.x < 1.2 and p.z < 2.2
+    opened = box
+      |> poly_extrude(selection: window, distance: -0.12, inset: 0.08, individual: false)
+      |> StoreNamedAttribute(name: "glass", value: front, domain: FACE)
+      // Marks pile up: take the window's away, so that front is the door's alone
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: doorway, distance: -0.08, inset: 0.06, individual: false)
+      |> StoreNamedAttribute(name: "door", value: front, domain: FACE)
+  }
+  "Vents" #violet {
+    // On the right wall, nine faces of the box, each pushed in on its own
+    grille = cell and n.x > 0.99 and p.y > -1.0 and p.y < -0.3 and p.z > 0.55 and p.z < 1.2
+    vented = opened
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: grille, distance: -0.04, inset: 0.03)
+      |> StoreNamedAttribute(name: "louvre", value: front or side, domain: FACE)
+  }
+  hut = vented
+    |> SetMaterial(material: RefugePaint)
+  base = plinth
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module refuge_step5
+// @title The refuge, step 5: a roof, extrusion after extrusion
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use poly_bevel
+use poly_extrude
+
+shader graph refuge_paint(
+    paint: Color = (0.62, 0.16, 0.05),
+    door_color: Color = (0.07, 0.09, 0.1),
+    steel: Color = (0.06, 0.065, 0.07),
+    trim: Color = (0.75, 0.74, 0.7),
+    glow: Float = 0.0 in 0.0..10.0
+) -> Shader {
+  "Painted steel, from what the tools stored: the door darker, the vents and the roof bare steel, the fascia pale, the window dark glass that glows with glow"
+  door = Attribute(attribute_name: "door").factor
+  glass = Attribute(attribute_name: "glass").factor
+  louvre = Attribute(attribute_name: "louvre").factor
+  roof = Attribute(attribute_name: "roof").factor
+  fascia = Attribute(attribute_name: "fascia").factor
+  walls = Mix(factor: door, a: paint, b: door_color, data_type: RGBA)
+  vents = Mix(factor: louvre, a: walls, b: steel, data_type: RGBA)
+  roofed = Mix(factor: roof, a: vents, b: steel, data_type: RGBA)
+  trimmed = Mix(factor: fascia, a: roofed, b: trim, data_type: RGBA)
+  glazed = Mix(factor: glass, a: trimmed, b: (0.02, 0.03, 0.04, 1.0), data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: glazed,
+    metallic: 0.3 + roof * 0.5,
+    roughness: 0.45 - glass * 0.42 - roof * 0.1,
+    emission_color: (1.0, 0.62, 0.28, 1.0),
+    emission_strength: glass * glow)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A hut on a plinth: a window, a door, vents, a roof and a mast"
+  // What the tools store, read back as fields; p and n, the position and the normal
+  front = NamedAttribute(name: "poly_front", data_type: BOOLEAN).attribute
+  side = NamedAttribute(name: "poly_side", data_type: BOOLEAN).attribute
+  cell = NamedAttribute(name: "bevel_face", data_type: BOOLEAN).attribute
+  p = Position()
+  n = Normal().normal
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  "Openings" #teal {
+    // On the front wall: a window 1 m square, a door 1 m by 2 m, each a region of faces
+    window = n.y < -0.99 and p.x > -1.2 and p.x < -0.3 and p.z > 1.3 and p.z < 2.2
+    doorway = n.y < -0.99 and p.x > 0.3 and p.x < 1.2 and p.z < 2.2
+    opened = box
+      |> poly_extrude(selection: window, distance: -0.12, inset: 0.08, individual: false)
+      |> StoreNamedAttribute(name: "glass", value: front, domain: FACE)
+      // Marks pile up: take the window's away, so that front is the door's alone
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: doorway, distance: -0.08, inset: 0.06, individual: false)
+      |> StoreNamedAttribute(name: "door", value: front, domain: FACE)
+  }
+  "Vents" #violet {
+    // On the right wall, nine faces of the box, each pushed in on its own
+    grille = cell and n.x > 0.99 and p.y > -1.0 and p.y < -0.3 and p.z > 0.55 and p.z < 1.2
+    vented = opened
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: grille, distance: -0.04, inset: 0.03)
+      |> StoreNamedAttribute(name: "louvre", value: front or side, domain: FACE)
+  }
+  "Roof" #orange {
+    // The top grown out flat (the soffit), pushed up (the fascia), then up and in (the roof)
+    roofed = vented
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(
+        selection: n.z > 0.99 and p.z > 2.7,
+        distance: 0.0,
+        taper: 1.1,
+        individual: false)
+      // Drop the sides so far: the front stays to be pushed, and side is the next one's alone
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.16, individual: false)
+      |> StoreNamedAttribute(name: "fascia", value: side, domain: FACE)
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.55, taper: 0.4, individual: false)
+      |> StoreNamedAttribute(name: "roof", value: front or side, domain: FACE)
+    mast = Cylinder(vertices: 16, radius: 0.05, depth: 1.5).mesh
+      |> TransformGeometry(translation: (0.3, 0.2, 4.0))
+  }
+  hut = roofed
+    |> SetMaterial(material: RefugePaint)
+  base = plinth + mast
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module refuge_step6
+// @title The refuge, step 6: a boolean hatch
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example refuge
+
+use modeling
+use poly_bevel
+use poly_extrude
+
+shader graph refuge_paint(
+    paint: Color = (0.62, 0.16, 0.05),
+    door_color: Color = (0.07, 0.09, 0.1),
+    steel: Color = (0.06, 0.065, 0.07),
+    trim: Color = (0.75, 0.74, 0.7),
+    glow: Float = 0.0 in 0.0..10.0
+) -> Shader {
+  "Painted steel, from what the tools stored: the door darker, the vents and the roof bare steel, the fascia and the hatch pale, the window dark glass that glows with glow"
+  door = Attribute(attribute_name: "door").factor
+  glass = Attribute(attribute_name: "glass").factor
+  louvre = Attribute(attribute_name: "louvre").factor
+  roof = Attribute(attribute_name: "roof").factor
+  fascia = Attribute(attribute_name: "fascia").factor
+  hatch = Attribute(attribute_name: "bool_cut").factor
+  walls = Mix(factor: door, a: paint, b: door_color, data_type: RGBA)
+  vents = Mix(factor: louvre, a: walls, b: steel, data_type: RGBA)
+  roofed = Mix(factor: roof, a: vents, b: steel, data_type: RGBA)
+  trimmed = Mix(factor: max(fascia, hatch), a: roofed, b: trim, data_type: RGBA)
+  glazed = Mix(factor: glass, a: trimmed, b: (0.02, 0.03, 0.04, 1.0), data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: glazed,
+    metallic: 0.3 + roof * 0.5,
+    roughness: 0.45 - glass * 0.42 - roof * 0.1,
+    emission_color: (1.0, 0.62, 0.28, 1.0),
+    emission_strength: glass * glow)
+}
+
+shader(material: true) graph RefugePaint() -> (surface: Shader) {
+  "The refuge's material: refuge_paint, whose inputs on its node in the material tune it"
+  return (surface: refuge_paint())
+}
+
+shader(material: true) graph Concrete() -> (surface: Shader) {
+  "The plinth, and the mast"
+  return (surface: PrincipledBSDF(base_color: (0.42, 0.41, 0.39), roughness: 0.8))
+}
+
+geometry graph refuge() -> Geometry {
+  "A hut on a plinth: a window, a door, vents, a roof and a mast, a round hatch"
+  // What the tools store, read back as fields; p and n, the position and the normal
+  front = NamedAttribute(name: "poly_front", data_type: BOOLEAN).attribute
+  side = NamedAttribute(name: "poly_side", data_type: BOOLEAN).attribute
+  cell = NamedAttribute(name: "bevel_face", data_type: BOOLEAN).attribute
+  p = Position()
+  n = Normal().normal
+  "Box" #blue {
+    // 3 m by 2.2 m, 2.5 m tall, its faces 25 cm apart: the openings are made of them
+    box = Cube(size: (3.0, 2.2, 2.5), vertices_x: 13, vertices_y: 9, vertices_z: 11).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 1.5))
+      |> poly_bevel(width: 0.06)
+    plinth = Cube(size: (3.5, 2.7, 0.25)).mesh
+      |> TransformGeometry(translation: (0.0, 0.0, 0.125))
+      |> chamfer_corners(width: 0.12)
+  }
+  "Openings" #teal {
+    // On the front wall: a window 1 m square, a door 1 m by 2 m, each a region of faces
+    window = n.y < -0.99 and p.x > -1.2 and p.x < -0.3 and p.z > 1.3 and p.z < 2.2
+    doorway = n.y < -0.99 and p.x > 0.3 and p.x < 1.2 and p.z < 2.2
+    opened = box
+      |> poly_extrude(selection: window, distance: -0.12, inset: 0.08, individual: false)
+      |> StoreNamedAttribute(name: "glass", value: front, domain: FACE)
+      // Marks pile up: take the window's away, so that front is the door's alone
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: doorway, distance: -0.08, inset: 0.06, individual: false)
+      |> StoreNamedAttribute(name: "door", value: front, domain: FACE)
+  }
+  "Vents" #violet {
+    // On the right wall, nine faces of the box, each pushed in on its own
+    grille = cell and n.x > 0.99 and p.y > -1.0 and p.y < -0.3 and p.z > 0.55 and p.z < 1.2
+    vented = opened
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(selection: grille, distance: -0.04, inset: 0.03)
+      |> StoreNamedAttribute(name: "louvre", value: front or side, domain: FACE)
+  }
+  "Roof" #orange {
+    // The top grown out flat (the soffit), pushed up (the fascia), then up and in (the roof)
+    roofed = vented
+      |> RemoveNamedAttribute(pattern_mode: Wildcard, name: "poly_*")
+      |> poly_extrude(
+        selection: n.z > 0.99 and p.z > 2.7,
+        distance: 0.0,
+        taper: 1.1,
+        individual: false)
+      // Drop the sides so far: the front stays to be pushed, and side is the next one's alone
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.16, individual: false)
+      |> StoreNamedAttribute(name: "fascia", value: side, domain: FACE)
+      |> RemoveNamedAttribute(name: "poly_side")
+      |> poly_extrude(selection: front, distance: 0.55, taper: 0.4, individual: false)
+      |> StoreNamedAttribute(name: "roof", value: front or side, domain: FACE)
+    mast = Cylinder(vertices: 16, radius: 0.05, depth: 1.5).mesh
+      |> TransformGeometry(translation: (0.3, 0.2, 4.0))
+  }
+  "Hatch" #red {
+    // A disc 64 cm across sunk 15 cm into the right wall
+    cutter = Cylinder(vertices: 48, radius: 0.32, depth: 0.3).mesh
+      |> TransformGeometry(translation: (1.5, 0.42, 1.88), rotation: (0.0, 1.5707964, 0.0))
+    holed = roofed
+      |> boolean_cut(cutter)
+  }
+  hut = holed
+    |> SetMaterial(material: RefugePaint)
+  base = plinth + mast
+    |> SetMaterial(material: Concrete)
+  return hut + base
+}
+</script></bn-file>
+    </div>
+    <p class="muted">
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/refuge"><code>examples/tutorials/refuge/</code></a>.
+    </p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

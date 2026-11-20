@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart crate — Smart Materials tutorial — Ludopant</title>
+<meta name="description" content="Weather a steel crate in Blender by assembling Base Node&#x27;s smart materials: mesh maps, generators and mesh effects, one line or one layer at a time, in .bn.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/tutorials/smart-crate.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Smart crate — Smart Materials tutorial — Ludopant">
+<meta property="og:description" content="Weather a steel crate in Blender by assembling Base Node&#x27;s smart materials: mesh maps, generators and mesh effects, one line or one layer at a time, in .bn.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/tutorials/smart-crate.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/smart-crate-step5.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-view.js"></script>
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-file.js"></script>
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs tuto">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › <a href="../smart-materials/">Smart Materials</a> › Tutorial: Smart crate</p>
+<h1>Smart crate</h1>
+    <p class="lead">
+      A painted steel crate, worn by the years: chipped edges, dents, rivets, rust run down from under its lid and from its rivets, paint run down its walls, dust on top.
+      Nothing here is written from scratch. Every effect is a ready-made group of the standard library; this tutorial only shows how to put them together.
+    </p>
+    <figure>
+      <img src="img/smart-crate-step5.png" width="1000" height="750" alt="A blue steel crate under a riveted lid, its edges chipped to bare steel, thin rust streaks running down from under the lid">
+      <figcaption>Where we are going. Five steps, each one a few lines more.</figcaption>
+    </figure>
+
+    <h2 id="before">Before you start</h2>
+    <p>
+      You need Blender 5 and the <a href="https://marcgardent.github.io/base-node-language/#blender">Base Node add-on</a>, version 0.12.1 or later, and the <a href="../smart-materials/">Smart Materials</a> pack: it carries the three modules this tutorial assembles (<code>mesh_maps</code>, <code>generators</code>, <code>mesh_effects</code>). The steps below are free; the modules they call are not.
+    </p>
+    <table>
+      <tr><th>Module</th><th>Kind</th><th>What it gives</th></tr>
+      <tr><td><code>mesh_maps</code></td><td>geometry</td><td>Computes the maps a texture painter bakes, live: curvature, ambient occlusion, thickness, sky… and stores them on the mesh.</td></tr>
+      <tr><td><code>generators</code></td><td>shader</td><td>Masks made from those maps, after Substance 3D Painter's generators: <code>metal_edge_wear</code>, <code>dirt</code>, <code>dust</code>, <code>dripping_rust</code>…</td></tr>
+      <tr><td><code>mesh_effects</code></td><td>geometry and shader</td><td>What a painter can only fake, made in the mesh: <code>dents</code>, <code>rivets</code>, <code>chip_edges</code>, <code>streaks</code>, <code>drips</code>, <code>dust_scatter</code>. Each stores where it acted, and <code>mesh_effects_read</code> gives it back to the material.</td></tr>
+    </table>
+    <p>
+      Every block below is a complete <code>.bn</code> file, its code beside the nodes it builds. Two ways to try a step:
+    </p>
+    <ul>
+      <li><strong>Drag it.</strong> Drag the file icon of its block, or its title, onto empty space in Blender's 3D Viewport, and keep <em>Instantiate the Example</em>: a new object carries <code>smart_crate</code> at the 3D cursor. A click on the file icon downloads the file instead.</li>
+      <li><strong>Paste it.</strong> Press the copy button of its block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>, on any mesh object: the graph makes its own crate.</li>
+    </ul>
+    <p>
+      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/smart_crate/render.py"><code>render.py</code></a>.
+    </p>
+
+    <h2 id="idea">Two halves</h2>
+    <p>
+      A smart material here is two things that work together:
+    </p>
+    <ul>
+      <li><strong>A pipe of effects, in Geometry Nodes.</strong> The mesh goes through them one after the other, one line each: <code>|&gt; dents(…)</code>, <code>|&gt; rivets(…)</code>… Each takes the mesh, changes it, and passes it on.</li>
+      <li><strong>A stack of layers, in the material.</strong> Each layer is a colour and a mask, laid over what is under it with a <code>Mix</code>: paint, then bare steel where the mask of wear says, then rust, grime, dust.</li>
+    </ul>
+    <p>
+      The geometry measures, the material paints: the masks of the material read what the effects stored on the mesh. Adding wear is adding a line to the pipe, a layer to the stack, or both.
+    </p>
+
+    <h2 id="step-1"><span class="n">1.</span> A painted crate</h2>
+    <p>
+      A box and a lid that overhangs it, both <code>Cube</code>s with enough vertices for the effects to come: 1.5 cm apart. The material is plain paint for now.
+    </p>
+    <p class="file">step1_crate.bn: <code>smart_crate</code>, <code>crate_steel</code>, <code>CrateSteel</code></p>
+    <bn-view graph="smart_crate" height="480"><script type="text/bn">
+// @module smart_crate_step1
+// @title Smart crate, step 1: a painted crate
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example smart_crate
+
+shader graph crate_steel(paint: Color = (0.03, 0.12, 0.16)) -> Shader {
+  "Steel, painted; nothing worn yet"
+  return PrincipledBSDF(base_color: paint, roughness: 0.4)
+}
+
+shader(material: true) graph CrateSteel() -> (surface: Shader) {
+  "The crate's material: crate_steel, whose inputs on its node in the material tune it"
+  return (surface: crate_steel())
+}
+
+geometry graph smart_crate() -> Geometry {
+  "A steel crate under a lid, painted"
+  // A box 1 m wide, and a lid that overhangs it by 7.5 cm; vertices 1.5 cm apart, for the wear
+  // to have points to work on
+  body = Cube(size: (1.0, 1.0, 1.0), vertices_x: 67, vertices_y: 67, vertices_z: 67).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+  lid = Cube(size: (1.15, 1.15, 0.08), vertices_x: 77, vertices_y: 77, vertices_z: 11).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.04))
+  return body + lid
+    |> SetMaterial(material: CrateSteel)
+}
+</script></bn-view>
+    <ul>
+      <li><code>crate_steel</code> is a shader group: its inputs (<code>paint</code>, and more in the next steps) are the knobs you turn, on its node in the material.</li>
+      <li><code>CrateSteel</code> is the material itself; <code>SetMaterial(material: CrateSteel)</code> gives it to the crate.</li>
+    </ul>
+    <figure>
+      <img src="img/smart-crate-step1.png" width="1000" height="750" loading="lazy" alt="A plain blue crate under a lid">
+      <figcaption>Step 1. Paint, and nothing else.</figcaption>
+    </figure>
+
+    <h2 id="step-2"><span class="n">2.</span> The maps, and two layers</h2>
+    <p>
+      One line in the pipe, <code>|&gt; mesh_maps(…)</code>, and the mesh knows where its edges and its corners are. Two layers in the material use it:
+    </p>
+    <p class="file">step2_maps.bn: <code>crate_steel</code>, <code>smart_crate</code></p>
+    <bn-view graph="crate_steel" height="480"><script type="text/bn">
+// @module smart_crate_step2
+// @title Smart crate, step 2: the mesh maps, two layers
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example smart_crate
+
+use generators
+use mesh_maps
+
+shader graph crate_steel(
+    paint: Color = (0.03, 0.12, 0.16),
+    steel: Color = (0.62, 0.62, 0.6),
+    grime: Color = (0.05, 0.035, 0.02),
+    wear: Float = 0.45 in 0.0..1.0
+) -> Shader {
+  "Paint, then two layers: bare steel where the edges wear, grime in the corners"
+  "Bare steel" #orange {
+    worn = metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1)
+    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+  }
+  "Grime" #violet {
+    dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
+    color = Mix(factor: dirty * 0.85, a: chipped, b: grime, data_type: RGBA)
+  }
+  return PrincipledBSDF(
+    base_color: color,
+    metallic: worn * (1.0 - dirty),
+    roughness: Mix(factor: worn, a: 0.4, b: 0.3) + dirty * 0.3)
+}
+
+shader(material: true) graph CrateSteel() -> (surface: Shader) {
+  "The crate's material: crate_steel, whose inputs on its node in the material tune it"
+  return (surface: crate_steel())
+}
+
+geometry graph smart_crate() -> Geometry {
+  "A steel crate under a lid, its mesh maps stored for the material"
+  // A box 1 m wide, and a lid that overhangs it by 7.5 cm; vertices 1.5 cm apart, for the wear
+  // to have points to work on
+  body = Cube(size: (1.0, 1.0, 1.0), vertices_x: 67, vertices_y: 67, vertices_z: 67).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+  lid = Cube(size: (1.15, 1.15, 0.08), vertices_x: 77, vertices_y: 77, vertices_z: 11).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.04))
+  return body + lid
+    |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
+    |> SetMaterial(material: CrateSteel)
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>Bare steel.</strong> <code>metal_edge_wear</code> is a mask, 1 on the edges that wear; <code>Mix</code> lays <code>steel</code> over <code>paint</code> there.</li>
+      <li><strong>Grime.</strong> <code>dirt</code> is a mask, 1 in the corners the mesh occludes; <code>Mix</code> lays <code>grime</code> over the layer before.</li>
+      <li><strong>The surface.</strong> The same masks make the steel metallic and the grime rough.</li>
+    </ol>
+    <p>
+      The order of the layers is the order of the <code>Mix</code>es: each one's <code>a</code> is the layer before.
+    </p>
+    <figure>
+      <img src="img/smart-crate-step2.png" width="1000" height="750" loading="lazy" alt="The blue crate with thin lines of bare steel along its edges">
+      <figcaption>Step 2. Worn edges, from the curvature <code>mesh_maps</code> stored.</figcaption>
+    </figure>
+
+    <h2 id="step-3"><span class="n">3.</span> Dents, rivets and chips</h2>
+    <p>
+      Three lines more, before the maps: the mesh is dented, riveted and chipped for real. In the material, one change: the bare steel takes <code>e.chip</code> too, where the mesh was chipped.
+    </p>
+    <p class="file">step3_effects.bn: <code>smart_crate</code>, <code>crate_steel</code></p>
+    <bn-view graph="smart_crate" height="480"><script type="text/bn">
+// @module smart_crate_step3
+// @title Smart crate, step 3: dents, rivets and chips in the mesh
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example smart_crate
+
+use generators
+use mesh_effects
+use mesh_maps
+
+shader graph crate_steel(
+    paint: Color = (0.03, 0.12, 0.16),
+    steel: Color = (0.62, 0.62, 0.6),
+    grime: Color = (0.05, 0.035, 0.02),
+    wear: Float = 0.45 in 0.0..1.0
+) -> Shader {
+  "Paint, then bare steel in the chips of the mesh and where the edges wear, then grime"
+  e = mesh_effects_read()
+  "Bare steel" #orange {
+    worn = max(
+      e.chip,
+      metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
+    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+  }
+  "Grime" #violet {
+    dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
+    color = Mix(factor: dirty * 0.85, a: chipped, b: grime, data_type: RGBA)
+  }
+  return PrincipledBSDF(
+    base_color: color,
+    metallic: worn * (1.0 - dirty),
+    roughness: Mix(factor: worn, a: 0.4, b: 0.3) + dirty * 0.3)
+}
+
+shader(material: true) graph CrateSteel() -> (surface: Shader) {
+  "The crate's material: crate_steel, whose inputs on its node in the material tune it"
+  return (surface: crate_steel())
+}
+
+geometry graph smart_crate() -> Geometry {
+  "A steel crate, dented, riveted and chipped in its mesh, its maps stored"
+  // A box 1 m wide, and a lid that overhangs it by 7.5 cm; vertices 1.5 cm apart, for the wear
+  // to have points to work on
+  body = Cube(size: (1.0, 1.0, 1.0), vertices_x: 67, vertices_y: 67, vertices_z: 67).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+  lid = Cube(size: (1.15, 1.15, 0.08), vertices_x: 77, vertices_y: 77, vertices_z: 11).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.04))
+  // The rivets stay whole: the effects after them leave them out
+  rivet = NamedAttribute(name: "mesh_rivet").attribute
+  return body + lid
+    |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
+    |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
+    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
+    |> SetMaterial(material: CrateSteel)
+}
+</script></bn-view>
+    <ul>
+      <li><strong>The order matters.</strong> The effects that change the shape come first, <code>mesh_maps</code> after them: the maps then see the dents and the rivets, and the edge wear follows the chips.</li>
+      <li><strong><code>rivet</code></strong> reads <code>mesh_rivet</code>, which <code>rivets</code> stored: <code>selection: rivet &lt; 0.5</code> keeps the effects after it off the rivets.</li>
+      <li><strong><code>e = mesh_effects_read()</code></strong> gives the material what the effects stored: <code>e.chip</code>, and in the next steps <code>e.streak</code>, <code>e.drip</code>, <code>e.dust</code>.</li>
+    </ul>
+    <figure>
+      <img src="img/smart-crate-step3.png" width="1000" height="750" loading="lazy" alt="The crate dented, with rows of rivets along its edges and chips of bare steel">
+      <figcaption>Step 3. A row of rivets along each edge, dents in the walls, chips knocked off the edges.</figcaption>
+    </figure>
+
+    <h2 id="step-4"><span class="n">4.</span> Rust</h2>
+    <p>
+      Rust runs down with the rain: from under the lid, from the top of the walls, from the rivets, never from the middle of a wall. <code>streaks</code> traces those runs on the mesh and stores them; a rust layer paints them.
+    </p>
+    <p class="file">step4_rust.bn: <code>smart_crate</code>, <code>crate_steel</code></p>
+    <bn-view graph="smart_crate" height="480"><script type="text/bn">
+// @module smart_crate_step4
+// @title Smart crate, step 4: rust from the top and the rivets
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example smart_crate
+
+use generators
+use mesh_effects
+use mesh_maps
+
+shader graph crate_steel(
+    paint: Color = (0.03, 0.12, 0.16),
+    steel: Color = (0.62, 0.62, 0.6),
+    rust: Color = (0.22, 0.07, 0.02),
+    grime: Color = (0.05, 0.035, 0.02),
+    wear: Float = 0.45 in 0.0..1.0
+) -> Shader {
+  "Paint, then bare steel in the chips and where the edges wear, rust, grime"
+  e = mesh_effects_read()
+  "Bare steel" #orange {
+    worn = max(
+      e.chip,
+      metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
+    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+  }
+  "Rust" #red {
+    // A little rust in the cavities, and the streaks the mesh stores
+    spread = dripping_rust(rust_spreading: 0.2, drips_intensity: 0.0, seed: 6)
+    rusty = Mix(
+      factor: max(spread.mask * 0.8, Clamp(value: e.streak * 1.6)),
+      a: chipped,
+      b: rust,
+      data_type: RGBA)
+  }
+  "Grime" #violet {
+    dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
+    color = Mix(factor: dirty * 0.85, a: rusty, b: grime, data_type: RGBA)
+  }
+  return PrincipledBSDF(
+    base_color: color,
+    metallic: worn * (1.0 - dirty) * (1.0 - e.streak),
+    roughness: Mix(factor: worn, a: 0.4, b: 0.3) + dirty * 0.3 + e.streak * 0.3)
+}
+
+shader(material: true) graph CrateSteel() -> (surface: Shader) {
+  "The crate's material: crate_steel, whose inputs on its node in the material tune it"
+  return (surface: crate_steel())
+}
+
+geometry graph smart_crate() -> Geometry {
+  "A steel crate, dented, riveted, chipped, rust streaked down from under the lid and the rivets"
+  // A box 1 m wide, and a lid that overhangs it by 7.5 cm; vertices 1.5 cm apart, for the wear
+  // to have points to work on
+  body = Cube(size: (1.0, 1.0, 1.0), vertices_x: 67, vertices_y: 67, vertices_z: 67).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+  lid = Cube(size: (1.15, 1.15, 0.08), vertices_x: 77, vertices_y: 77, vertices_z: 11).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.04))
+  // The rivets stay whole: the effects after them leave them out
+  rivet = NamedAttribute(name: "mesh_rivet").attribute
+  return body + lid
+    |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
+    |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
+    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
+    |> streaks(
+      density: 80.0,
+      length: 0.55,
+      width: 0.015,
+      seed: 8,
+      selection: rivet < 0.5,
+      edges: 0.4,
+      rivets: 0.35)
+    |> SetMaterial(material: CrateSteel)
+}
+</script></bn-view>
+    <ul>
+      <li><code>streaks</code> comes after <code>mesh_maps</code>: it adds no geometry, only <code>mesh_streak</code>, a stain from 0 to 1.</li>
+      <li><code>rivets: 0.35</code>: about a third of the rivets bleed rust.</li>
+      <li>The rust layer takes <code>e.streak</code>, and a little rust in the cavities from <code>dripping_rust</code>.</li>
+    </ul>
+    <figure>
+      <img src="img/smart-crate-step4.png" width="1000" height="750" loading="lazy" alt="The crate with thin rust streaks running down its walls from under the lid">
+      <figcaption>Step 4. Streaks from under the lid and from the rivets, fading as they run down.</figcaption>
+    </figure>
+
+    <h2 id="step-5"><span class="n">5.</span> Paint runs and dust</h2>
+    <p>
+      Two lines to finish: <code>drips</code>, paint run down the walls, and <code>dust_scatter</code>, specks on what faces up. In the material, a dust layer, and no edge wear on the paint runs.
+    </p>
+    <p class="file">step5_finish.bn: <code>smart_crate</code>, <code>crate_steel</code></p>
+    <bn-view graph="smart_crate" height="480"><script type="text/bn">
+// @module smart_crate_step5
+// @title Smart crate, step 5: paint runs and dust
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example smart_crate
+
+use generators
+use mesh_effects
+use mesh_maps
+
+shader graph crate_steel(
+    paint: Color = (0.03, 0.12, 0.16),
+    steel: Color = (0.62, 0.62, 0.6),
+    rust: Color = (0.22, 0.07, 0.02),
+    grime: Color = (0.05, 0.035, 0.02),
+    dust_color: Color = (0.5, 0.45, 0.37),
+    wear: Float = 0.45 in 0.0..1.0
+) -> Shader {
+  "Paint, then bare steel in the chips and where the edges wear, rust, grime, dust"
+  e = mesh_effects_read()
+  "Bare steel" #orange {
+    // Not on the paint run down over the edges
+    worn = max(
+      e.chip,
+      metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
+      * (1.0 - e.drip)
+    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+  }
+  "Rust" #red {
+    // A little rust in the cavities, and the streaks the mesh stores
+    spread = dripping_rust(rust_spreading: 0.2, drips_intensity: 0.0, seed: 6)
+    rusty = Mix(
+      factor: max(spread.mask * 0.8, Clamp(value: e.streak * 1.6)),
+      a: chipped,
+      b: rust,
+      data_type: RGBA)
+  }
+  "Grime" #violet {
+    dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
+    soiled = Mix(factor: dirty * 0.85, a: rusty, b: grime, data_type: RGBA)
+  }
+  "Dust" #yellow {
+    // Settled on what faces up, and the specks the mesh scatters
+    dusty = max(dust(dust_level: 0.35, grunge_scale: 0.2, seed: 4) * 0.5, e.dust)
+    color = Mix(factor: dusty, a: soiled, b: dust_color, data_type: RGBA)
+  }
+  return PrincipledBSDF(
+    base_color: color,
+    metallic: worn * (1.0 - dirty) * (1.0 - dusty) * (1.0 - e.streak),
+    roughness: Mix(factor: worn, a: 0.4, b: 0.3)
+      + dirty * 0.3
+      + dusty * 0.4
+      + e.streak * 0.3
+      - e.drip * 0.15)
+}
+
+shader(material: true) graph CrateSteel() -> (surface: Shader) {
+  "The crate's material: crate_steel, whose inputs on its node in the material tune it"
+  return (surface: crate_steel())
+}
+
+geometry graph smart_crate() -> Geometry {
+  "A steel crate, dented, riveted, chipped, rust streaked, paint run down, dusty"
+  // A box 1 m wide, and a lid that overhangs it by 7.5 cm; vertices 1.5 cm apart, for the wear
+  // to have points to work on
+  body = Cube(size: (1.0, 1.0, 1.0), vertices_x: 67, vertices_y: 67, vertices_z: 67).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+  lid = Cube(size: (1.15, 1.15, 0.08), vertices_x: 77, vertices_y: 77, vertices_z: 11).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.04))
+  // The rivets stay whole: the effects after them leave them out
+  rivet = NamedAttribute(name: "mesh_rivet").attribute
+  return body + lid
+    |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
+    |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
+    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
+    |> streaks(
+      density: 80.0,
+      length: 0.55,
+      width: 0.015,
+      seed: 8,
+      selection: rivet < 0.5,
+      edges: 0.4,
+      rivets: 0.35)
+    |> drips(density: 60.0, seed: 3, selection: rivet < 0.5, edges: 0.2)
+    |> dust_scatter(
+      density: 600.0,
+      size: 0.003,
+      seed: 5,
+      selection: rivet + NamedAttribute(name: "mesh_drip").attribute < 0.5)
+    |> SetMaterial(material: CrateSteel)
+}
+</script></bn-view>
+    <ul>
+      <li><code>drips</code> comes after the maps and the rust: a drip takes the material and the maps of the wall under it, so it is painted, rusted and worn like the wall, with no grime of its own.</li>
+      <li>Its defaults are subtle: 5 mm wide, up to 80 cm long. <code>drop</code> sets the drop at its end, as a multiple of its width; 0 for none.</li>
+    </ul>
+    <figure>
+      <img src="img/smart-crate-close.png" width="1000" height="750" loading="lazy" alt="Close to a corner of the lid: rivets, rust streaks from under it, a thin paint run, dust on top">
+      <figcaption>Step 5, close to a corner of the lid.</figcaption>
+    </figure>
+
+    <h2 id="tune">The knobs</h2>
+    <p>
+      Every effect has its inputs; every layer its colour. A few to start with:
+    </p>
+    <table>
+      <tr><th>Where</th><th>Input</th><th>What it does</th></tr>
+      <tr><td><code>crate_steel</code></td><td><code>paint</code>, <code>rust</code>, <code>grime</code>…</td><td>The colour of each layer, on the group node in the material.</td></tr>
+      <tr><td><code>crate_steel</code></td><td><code>wear</code></td><td>How far the bare steel spreads from the edges.</td></tr>
+      <tr><td><code>streaks</code></td><td><code>density</code>, <code>length</code>, <code>rivets</code></td><td>How many runs of rust, how far they go, how many rivets bleed.</td></tr>
+      <tr><td><code>drips</code></td><td><code>density</code>, <code>radius</code>, <code>length</code>, <code>drop</code></td><td>How many runs of paint, how wide, how long, how big the drop at their end.</td></tr>
+      <tr><td><code>chip_edges</code></td><td><code>wear</code>, <code>width</code></td><td>How much of the edges is chipped, and how far in.</td></tr>
+    </table>
+    <p class="try"><strong>Try:</strong> on step 5, set <code>drop</code> of <code>drips</code> to 0, then to 2. Set <code>rivets</code> of <code>streaks</code> to 1: every rivet rusts.</p>
+    <p>
+      To wear your own model, use your mesh instead of <code>body + lid</code>: the pipe and the material stay as they are. Mind the density of its vertices: the effects work on them, so a model with large faces needs a <code>SubdivideMesh</code> first.
+    </p>
+
+    <h2 id="files">Take it to Blender</h2>
+    <p>
+      The finished crate, in one file. Drag the card onto empty space in Blender's 3D Viewport and keep <em>Instantiate the Example</em>: a new object carries <code>smart_crate</code>. A click on the card downloads the file.
+    </p>
+    <bn-file><script type="text/bn">
+// @module smart_crate_step5
+// @title Smart crate, step 5: paint runs and dust
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example smart_crate
+
+use generators
+use mesh_effects
+use mesh_maps
+
+shader graph crate_steel(
+    paint: Color = (0.03, 0.12, 0.16),
+    steel: Color = (0.62, 0.62, 0.6),
+    rust: Color = (0.22, 0.07, 0.02),
+    grime: Color = (0.05, 0.035, 0.02),
+    dust_color: Color = (0.5, 0.45, 0.37),
+    wear: Float = 0.45 in 0.0..1.0
+) -> Shader {
+  "Paint, then bare steel in the chips and where the edges wear, rust, grime, dust"
+  e = mesh_effects_read()
+  "Bare steel" #orange {
+    // Not on the paint run down over the edges
+    worn = max(
+      e.chip,
+      metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
+      * (1.0 - e.drip)
+    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+  }
+  "Rust" #red {
+    // A little rust in the cavities, and the streaks the mesh stores
+    spread = dripping_rust(rust_spreading: 0.2, drips_intensity: 0.0, seed: 6)
+    rusty = Mix(
+      factor: max(spread.mask * 0.8, Clamp(value: e.streak * 1.6)),
+      a: chipped,
+      b: rust,
+      data_type: RGBA)
+  }
+  "Grime" #violet {
+    dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
+    soiled = Mix(factor: dirty * 0.85, a: rusty, b: grime, data_type: RGBA)
+  }
+  "Dust" #yellow {
+    // Settled on what faces up, and the specks the mesh scatters
+    dusty = max(dust(dust_level: 0.35, grunge_scale: 0.2, seed: 4) * 0.5, e.dust)
+    color = Mix(factor: dusty, a: soiled, b: dust_color, data_type: RGBA)
+  }
+  return PrincipledBSDF(
+    base_color: color,
+    metallic: worn * (1.0 - dirty) * (1.0 - dusty) * (1.0 - e.streak),
+    roughness: Mix(factor: worn, a: 0.4, b: 0.3)
+      + dirty * 0.3
+      + dusty * 0.4
+      + e.streak * 0.3
+      - e.drip * 0.15)
+}
+
+shader(material: true) graph CrateSteel() -> (surface: Shader) {
+  "The crate's material: crate_steel, whose inputs on its node in the material tune it"
+  return (surface: crate_steel())
+}
+
+geometry graph smart_crate() -> Geometry {
+  "A steel crate, dented, riveted, chipped, rust streaked, paint run down, dusty"
+  // A box 1 m wide, and a lid that overhangs it by 7.5 cm; vertices 1.5 cm apart, for the wear
+  // to have points to work on
+  body = Cube(size: (1.0, 1.0, 1.0), vertices_x: 67, vertices_y: 67, vertices_z: 67).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+  lid = Cube(size: (1.15, 1.15, 0.08), vertices_x: 77, vertices_y: 77, vertices_z: 11).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.04))
+  // The rivets stay whole: the effects after them leave them out
+  rivet = NamedAttribute(name: "mesh_rivet").attribute
+  return body + lid
+    |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
+    |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
+    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
+    |> streaks(
+      density: 80.0,
+      length: 0.55,
+      width: 0.015,
+      seed: 8,
+      selection: rivet < 0.5,
+      edges: 0.4,
+      rivets: 0.35)
+    |> drips(density: 60.0, seed: 3, selection: rivet < 0.5, edges: 0.2)
+    |> dust_scatter(
+      density: 600.0,
+      size: 0.003,
+      seed: 5,
+      selection: rivet + NamedAttribute(name: "mesh_drip").attribute < 0.5)
+    |> SetMaterial(material: CrateSteel)
+}
+</script></bn-file>
+    <p>The steps before it, to start again from any of them:</p>
+    <div class="cards">
+      <bn-file><script type="text/bn">
+// @module smart_crate_step1
+// @title Smart crate, step 1: a painted crate
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example smart_crate
+
+shader graph crate_steel(paint: Color = (0.03, 0.12, 0.16)) -> Shader {
+  "Steel, painted; nothing worn yet"
+  return PrincipledBSDF(base_color: paint, roughness: 0.4)
+}
+
+shader(material: true) graph CrateSteel() -> (surface: Shader) {
+  "The crate's material: crate_steel, whose inputs on its node in the material tune it"
+  return (surface: crate_steel())
+}
+
+geometry graph smart_crate() -> Geometry {
+  "A steel crate under a lid, painted"
+  // A box 1 m wide, and a lid that overhangs it by 7.5 cm; vertices 1.5 cm apart, for the wear
+  // to have points to work on
+  body = Cube(size: (1.0, 1.0, 1.0), vertices_x: 67, vertices_y: 67, vertices_z: 67).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+  lid = Cube(size: (1.15, 1.15, 0.08), vertices_x: 77, vertices_y: 77, vertices_z: 11).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.04))
+  return body + lid
+    |> SetMaterial(material: CrateSteel)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module smart_crate_step2
+// @title Smart crate, step 2: the mesh maps, two layers
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example smart_crate
+
+use generators
+use mesh_maps
+
+shader graph crate_steel(
+    paint: Color = (0.03, 0.12, 0.16),
+    steel: Color = (0.62, 0.62, 0.6),
+    grime: Color = (0.05, 0.035, 0.02),
+    wear: Float = 0.45 in 0.0..1.0
+) -> Shader {
+  "Paint, then two layers: bare steel where the edges wear, grime in the corners"
+  "Bare steel" #orange {
+    worn = metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1)
+    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+  }
+  "Grime" #violet {
+    dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
+    color = Mix(factor: dirty * 0.85, a: chipped, b: grime, data_type: RGBA)
+  }
+  return PrincipledBSDF(
+    base_color: color,
+    metallic: worn * (1.0 - dirty),
+    roughness: Mix(factor: worn, a: 0.4, b: 0.3) + dirty * 0.3)
+}
+
+shader(material: true) graph CrateSteel() -> (surface: Shader) {
+  "The crate's material: crate_steel, whose inputs on its node in the material tune it"
+  return (surface: crate_steel())
+}
+
+geometry graph smart_crate() -> Geometry {
+  "A steel crate under a lid, its mesh maps stored for the material"
+  // A box 1 m wide, and a lid that overhangs it by 7.5 cm; vertices 1.5 cm apart, for the wear
+  // to have points to work on
+  body = Cube(size: (1.0, 1.0, 1.0), vertices_x: 67, vertices_y: 67, vertices_z: 67).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+  lid = Cube(size: (1.15, 1.15, 0.08), vertices_x: 77, vertices_y: 77, vertices_z: 11).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.04))
+  return body + lid
+    |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
+    |> SetMaterial(material: CrateSteel)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module smart_crate_step3
+// @title Smart crate, step 3: dents, rivets and chips in the mesh
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example smart_crate
+
+use generators
+use mesh_effects
+use mesh_maps
+
+shader graph crate_steel(
+    paint: Color = (0.03, 0.12, 0.16),
+    steel: Color = (0.62, 0.62, 0.6),
+    grime: Color = (0.05, 0.035, 0.02),
+    wear: Float = 0.45 in 0.0..1.0
+) -> Shader {
+  "Paint, then bare steel in the chips of the mesh and where the edges wear, then grime"
+  e = mesh_effects_read()
+  "Bare steel" #orange {
+    worn = max(
+      e.chip,
+      metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
+    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+  }
+  "Grime" #violet {
+    dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
+    color = Mix(factor: dirty * 0.85, a: chipped, b: grime, data_type: RGBA)
+  }
+  return PrincipledBSDF(
+    base_color: color,
+    metallic: worn * (1.0 - dirty),
+    roughness: Mix(factor: worn, a: 0.4, b: 0.3) + dirty * 0.3)
+}
+
+shader(material: true) graph CrateSteel() -> (surface: Shader) {
+  "The crate's material: crate_steel, whose inputs on its node in the material tune it"
+  return (surface: crate_steel())
+}
+
+geometry graph smart_crate() -> Geometry {
+  "A steel crate, dented, riveted and chipped in its mesh, its maps stored"
+  // A box 1 m wide, and a lid that overhangs it by 7.5 cm; vertices 1.5 cm apart, for the wear
+  // to have points to work on
+  body = Cube(size: (1.0, 1.0, 1.0), vertices_x: 67, vertices_y: 67, vertices_z: 67).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+  lid = Cube(size: (1.15, 1.15, 0.08), vertices_x: 77, vertices_y: 77, vertices_z: 11).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.04))
+  // The rivets stay whole: the effects after them leave them out
+  rivet = NamedAttribute(name: "mesh_rivet").attribute
+  return body + lid
+    |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
+    |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
+    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
+    |> SetMaterial(material: CrateSteel)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module smart_crate_step4
+// @title Smart crate, step 4: rust from the top and the rivets
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example smart_crate
+
+use generators
+use mesh_effects
+use mesh_maps
+
+shader graph crate_steel(
+    paint: Color = (0.03, 0.12, 0.16),
+    steel: Color = (0.62, 0.62, 0.6),
+    rust: Color = (0.22, 0.07, 0.02),
+    grime: Color = (0.05, 0.035, 0.02),
+    wear: Float = 0.45 in 0.0..1.0
+) -> Shader {
+  "Paint, then bare steel in the chips and where the edges wear, rust, grime"
+  e = mesh_effects_read()
+  "Bare steel" #orange {
+    worn = max(
+      e.chip,
+      metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
+    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+  }
+  "Rust" #red {
+    // A little rust in the cavities, and the streaks the mesh stores
+    spread = dripping_rust(rust_spreading: 0.2, drips_intensity: 0.0, seed: 6)
+    rusty = Mix(
+      factor: max(spread.mask * 0.8, Clamp(value: e.streak * 1.6)),
+      a: chipped,
+      b: rust,
+      data_type: RGBA)
+  }
+  "Grime" #violet {
+    dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
+    color = Mix(factor: dirty * 0.85, a: rusty, b: grime, data_type: RGBA)
+  }
+  return PrincipledBSDF(
+    base_color: color,
+    metallic: worn * (1.0 - dirty) * (1.0 - e.streak),
+    roughness: Mix(factor: worn, a: 0.4, b: 0.3) + dirty * 0.3 + e.streak * 0.3)
+}
+
+shader(material: true) graph CrateSteel() -> (surface: Shader) {
+  "The crate's material: crate_steel, whose inputs on its node in the material tune it"
+  return (surface: crate_steel())
+}
+
+geometry graph smart_crate() -> Geometry {
+  "A steel crate, dented, riveted, chipped, rust streaked down from under the lid and the rivets"
+  // A box 1 m wide, and a lid that overhangs it by 7.5 cm; vertices 1.5 cm apart, for the wear
+  // to have points to work on
+  body = Cube(size: (1.0, 1.0, 1.0), vertices_x: 67, vertices_y: 67, vertices_z: 67).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+  lid = Cube(size: (1.15, 1.15, 0.08), vertices_x: 77, vertices_y: 77, vertices_z: 11).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.04))
+  // The rivets stay whole: the effects after them leave them out
+  rivet = NamedAttribute(name: "mesh_rivet").attribute
+  return body + lid
+    |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
+    |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
+    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
+    |> streaks(
+      density: 80.0,
+      length: 0.55,
+      width: 0.015,
+      seed: 8,
+      selection: rivet < 0.5,
+      edges: 0.4,
+      rivets: 0.35)
+    |> SetMaterial(material: CrateSteel)
+}
+</script></bn-file>
+    </div>
+    <p class="muted">
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/smart_crate"><code>examples/tutorials/smart_crate/</code></a>.
+    </p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

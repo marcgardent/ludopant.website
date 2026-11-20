@@ -1,0 +1,1251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The valley — Procedural Toolkit tutorial — Ludopant</title>
+<meta name="description" content="Build an eroded valley in Blender, step by step, with the Procedural Toolkit: layered noise, terraces, thermal and hydraulic erosion, rock fractured at the foot of the cliffs, L-system trees, in .bn.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/tutorials/valley.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="The valley — Procedural Toolkit tutorial — Ludopant">
+<meta property="og:description" content="Build an eroded valley in Blender, step by step, with the Procedural Toolkit: layered noise, terraces, thermal and hydraulic erosion, rock fractured at the foot of the cliffs, L-system trees, in .bn.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/tutorials/valley.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/valley-step8.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-view.js"></script>
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-file.js"></script>
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs tuto">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › <a href="../procedural/">Procedural Toolkit</a> › Tutorial: The valley</p>
+<h1>The valley</h1>
+    <p class="lead">
+      A winding valley, six metres long: hillsides cut into terraces, worn by landslides and by rain, rock on the cliffs, broken boulders at their foot, a few trees on the wet ground of the floor.
+      Each step adds one idea, and a few lines, to the step before.
+    </p>
+    <figure>
+      <img src="img/valley-step8.png" width="1000" height="750" alt="A green valley seen from above one end: terraced hillsides with bands of brown rock, a sandy river bed winding down the middle, trees on the floor, cracked boulders on the ledges">
+      <figcaption>Where we are going. Eight steps, each one a few lines more.</figcaption>
+    </figure>
+
+    <h2 id="learn">You will learn</h2>
+    <ul>
+      <li><strong>The craft.</strong> Shape a terrain in layers, wear it with thermal then hydraulic erosion, read the maps the water leaves behind, break a rock with a Voronoi fracture and grow trees with an L-system.</li>
+      <li><strong>The language.</strong> A long pipe of <code>|&gt;</code> lines, one pass of the terrain each; <code>use</code> to bring in a module; a field stored once on the mesh and read back twice, by the material and by the scattering. Each file is the one before plus a few lines: compare two steps to see what changed.</li>
+    </ul>
+    <p>
+      This page goes faster on the basics than <a href="https://marcgardent.github.io/base-node-language/tutorials/lunar-ground.html">Lunar ground</a>, which starts from a flat square: a noise, <code>SetPosition</code>, a material. Read it first if those are new to you.
+    </p>
+
+    <h2 id="before">Before you start</h2>
+    <p>
+      You need Blender 5, the <a href="https://marcgardent.github.io/base-node-language/#blender">Base Node add-on</a>, and the <a href="../procedural/">Procedural Toolkit</a> pack, version 0.13.1 or later: it carries the three modules this tutorial assembles.
+      The step files below are free to read, copy and change; the modules they <code>use</code> come with the pack, which is paid.
+    </p>
+    <table>
+      <tr><th>Module</th><th>Kind</th><th>What it gives</th></tr>
+      <tr><td><code>terrain</code></td><td>geometry</td><td>Terrains on a grid of square cells: <code>layered_noise</code>, <code>terrace</code>, <code>thermal_erosion</code>, <code>hydraulic_erosion</code> and its maps, <code>terrain_slope_mask</code>.</td></tr>
+      <tr><td><code>fracture</code></td><td>geometry</td><td><code>voronoi_fracture</code>: a closed mesh broken into convex pieces, the cut faces marked; <code>explode</code> pushes them apart.</td></tr>
+      <tr><td><code>lsystem</code></td><td>geometry</td><td><code>lsystem_tree</code>: branches grown by rewriting their tips, leaves at the last tips; <code>branches_to_tubes</code> gives them a body.</td></tr>
+    </table>
+    <p>
+      Every block below is a complete <code>.bn</code> file, its code beside the nodes it builds. Two ways to try a step:
+    </p>
+    <ul>
+      <li><strong>Drag it.</strong> Drag the file icon of its block, or its title, onto empty space in Blender's 3D Viewport, and keep <em>Instantiate the Example</em>: a new object carries <code>valley</code> at the 3D cursor. A click on the file icon downloads the file instead.</li>
+      <li><strong>Paste it.</strong> Press the copy button of its block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>, on any mesh object: the graph makes its own grid and ignores the mesh it is given.</li>
+    </ul>
+    <p>
+      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/valley/render.py"><code>render.py</code></a>, with the same camera, sun and sky, except where a caption says otherwise.
+    </p>
+
+    <h2 id="step-1"><span class="n">1.</span> A valley on a grid</h2>
+    <p>
+      Every pass of the <code>terrain</code> module works on a grid of square cells: erosion moves earth and water from a cell to its neighbours, and needs to know how far they are.
+      <code>Grid</code> gives one: 181 × 121 points over 6 m × 4 m, a point every 3.3 cm both ways.
+    </p>
+    <p class="file">step1_valley.bn: <code>valley</code></p>
+    <bn-view graph="valley" height="480"><script type="text/bn">
+// @module valley_step1
+// @title The valley, step 1: a valley on a grid
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+shader graph valley_ground(clay: Color = (0.3, 0.27, 0.24)) -> Shader {
+  "Clay, to see the shape and nothing else"
+  return PrincipledBSDF(base_color: clay, roughness: 0.9)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley() -> Geometry {
+  "A valley that winds along x, on a grid of square cells"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: sides))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-view>
+    <ul>
+      <li><code>across</code> is the distance to the middle of the valley, in units of 2 m. Its square, <code>sides</code>, is 0 along the middle and 1 two metres away: a U, lifted as a height by <code>SetPosition</code>.</li>
+      <li><code>middle</code> moves that middle 40 cm to one side and back as <code>x</code> goes: a straight trough becomes a valley that winds.</li>
+      <li>The material is plain clay for now. Colour would only hide the shape, and the shape is what the next three steps change.</li>
+    </ul>
+    <figure>
+      <img src="img/valley-step1.png" width="1000" height="750" loading="lazy" alt="A smooth grey surface curved into a winding trough">
+      <figcaption>Step 1. A smooth trough that winds. The sun is behind the hillside on the right, which stays in its own shadow, as in every picture of this page.</figcaption>
+    </figure>
+
+    <h2 id="step-2"><span class="n">2.</span> Layered noise</h2>
+    <p>
+      <code>use terrain</code> brings in the module. Its <code>layered_noise</code> is the noise of a terrain generator: rolling hills, mixed with ridged mountains by <code>ridges</code>, its space bent by a noise of its own, <code>warp</code>, so that the hills do not line up.
+    </p>
+    <p class="file">step2_noise.bn: <code>valley</code></p>
+    <bn-view graph="valley" height="480"><script type="text/bn">
+// @module valley_step2
+// @title The valley, step 2: layered noise
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use terrain
+
+shader graph valley_ground(clay: Color = (0.3, 0.27, 0.24)) -> Shader {
+  "Clay, to see the shape and nothing else"
+  return PrincipledBSDF(base_color: clay, roughness: 0.9)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley that winds along x, its sides broken by layered noise"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-view>
+    <ul>
+      <li>The noise wanders around 0.5; minus 0.5, it goes as much down as up.</li>
+      <li>It is scaled by <code>0.2 + sides * 1.2</code>: a little on the floor, a lot on the hillsides. A real valley floor is where earth piles up, so it stays gentle.</li>
+      <li>The module also has <code>heightfield</code>, a grid and its noise in one node. We keep our own grid instead, because the height adds the noise to the U of step 1.</li>
+    </ul>
+    <figure>
+      <img src="img/valley-step2.png" width="1000" height="750" loading="lazy" alt="The trough, its hillsides now rough with bumps and ridges">
+      <figcaption>Step 2. The hillsides break into hills and ridges; the floor barely moves.</figcaption>
+    </figure>
+
+    <h2 id="step-3"><span class="n">3.</span> Terraces</h2>
+    <p>
+      Rock lies in layers, some hard, some soft. The soft ones wear back and the hard ones stay as ledges: hillsides go up in steps. <code>terrace</code> makes those steps.
+    </p>
+    <p class="file">step3_terraces.bn: <code>valley</code></p>
+    <bn-view graph="valley" height="480"><script type="text/bn">
+// @module valley_step3
+// @title The valley, step 3: terraces
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use terrain
+
+shader graph valley_ground(clay: Color = (0.3, 0.27, 0.24)) -> Shader {
+  "Clay, to see the shape and nothing else"
+  return PrincipledBSDF(base_color: clay, roughness: 0.9)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley that winds along x, its sides broken by layered noise and cut into terraces"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-view>
+    <ul>
+      <li><code>step: 0.14</code>: a level every 14 cm. With <code>softness: 0.3</code>, each terrace is flat over 70 % of its step and rises over the other 30 %: a ledge, then a cliff.</li>
+      <li><code>selection: Position().z &gt; 0.28</code> leaves the floor as it is. The limit is a level, twice the step: a point just above it is laid down on that level, a point just below keeps its height, so there is no cliff where the terraces stop.</li>
+      <li>This is a line in the pipe, like every pass to come: each one takes the terrain and passes it on.</li>
+    </ul>
+    <figure>
+      <img src="img/valley-step3.png" width="1000" height="750" loading="lazy" alt="The hillsides cut into flat ledges and steep steps that follow the contour of the slopes">
+      <figcaption>Step 3. Terraces follow the contours: on the right, they cast their shadow down the hillside.</figcaption>
+    </figure>
+
+    <h2 id="step-4"><span class="n">4.</span> Thermal erosion</h2>
+    <p>
+      Fresh cliffs do not stay sharp. Frost and heat crack them, and what breaks off slides down until the slope can hold it.
+      <code>thermal_erosion</code> does this: wherever the ground is steeper than <code>talus</code>, it moves some of it to the lower neighbours, 20 times over.
+    </p>
+    <p class="file">step4_thermal.bn: <code>valley</code></p>
+    <bn-view graph="valley" height="480"><script type="text/bn">
+// @module valley_step4
+// @title The valley, step 4: thermal erosion
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use terrain
+
+shader graph valley_ground(clay: Color = (0.3, 0.27, 0.24)) -> Shader {
+  "Clay, to see the shape and nothing else"
+  return PrincipledBSDF(base_color: clay, roughness: 0.9)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley that winds along x, its sides broken by layered noise, cut into terraces, crumbled"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    // What stands steeper than 50° slides down to the foot of its cliff
+    |> thermal_erosion(iterations: 20, talus: 0.8726646)
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-view>
+    <ul>
+      <li><code>talus</code> is an angle in radians: 0.873 is 50°. Steeper ground slides; gentler ground stays.</li>
+      <li>Earth is moved, never lost: what a crest loses lands at the foot of its cliff, as a heap of scree.</li>
+    </ul>
+    <div class="pair">
+      <figure>
+        <img src="img/valley-step3-terraces.png" width="1000" height="750" loading="lazy" alt="Close to a terraced hillside: sharp ledges, steep straight cliffs">
+        <figcaption>Step 3, close to a hillside: the terraces as <code>terrace</code> cuts them.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/valley-step4-terraces.png" width="1000" height="750" loading="lazy" alt="The same hillside after thermal erosion: the edges of the ledges rounded">
+        <figcaption>Step 4, the same view: crests rounded, cliffs laid back to 50°.</figcaption>
+      </figure>
+    </div>
+    <p>
+      From afar the change is small; it is what makes the next steps look natural. Water finds softer edges to run over, and the cliffs of step 6 are those still steep after the slides.
+    </p>
+
+    <h2 id="step-5"><span class="n">5.</span> Hydraulic erosion, and its maps</h2>
+    <p>
+      Rain is what carves a valley. <code>hydraulic_erosion</code> rains on every cell for <code>duration</code> seconds of its own: 1.17 here, cut into 96 short steps. The water flows to the eight neighbours of each cell, faster down steeper drops.
+      Running water picks up earth: more when it is deep, fast and on a slope. When it slows, it drops what it can no longer carry. At the end, what it still carries is laid down where it is.
+    </p>
+    <p class="file">step5_rain.bn: <code>valley</code>, <code>valley_ground</code></p>
+    <bn-view graph="valley" height="480"><script type="text/bn">
+// @module valley_step5
+// @title The valley, step 5: hydraulic erosion
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use terrain
+
+shader graph valley_ground(
+    grass: Color = (0.11, 0.2, 0.05),
+    sand: Color = (0.45, 0.37, 0.25),
+    mud: Color = (0.05, 0.06, 0.04)
+) -> Shader {
+  "Grass, sand where the water laid its sediment, dark where it stayed"
+  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
+  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
+  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
+  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
+  return PrincipledBSDF(base_color: damp, roughness: 0.9 - wet * 0.4)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley: layered noise, terraces, thermal then hydraulic erosion"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    // What stands steeper than 50° slides down to the foot of its cliff
+    |> thermal_erosion(iterations: 20, talus: 0.8726646)
+    // Rain for 1.17 s: it digs where it runs, lays down where it slows, and stores its maps
+    |> hydraulic_erosion(duration: 1.17)
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-view>
+    <p>
+      The erosion also stores what happened on each point of the terrain, as named attributes. Three of them, seen from above:
+    </p>
+    <div class="pair">
+      <figure>
+        <img src="img/valley-map-water.png" width="600" height="400" loading="lazy" alt="Map from above: black hillsides streaked with thin blue rills, a wide bright band of water along the winding floor">
+        <figcaption><code>terrain_water</code>: the depth of water left at the end. It gathers on the floor: the border of the grid is a wall, and the water has nowhere else to go.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/valley-map-wetness.png" width="600" height="400" loading="lazy" alt="Map from above: the rills on the hillsides and the floor in light cyan, the ledges in faint lines">
+        <figcaption><code>terrain_wetness</code>: the mean depth over the 96 steps. It remembers the rills where water ran, even when it has gone.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/valley-map-change.png" width="600" height="400" loading="lazy" alt="Map from above: red hillsides cut by rills, yellow floor and yellow bands along the ledges">
+        <figcaption><code>terrain_change</code>: the height dug, in red, or laid down, in yellow. The hillsides lose earth; the floor and the ledges get it.</figcaption>
+      </figure>
+    </div>
+    <p>
+      <code>hydraulic_erosion</code> also lets slopes slide at each step, past 45° (its own <code>talus</code>): the banks the water undercuts fall in.
+      The material of this step reads two of these maps with an <code>Attribute</code> node, by name: sand where earth was laid down, dark where the ground stayed wet.
+      The maps above were made the same way: a material that shows one attribute and nothing else, set up by <code>render.py</code>.
+    </p>
+    <figure>
+      <img src="img/valley-step5.png" width="1000" height="750" loading="lazy" alt="The valley in colour: green hillsides with fine rills, a sandy bed winding along the floor">
+      <figcaption>Step 5. A bed of sand along the floor, laid there by the water; fine rills down the hillsides.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> <code>hydraulic_erosion(duration: 2.34)</code>, twice as long. The rills cut deeper, the bed widens, and the water washes the terraces away; the erosion runs twice as many steps.</p>
+
+    <h2 id="step-6"><span class="n">6.</span> Rock on the cliffs</h2>
+    <p>
+      Grass does not hold on a cliff: bare rock shows there. <code>terrain_slope_mask</code> is 1 where the ground is steeper than <code>min_angle</code> and fades out over <code>softness</code> below it.
+    </p>
+    <p class="file">step6_cliffs.bn: <code>valley</code>, <code>valley_ground</code></p>
+    <bn-view graph="valley" height="480"><script type="text/bn">
+// @module valley_step6
+// @title The valley, step 6: rock on the cliffs
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use terrain
+
+shader graph valley_ground(
+    grass: Color = (0.11, 0.2, 0.05),
+    rock: Color = (0.2, 0.16, 0.12),
+    sand: Color = (0.45, 0.37, 0.25),
+    mud: Color = (0.05, 0.06, 0.04)
+) -> Shader {
+  "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
+  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
+  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
+  cliff = Attribute(attribute_name: "valley_cliff").factor
+  grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
+  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
+  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
+  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
+  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley: layered noise, terraces, thermal then hydraulic erosion, rock on the cliffs"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    // What stands steeper than 50° slides down to the foot of its cliff
+    |> thermal_erosion(iterations: 20, talus: 0.8726646)
+    // Rain for 1.17 s: it digs where it runs, lays down where it slows, and stores its maps
+    |> hydraulic_erosion(duration: 1.17)
+    // 1 on the ground steeper than 43°, fading out over 11° below
+    |> StoreNamedAttribute(
+      name: "valley_cliff",
+      value: terrain_slope_mask(min_angle: 0.75, softness: 0.2))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-view>
+    <ul>
+      <li><code>min_angle: 0.75</code> is 43°, <code>softness: 0.2</code> about 11°: the cliffs the thermal erosion left steep.</li>
+      <li>The mask is stored once on the mesh, as <code>valley_cliff</code>, with <code>StoreNamedAttribute</code>. The material reads it to paint the rock; step 7 reads it again to find the foot of the cliffs.</li>
+      <li>In the material, a noise varies the rock between two shades, so that it does not look painted.</li>
+    </ul>
+    <figure>
+      <img src="img/valley-step6.png" width="1000" height="750" loading="lazy" alt="The valley with bands of brown rock along each step of the terraces">
+      <figcaption>Step 6. Rock on the face of every terrace, grass on the ledges.</figcaption>
+    </figure>
+
+    <h2 id="step-7"><span class="n">7.</span> Boulders at the foot of the cliffs</h2>
+    <p>
+      Cliffs shed rocks, and rocks break when they land. <code>voronoi_fracture</code> breaks a mesh: it scatters points inside it, and cuts out around each point the part of the mesh that is nearer to it than to any other.
+    </p>
+    <p class="file">step7_boulders.bn: <code>valley</code>, <code>Stone</code></p>
+    <bn-view graph="valley" height="480"><script type="text/bn">
+// @module valley_step7
+// @title The valley, step 7: boulders at the foot of the cliffs
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use fracture
+use terrain
+
+shader graph valley_ground(
+    grass: Color = (0.11, 0.2, 0.05),
+    rock: Color = (0.2, 0.16, 0.12),
+    sand: Color = (0.45, 0.37, 0.25),
+    mud: Color = (0.05, 0.06, 0.04)
+) -> Shader {
+  "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
+  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
+  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
+  cliff = Attribute(attribute_name: "valley_cliff").factor
+  grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
+  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
+  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
+  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
+  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+shader(material: true) graph Stone() -> (surface: Shader) {
+  "Weathered outside, lighter where the stone broke"
+  inside = Attribute(attribute_name: "fracture_inside").factor
+  color = Mix(factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45), data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: color, roughness: 0.8))
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley: layered noise, terraces, thermal then hydraulic erosion, rock on the cliffs, boulders at their foot"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  land = grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    // What stands steeper than 50° slides down to the foot of its cliff
+    |> thermal_erosion(iterations: 20, talus: 0.8726646)
+    // Rain for 1.17 s: it digs where it runs, lays down where it slows, and stores its maps
+    |> hydraulic_erosion(duration: 1.17)
+    // 1 on the ground steeper than 43°, fading out over 11° below
+    |> StoreNamedAttribute(
+      name: "valley_cliff",
+      value: terrain_slope_mask(min_angle: 0.75, softness: 0.2))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+  "Boulders" #slategray {
+    // One boulder, lumpy, sunk 3 cm in the ground, broken into 8 pieces 1 cm apart, pushed 1.5 cm out
+    lumpy = NoiseTexture(scale: 6.0, detail: 3.0).factor - 0.5
+    stone = IcoSphere(radius: 0.1, subdivisions: 3).mesh
+      |> SetPosition(offset: Normal() * lumpy * 0.06)
+      |> TransformGeometry(translation: (0.0, 0.0, 0.04), scale: (1.3, 1.0, 0.7))
+    broken = voronoi_fracture(stone, count: 8, seed: seed, gap: 0.01).pieces
+      |> explode(distance: 0.015)
+      |> SetMaterial(material: Stone)
+    // Near a cliff, on flat ground: where a falling rock stops
+    near_cliff = BlurAttribute(value: NamedAttribute(name: "valley_cliff").attribute, iterations: 6)
+    foot = land
+      |> DistributePointsOnFaces(
+        selection: near_cliff.value > 0.2
+          and terrain_slope_mask(min_angle: 0.0, max_angle: 0.4) > 0.5,
+        density: 12.0,
+        seed: seed)
+    boulders = foot.points
+      |> InstanceOnPoints(
+        instance: broken,
+        rotation: CombineXYZ(z: RandomValue(max: 6.2831855, seed: seed + 1)),
+        scale: RandomValue(min: 0.5, max: 1.5, seed: seed + 2))
+  }
+  return land + boulders
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>One boulder.</strong> An <code>IcoSphere</code>, made lumpy by a noise along its normals, flattened, and sunk 3 cm so that it sits in the ground.</li>
+      <li><strong>Broken.</strong> <code>count: 8</code> pieces, a <code>gap</code> of 1 cm between them, then <code>explode</code> pushes each one 1.5 cm away from the centre. Each cut is a Boolean, so we break one boulder and copy it, instead of breaking every copy.</li>
+      <li><strong>Where.</strong> <code>BlurAttribute</code> spreads <code>valley_cliff</code> over six rings of neighbours: it is above 0.2 next to a cliff. With a second <code>terrain_slope_mask</code> for flat ground, that is where a falling rock stops: at the foot of a cliff, sometimes on the ledge above it.</li>
+      <li><strong>Copies.</strong> <code>InstanceOnPoints</code> sets the broken boulder on each point, turned and sized at random.</li>
+    </ol>
+    <p>
+      <code>voronoi_fracture</code> marks the faces its cuts made with <code>fracture_inside</code>. The material <code>Stone</code> reads it: dark weathered skin outside, fresh pale stone in the cracks.
+    </p>
+    <figure>
+      <img src="img/valley-step7.png" width="1000" height="750" loading="lazy" alt="Close to a terraced hillside: three grey boulders on its ledges, each split into pieces by pale cracks">
+      <figcaption>Step 7, from near the ground: boulders split by pale cracks, on the ledges of a terraced hillside.</figcaption>
+    </figure>
+
+    <h2 id="step-8"><span class="n">8.</span> Trees on the wet flats</h2>
+    <p>
+      Last, a few trees, where trees grow: on flat ground that the water keeps wet.
+      <code>lsystem_tree</code> grows one by rewriting: a trunk; then each tip goes on, and opens three side branches, shorter and tilted; then again, four times.
+    </p>
+    <p class="file">step8_trees.bn: <code>valley</code></p>
+    <bn-view graph="valley" height="480"><script type="text/bn">
+// @module valley_step8
+// @title The valley, step 8: trees on the wet flats
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use fracture
+use lsystem
+use terrain
+
+shader graph valley_ground(
+    grass: Color = (0.11, 0.2, 0.05),
+    rock: Color = (0.2, 0.16, 0.12),
+    sand: Color = (0.45, 0.37, 0.25),
+    mud: Color = (0.05, 0.06, 0.04)
+) -> Shader {
+  "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
+  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
+  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
+  cliff = Attribute(attribute_name: "valley_cliff").factor
+  grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
+  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
+  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
+  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
+  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+shader(material: true) graph Stone() -> (surface: Shader) {
+  "Weathered outside, lighter where the stone broke"
+  inside = Attribute(attribute_name: "fracture_inside").factor
+  color = Mix(factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45), data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: color, roughness: 0.8))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.18, 0.11, 0.06), roughness: 0.85))
+}
+
+shader(material: true) graph Leaves() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.3, 0.05), roughness: 0.6))
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley: layered noise, terraces, thermal then hydraulic erosion, rock on the cliffs, boulders at their foot, trees on the wet flats"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  land = grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    // What stands steeper than 50° slides down to the foot of its cliff
+    |> thermal_erosion(iterations: 20, talus: 0.8726646)
+    // Rain for 1.17 s: it digs where it runs, lays down where it slows, and stores its maps
+    |> hydraulic_erosion(duration: 1.17)
+    // 1 on the ground steeper than 43°, fading out over 11° below
+    |> StoreNamedAttribute(
+      name: "valley_cliff",
+      value: terrain_slope_mask(min_angle: 0.75, softness: 0.2))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+  "Boulders" #slategray {
+    // One boulder, lumpy, sunk 3 cm in the ground, broken into 8 pieces 1 cm apart, pushed 1.5 cm out
+    lumpy = NoiseTexture(scale: 6.0, detail: 3.0).factor - 0.5
+    stone = IcoSphere(radius: 0.1, subdivisions: 3).mesh
+      |> SetPosition(offset: Normal() * lumpy * 0.06)
+      |> TransformGeometry(translation: (0.0, 0.0, 0.04), scale: (1.3, 1.0, 0.7))
+    broken = voronoi_fracture(stone, count: 8, seed: seed, gap: 0.01).pieces
+      |> explode(distance: 0.015)
+      |> SetMaterial(material: Stone)
+    // Near a cliff, on flat ground: where a falling rock stops
+    near_cliff = BlurAttribute(value: NamedAttribute(name: "valley_cliff").attribute, iterations: 6)
+    foot = land
+      |> DistributePointsOnFaces(
+        selection: near_cliff.value > 0.2
+          and terrain_slope_mask(min_angle: 0.0, max_angle: 0.4) > 0.5,
+        density: 12.0,
+        seed: seed)
+    boulders = foot.points
+      |> InstanceOnPoints(
+        instance: broken,
+        rotation: CombineXYZ(z: RandomValue(max: 6.2831855, seed: seed + 1)),
+        scale: RandomValue(min: 0.5, max: 1.5, seed: seed + 2))
+  }
+  "Trees" #olive {
+    // One tree: 4 rewrites of F -> F [&F] [&F] [&F], branches as tubes, a ball of leaves at each tip
+    tree = lsystem_tree(
+      iterations: 4,
+      branches: 3,
+      angle: 0.6,
+      decay: 0.68,
+      jitter: 0.25,
+      tropism: 0.15,
+      radius: 0.07,
+      seed: seed)
+    wood = tree.branches
+      |> branches_to_tubes(resolution: 6)
+      |> SetMaterial(material: Bark)
+    crown = tree.leaves
+      |> InstanceOnPoints(instance: IcoSphere(radius: 0.13, subdivisions: 1).mesh)
+      |> RealizeInstances()
+      |> SetMaterial(material: Leaves)
+    // On flat ground that the rain kept wet, out of the water still standing
+    wet = NamedAttribute(name: "terrain_wetness").attribute
+    water = NamedAttribute(name: "terrain_water").attribute
+    spots = land
+      |> DistributePointsOnFaces(
+        selection: terrain_slope_mask(min_angle: 0.0, max_angle: 0.25) > 0.5
+          and wet > 0.006
+          and water < 0.02,
+        density: 4.0,
+        seed: seed)
+    trees = spots.points
+      |> InstanceOnPoints(
+        instance: wood + crown,
+        rotation: CombineXYZ(z: RandomValue(max: 6.2831855, seed: seed + 3)),
+        scale: RandomValue(min: 0.12, max: 0.2, seed: seed + 4))
+  }
+  return land + boulders + trees
+}
+</script></bn-view>
+    <ul>
+      <li>Four children per tip, four rewrites: 341 segments and 256 tips. <code>decay: 0.68</code> shortens each level, <code>angle: 0.6</code> (34°) tilts the side branches, <code>tropism: 0.15</code> bends them up a little, <code>jitter</code> makes them uneven.</li>
+      <li><code>tree.branches</code> are curves: <code>branches_to_tubes</code> gives them a body of their radius. <code>tree.leaves</code> are points at the last tips: a small ball of leaves on each one.</li>
+      <li>The spots read the maps of step 5 again: slope under 14°, a mean wetness over 6 mm, and less than 2 cm of water still standing, so that no tree stands in the river.</li>
+    </ul>
+    <figure>
+      <img src="img/valley-close.png" width="1000" height="750" loading="lazy" alt="From the valley floor: trees with thin branching trunks and round crowns on the sandy bed, terraced hillside with boulders behind">
+      <figcaption>Step 8, from the floor of the valley: trees on the sandy bed, boulders on the ledges behind.</figcaption>
+    </figure>
+
+    <h2 id="tune">The knobs</h2>
+    <p>
+      Every pass has its inputs, on its node in the Geometry Node editor. A few worth turning:
+    </p>
+    <table>
+      <tr><th>Where</th><th>Input</th><th>What it does</th></tr>
+      <tr><td><code>valley</code></td><td><code>seed</code></td><td>Another valley: the noise, the boulders and the trees change together.</td></tr>
+      <tr><td><code>layered_noise</code></td><td><code>scale</code>, <code>ridges</code>, <code>warp</code></td><td>How many hills across, how sharp their crests, how twisted.</td></tr>
+      <tr><td><code>terrace</code></td><td><code>step</code>, <code>softness</code></td><td>How high each terrace, how steep its cliff: 1 smooths them away.</td></tr>
+      <tr><td><code>thermal_erosion</code></td><td><code>talus</code>, <code>iterations</code></td><td>The steepest slope that holds, and how long the ground has to slide.</td></tr>
+      <tr><td><code>hydraulic_erosion</code></td><td><code>duration</code>, <code>rain</code>, <code>capacity</code></td><td>How long it rains, how hard, how much earth the water can carry.</td></tr>
+      <tr><td><code>terrain_slope_mask</code></td><td><code>min_angle</code></td><td>From which slope the rock shows, and the boulders fall.</td></tr>
+      <tr><td><code>voronoi_fracture</code></td><td><code>count</code>, <code>gap</code></td><td>How many pieces, how wide the cracks.</td></tr>
+      <tr><td><code>lsystem_tree</code></td><td><code>iterations</code>, <code>branches</code>, <code>angle</code>, <code>decay</code></td><td>How many levels of branches, how many per tip, how open, how fast they shorten.</td></tr>
+    </table>
+    <p class="try"><strong>Try:</strong> on step 8, set <code>seed</code> of <code>valley</code> to 7, then set <code>softness</code> of <code>terrace</code> to 1: no more terraces, and most of the rock goes with them.</p>
+    <p>
+      Mind the size of the grid: erosion works on every point, at every step. 181 × 121 points build in a few seconds. Twice as many along each side are four times as many points, and <code>hydraulic_erosion</code> cuts the same duration into twice as many steps, to erode about as much: it takes four to eight times as long.
+    </p>
+
+    <h2 id="files">Take it to Blender</h2>
+    <p>
+      The finished valley, in one file. Drag the card onto empty space in Blender's 3D Viewport and keep <em>Instantiate the Example</em>: a new object carries <code>valley</code>. A click on the card downloads the file.
+    </p>
+    <bn-file><script type="text/bn">
+// @module valley_step8
+// @title The valley, step 8: trees on the wet flats
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use fracture
+use lsystem
+use terrain
+
+shader graph valley_ground(
+    grass: Color = (0.11, 0.2, 0.05),
+    rock: Color = (0.2, 0.16, 0.12),
+    sand: Color = (0.45, 0.37, 0.25),
+    mud: Color = (0.05, 0.06, 0.04)
+) -> Shader {
+  "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
+  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
+  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
+  cliff = Attribute(attribute_name: "valley_cliff").factor
+  grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
+  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
+  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
+  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
+  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+shader(material: true) graph Stone() -> (surface: Shader) {
+  "Weathered outside, lighter where the stone broke"
+  inside = Attribute(attribute_name: "fracture_inside").factor
+  color = Mix(factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45), data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: color, roughness: 0.8))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.18, 0.11, 0.06), roughness: 0.85))
+}
+
+shader(material: true) graph Leaves() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.3, 0.05), roughness: 0.6))
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley: layered noise, terraces, thermal then hydraulic erosion, rock on the cliffs, boulders at their foot, trees on the wet flats"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  land = grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    // What stands steeper than 50° slides down to the foot of its cliff
+    |> thermal_erosion(iterations: 20, talus: 0.8726646)
+    // Rain for 1.17 s: it digs where it runs, lays down where it slows, and stores its maps
+    |> hydraulic_erosion(duration: 1.17)
+    // 1 on the ground steeper than 43°, fading out over 11° below
+    |> StoreNamedAttribute(
+      name: "valley_cliff",
+      value: terrain_slope_mask(min_angle: 0.75, softness: 0.2))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+  "Boulders" #slategray {
+    // One boulder, lumpy, sunk 3 cm in the ground, broken into 8 pieces 1 cm apart, pushed 1.5 cm out
+    lumpy = NoiseTexture(scale: 6.0, detail: 3.0).factor - 0.5
+    stone = IcoSphere(radius: 0.1, subdivisions: 3).mesh
+      |> SetPosition(offset: Normal() * lumpy * 0.06)
+      |> TransformGeometry(translation: (0.0, 0.0, 0.04), scale: (1.3, 1.0, 0.7))
+    broken = voronoi_fracture(stone, count: 8, seed: seed, gap: 0.01).pieces
+      |> explode(distance: 0.015)
+      |> SetMaterial(material: Stone)
+    // Near a cliff, on flat ground: where a falling rock stops
+    near_cliff = BlurAttribute(value: NamedAttribute(name: "valley_cliff").attribute, iterations: 6)
+    foot = land
+      |> DistributePointsOnFaces(
+        selection: near_cliff.value > 0.2
+          and terrain_slope_mask(min_angle: 0.0, max_angle: 0.4) > 0.5,
+        density: 12.0,
+        seed: seed)
+    boulders = foot.points
+      |> InstanceOnPoints(
+        instance: broken,
+        rotation: CombineXYZ(z: RandomValue(max: 6.2831855, seed: seed + 1)),
+        scale: RandomValue(min: 0.5, max: 1.5, seed: seed + 2))
+  }
+  "Trees" #olive {
+    // One tree: 4 rewrites of F -> F [&F] [&F] [&F], branches as tubes, a ball of leaves at each tip
+    tree = lsystem_tree(
+      iterations: 4,
+      branches: 3,
+      angle: 0.6,
+      decay: 0.68,
+      jitter: 0.25,
+      tropism: 0.15,
+      radius: 0.07,
+      seed: seed)
+    wood = tree.branches
+      |> branches_to_tubes(resolution: 6)
+      |> SetMaterial(material: Bark)
+    crown = tree.leaves
+      |> InstanceOnPoints(instance: IcoSphere(radius: 0.13, subdivisions: 1).mesh)
+      |> RealizeInstances()
+      |> SetMaterial(material: Leaves)
+    // On flat ground that the rain kept wet, out of the water still standing
+    wet = NamedAttribute(name: "terrain_wetness").attribute
+    water = NamedAttribute(name: "terrain_water").attribute
+    spots = land
+      |> DistributePointsOnFaces(
+        selection: terrain_slope_mask(min_angle: 0.0, max_angle: 0.25) > 0.5
+          and wet > 0.006
+          and water < 0.02,
+        density: 4.0,
+        seed: seed)
+    trees = spots.points
+      |> InstanceOnPoints(
+        instance: wood + crown,
+        rotation: CombineXYZ(z: RandomValue(max: 6.2831855, seed: seed + 3)),
+        scale: RandomValue(min: 0.12, max: 0.2, seed: seed + 4))
+  }
+  return land + boulders + trees
+}
+</script></bn-file>
+    <p>The steps before it, to start again from any of them:</p>
+    <div class="cards">
+      <bn-file><script type="text/bn">
+// @module valley_step1
+// @title The valley, step 1: a valley on a grid
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+shader graph valley_ground(clay: Color = (0.3, 0.27, 0.24)) -> Shader {
+  "Clay, to see the shape and nothing else"
+  return PrincipledBSDF(base_color: clay, roughness: 0.9)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley() -> Geometry {
+  "A valley that winds along x, on a grid of square cells"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: sides))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module valley_step2
+// @title The valley, step 2: layered noise
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use terrain
+
+shader graph valley_ground(clay: Color = (0.3, 0.27, 0.24)) -> Shader {
+  "Clay, to see the shape and nothing else"
+  return PrincipledBSDF(base_color: clay, roughness: 0.9)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley that winds along x, its sides broken by layered noise"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module valley_step3
+// @title The valley, step 3: terraces
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use terrain
+
+shader graph valley_ground(clay: Color = (0.3, 0.27, 0.24)) -> Shader {
+  "Clay, to see the shape and nothing else"
+  return PrincipledBSDF(base_color: clay, roughness: 0.9)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley that winds along x, its sides broken by layered noise and cut into terraces"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module valley_step4
+// @title The valley, step 4: thermal erosion
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use terrain
+
+shader graph valley_ground(clay: Color = (0.3, 0.27, 0.24)) -> Shader {
+  "Clay, to see the shape and nothing else"
+  return PrincipledBSDF(base_color: clay, roughness: 0.9)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley that winds along x, its sides broken by layered noise, cut into terraces, crumbled"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    // What stands steeper than 50° slides down to the foot of its cliff
+    |> thermal_erosion(iterations: 20, talus: 0.8726646)
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module valley_step5
+// @title The valley, step 5: hydraulic erosion
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use terrain
+
+shader graph valley_ground(
+    grass: Color = (0.11, 0.2, 0.05),
+    sand: Color = (0.45, 0.37, 0.25),
+    mud: Color = (0.05, 0.06, 0.04)
+) -> Shader {
+  "Grass, sand where the water laid its sediment, dark where it stayed"
+  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
+  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
+  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
+  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
+  return PrincipledBSDF(base_color: damp, roughness: 0.9 - wet * 0.4)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley: layered noise, terraces, thermal then hydraulic erosion"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    // What stands steeper than 50° slides down to the foot of its cliff
+    |> thermal_erosion(iterations: 20, talus: 0.8726646)
+    // Rain for 1.17 s: it digs where it runs, lays down where it slows, and stores its maps
+    |> hydraulic_erosion(duration: 1.17)
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module valley_step6
+// @title The valley, step 6: rock on the cliffs
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use terrain
+
+shader graph valley_ground(
+    grass: Color = (0.11, 0.2, 0.05),
+    rock: Color = (0.2, 0.16, 0.12),
+    sand: Color = (0.45, 0.37, 0.25),
+    mud: Color = (0.05, 0.06, 0.04)
+) -> Shader {
+  "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
+  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
+  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
+  cliff = Attribute(attribute_name: "valley_cliff").factor
+  grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
+  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
+  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
+  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
+  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley: layered noise, terraces, thermal then hydraulic erosion, rock on the cliffs"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  return grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    // What stands steeper than 50° slides down to the foot of its cliff
+    |> thermal_erosion(iterations: 20, talus: 0.8726646)
+    // Rain for 1.17 s: it digs where it runs, lays down where it slows, and stores its maps
+    |> hydraulic_erosion(duration: 1.17)
+    // 1 on the ground steeper than 43°, fading out over 11° below
+    |> StoreNamedAttribute(
+      name: "valley_cliff",
+      value: terrain_slope_mask(min_angle: 0.75, softness: 0.2))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module valley_step7
+// @title The valley, step 7: boulders at the foot of the cliffs
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example valley
+
+use fracture
+use terrain
+
+shader graph valley_ground(
+    grass: Color = (0.11, 0.2, 0.05),
+    rock: Color = (0.2, 0.16, 0.12),
+    sand: Color = (0.45, 0.37, 0.25),
+    mud: Color = (0.05, 0.06, 0.04)
+) -> Shader {
+  "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
+  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
+  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
+  cliff = Attribute(attribute_name: "valley_cliff").factor
+  grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
+  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
+  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
+  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
+  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
+}
+
+shader(material: true) graph Ground() -> (surface: Shader) {
+  return (surface: valley_ground())
+}
+
+shader(material: true) graph Stone() -> (surface: Shader) {
+  "Weathered outside, lighter where the stone broke"
+  inside = Attribute(attribute_name: "fracture_inside").factor
+  color = Mix(factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45), data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: color, roughness: 0.8))
+}
+
+geometry graph valley(seed: Int = 3) -> Geometry {
+  "A valley: layered noise, terraces, thermal then hydraulic erosion, rock on the cliffs, boulders at their foot"
+  // 6 m by 4 m, a point every 3.3 cm: 181 by 121 points, square cells
+  grid = Grid(size_x: 6.0, size_y: 4.0, vertices_x: 181, vertices_y: 121).mesh
+  // The valley winds: its middle swings 40 cm either side of y = 0 along x
+  middle = sin(Position().x * 1.1) * 0.4
+  // 0 along the middle of the valley, 1 two metres away
+  across = (Position().y - middle) / 2.0
+  sides = across * across
+  // Hills and ridges, from about -0.5 to 0.5; a little on the floor, a lot on the sides
+  relief = layered_noise(scale: 0.6, ridges: 0.5, warp: 0.5, seed: seed) - 0.5
+  height = sides + relief * (0.2 + sides * 1.2)
+  land = grid
+    |> SetPosition(offset: CombineXYZ(z: height))
+    // A level every 14 cm, above the second one: the floor stays as it is
+    |> terrace(step: 0.14, softness: 0.3, selection: Position().z > 0.28)
+    // What stands steeper than 50° slides down to the foot of its cliff
+    |> thermal_erosion(iterations: 20, talus: 0.8726646)
+    // Rain for 1.17 s: it digs where it runs, lays down where it slows, and stores its maps
+    |> hydraulic_erosion(duration: 1.17)
+    // 1 on the ground steeper than 43°, fading out over 11° below
+    |> StoreNamedAttribute(
+      name: "valley_cliff",
+      value: terrain_slope_mask(min_angle: 0.75, softness: 0.2))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Ground)
+  "Boulders" #slategray {
+    // One boulder, lumpy, sunk 3 cm in the ground, broken into 8 pieces 1 cm apart, pushed 1.5 cm out
+    lumpy = NoiseTexture(scale: 6.0, detail: 3.0).factor - 0.5
+    stone = IcoSphere(radius: 0.1, subdivisions: 3).mesh
+      |> SetPosition(offset: Normal() * lumpy * 0.06)
+      |> TransformGeometry(translation: (0.0, 0.0, 0.04), scale: (1.3, 1.0, 0.7))
+    broken = voronoi_fracture(stone, count: 8, seed: seed, gap: 0.01).pieces
+      |> explode(distance: 0.015)
+      |> SetMaterial(material: Stone)
+    // Near a cliff, on flat ground: where a falling rock stops
+    near_cliff = BlurAttribute(value: NamedAttribute(name: "valley_cliff").attribute, iterations: 6)
+    foot = land
+      |> DistributePointsOnFaces(
+        selection: near_cliff.value > 0.2
+          and terrain_slope_mask(min_angle: 0.0, max_angle: 0.4) > 0.5,
+        density: 12.0,
+        seed: seed)
+    boulders = foot.points
+      |> InstanceOnPoints(
+        instance: broken,
+        rotation: CombineXYZ(z: RandomValue(max: 6.2831855, seed: seed + 1)),
+        scale: RandomValue(min: 0.5, max: 1.5, seed: seed + 2))
+  }
+  return land + boulders
+}
+</script></bn-file>
+    </div>
+    <p class="muted">
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/valley"><code>examples/tutorials/valley/</code></a>.
+    </p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

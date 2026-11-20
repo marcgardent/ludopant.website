@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The promo cut — Motion Compositing tutorial — Ludopant</title>
+<meta name="description" content="Cut three renders into a looping promo in Blender&#x27;s compositor: wipes, dissolves and a push on the timeline, then a print look, a video tape, glitches, a neon title and a lens, one step at a time in .bn.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/tutorials/promo-cut.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="The promo cut — Motion Compositing tutorial — Ludopant">
+<meta property="og:description" content="Cut three renders into a looping promo in Blender&#x27;s compositor: wipes, dissolves and a push on the timeline, then a print look, a video tape, glitches, a neon title and a lens, one step at a time in .bn.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/tutorials/promo-cut.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/promo-cut-step8.webp">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-view.js"></script>
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-file.js"></script>
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs tuto">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › <a href="../motion-compositing/">Motion Compositing</a> › Tutorial: The promo cut</p>
+<h1>The promo cut</h1>
+    <p class="lead">
+      Three stills, rendered once: a product on a podium, golden hills, a title. Four seconds later they are a promo that loops: pushed, printed, wiped, glitched, lit in neon.
+      All of it happens in the compositor, on the timeline. No 3D scene is rendered again, and every cut is a line of text you can retime.
+    </p>
+    <figure>
+      <img src="img/promo-cut-step8.webp" width="640" height="427" alt="A looping promo: an orange orb on a podium between neon rings is pushed out by golden hills in a comic print, which a wipe develops; an iris opens on the glossy title SUMMER DROP, whose neon outline flickers on; a dip through magenta brings back the podium; glitch blocks tear the frame at the cuts">
+      <figcaption>Where we are going: three renders, one compositor graph, 96 frames that loop.</figcaption>
+    </figure>
+
+    <h2 id="learn">You will learn</h2>
+    <ul>
+      <li><strong>The craft.</strong> How a motion designer cuts: transitions that cover exactly their share of the frame, timed in frames and eased, chained one into the next, and the looks (print, tape, glitch, neon, lens) laid over the cut, not under it.</li>
+      <li><strong>The .bn.</strong> A transition is a call that takes two images and gives one: the cut so far goes in as the <code>a</code> of the next, so a whole edit reads top to bottom, a line per cut.</li>
+    </ul>
+
+    <h2 id="prereq">Prerequisites</h2>
+    <p>
+      If <code>.bn</code> is new to you, start with <a href="https://marcgardent.github.io/base-node-language/tutorials/lunar-ground.html">Lunar ground</a>: it shows the language one line at a time.
+      If the compositor is, <a href="final-shot.html">The final shot</a> finishes a render there step by step; this page goes faster on the basics it explains, pipes and <code>keymix</code> among them.
+    </p>
+
+    <h2 id="before">Before you start</h2>
+    <p>
+      You need Blender 5, the <a href="https://marcgardent.github.io/base-node-language/#blender">Base Node add-on</a>, version 0.13.1 or later, and the <a href="../motion-compositing/">Motion Compositing</a> pack.
+      The pack is sold by the author of Base Node, apart from the open source project. The steps are free to read and to copy; the two modules they call are not.
+    </p>
+    <table>
+      <tr><th>Module</th><th>Comes with</th><th>What it gives</th></tr>
+      <tr><td><code>transitions</code></td><td>Motion Compositing</td><td>Linear, radial, clock and iris wipes, a wipe by a gradient map, cross dissolve, dissolve by noise, dip to a colour, push; <code>frame_progress</code> to drive them by the frame.</td></tr>
+      <tr><td><code>stylize</code></td><td>Motion Compositing</td><td>Posterize, halftone and colour halftone, scanlines, video tape, glitch blocks, neon outline, vignette, chromatic aberration.</td></tr>
+      <tr><td><code>merge</code>, <code>grade</code>, <code>mask2d</code></td><td>the add-on, free</td><td>Nuke's Merge operations, exposure, and 2D masks.</td></tr>
+    </table>
+    <p>
+      The cut is made of three plates. Download them, or render your own at the same size:
+    </p>
+    <div class="pair">
+      <figure>
+        <a href="img/promo-cut-plate-a.png" download><img src="img/promo-cut-plate-a.png" width="640" height="427" loading="lazy" alt="An orange orb in a chrome ring on a white podium, lit magenta from the left and cyan from the right, two neon rings behind it"></a>
+        <figcaption><code>promo-cut-plate-a.png</code>, the podium.</figcaption>
+      </figure>
+      <figure>
+        <a href="img/promo-cut-plate-b.png" download><img src="img/promo-cut-plate-b.png" width="640" height="427" loading="lazy" alt="Rolling green hills at golden hour, pointed trees, a red and a yellow hot-air balloon in a pale sky"></a>
+        <figcaption><code>promo-cut-plate-b.png</code>, the hills.</figcaption>
+      </figure>
+      <figure>
+        <a href="img/promo-cut-plate-c.png" download><img src="img/promo-cut-plate-c.png" width="640" height="427" loading="lazy" alt="The words SUMMER DROP in glossy extruded letters, orange to pink, on a transparent background"></a>
+        <figcaption><code>promo-cut-plate-c.png</code>, the title, with its alpha.</figcaption>
+      </figure>
+    </div>
+    <p>
+      In Blender, open the three in an Image Editor (<em>Image › Open</em>): the graphs read them by their names, <code>Image(image: "promo-cut-plate-a.png")</code>. A name Blender does not have stops the step with an error that says so.
+      For your own shots, change those names. Set the scene's resolution to 640 × 427, its frame range from 1 to the length of the step, and in <em>Color Management</em> its <em>View Transform</em> to <em>Standard</em>: the plates are pictures already viewed, and the default AgX would view them a second time.
+    </p>
+    <p>
+      Every block below is a complete <code>.bn</code> file, its code beside the nodes it builds. Two ways to try a step:
+    </p>
+    <ul>
+      <li><strong>Drag it.</strong> Drag the file icon of its block, or its title, onto Blender and keep <em>Import into the .blend</em>: <code>promo_cut</code> becomes the scene's compositor, if the scene has none yet. A click on the file icon downloads the file instead.</li>
+      <li><strong>Paste it.</strong> Press the copy button of its block, open the Compositor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>.</li>
+    </ul>
+    <p>
+      Render the animation with <kbd>Ctrl</kbd>+<kbd>F12</kbd>, or scrub the timeline with the compositor's backdrop on. The animations are made from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/promo_cut/render.py"><code>render.py</code></a>:
+      it renders the three plates once, then the compositor of each step frame by frame, in a scene with nothing to render.
+    </p>
+
+    <h2 id="idea">A transition is a share of the frame</h2>
+    <p>
+      Every transition of <code>transitions</code> goes from an image <code>a</code>, shown alone at a <code>progress</code> of 0, to an image <code>b</code>, shown alone at 1. Between the two, a wipe gives each pixel a rank, the share of the frame that <code>b</code> covers before it reaches that pixel, and shows <code>b</code> where the rank is below the progress.
+      So at a progress of 0.3, <code>b</code> covers 30 % of the frame, whatever the shape: a straight edge at any angle, a clock hand, a circle that opens. Ease the progress and the motion eases; the coverage never jumps at a corner of the frame, as it does when a wipe is a plain distance or angle.
+    </p>
+    <p>
+      Each one gives two outputs: <code>.image</code>, the cut, and <code>.mask</code>, 1 where <code>b</code> shows, to put an effect on the edge or on one side only.
+    </p>
+
+    <h2 id="step-1"><span class="n">1.</span> A linear wipe</h2>
+    <p>
+      The hills wipe the podium away. <code>wipe_at</code> takes the progress as its input; <code>promo_cut</code>, the scene's compositor, calls it at 0.5.
+    </p>
+    <p class="file">step1_wipe.bn: <code>promo_cut</code>, <code>wipe_at</code></p>
+    <bn-view graph="promo_cut" height="480"><script type="text/bn">
+// @module promo_cut_step1
+// @title The promo cut, step 1: a linear wipe
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use transitions (linear_wipe)
+
+compositor graph wipe_at(progress: Float(subtype: FACTOR) = 0.5 in 0.0..1.0) -> Color {
+  "The podium wiped away by the hills, along 30°, a soft edge; progress 0 shows the podium, 1 the hills"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  return linear_wipe(a, b, progress, angle: 0.5235988, softness: 0.04).image
+}
+
+compositor graph promo_cut() -> Color {
+  "The cut, halfway through the wipe"
+  return wipe_at(0.5)
+}
+</script></bn-view>
+    <ul>
+      <li><strong>The angle</strong> is the way <code>b</code> comes in: 0 from the left, 90° from the bottom. 0.5236 radians is 30°: the edge leans, which reads as motion even in a still.</li>
+      <li><strong>The softness</strong> is the width of the edge, in rank: 0.04 is a 4 % band of the frame, enough to hide the pixels of the edge, not enough to read as a dissolve. The band slides so that 0 still shows the podium alone and 1 the hills alone.</li>
+      <li><strong>Why a separate graph.</strong> The scene's compositor gets its render and nothing else: an input of <code>promo_cut</code> would stay at 0. <code>wipe_at</code> has the input, so you can see it in the node editor and keyframe it on its group node (<kbd>I</kbd> over the field).</li>
+    </ul>
+    <figure>
+      <img src="img/promo-cut-step1.webp" width="640" height="427" loading="lazy" alt="The podium wiped away by the hills along a leaning edge, then wiped back">
+      <figcaption>Step 1. The progress from 0 to 1 and back, as you would drag it: the edge always covers the share of the frame the progress says.</figcaption>
+    </figure>
+
+    <h2 id="step-2"><span class="n">2.</span> On the timeline</h2>
+    <p>
+      Keyframes work, and they live outside the text. <code>frame_progress</code> puts the timing in the graph instead: 0 until the frame <code>start</code>, 1 from <code>length</code> frames later, and between, a smoothstep when <code>ease</code> is on.
+    </p>
+    <p class="file">step2_frame.bn: <code>promo_cut</code></p>
+    <bn-view graph="promo_cut" height="480"><script type="text/bn">
+// @module promo_cut_step2
+// @title The promo cut, step 2: a wipe on the timeline
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use transitions (frame_progress, linear_wipe)
+
+compositor graph promo_cut() -> Color {
+  "The podium wiped away by the hills from frame 13 to frame 37, eased in and out"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  t = frame_progress(start: 13.0, length: 24.0, ease: true)
+  return linear_wipe(a, b, t, angle: 0.5235988, softness: 0.04).image
+}
+</script></bn-view>
+    <ul>
+      <li><strong>The numbers are frames.</strong> At 24 frames a second, the wipe starts at half a second and lasts one. Retime it by changing two numbers, and read the timing back in the text.</li>
+      <li><strong>The ease</strong> starts the edge slowly, speeds it up, and slows it down before it stops: a cut that lands. A linear wipe, <code>ease: false</code>, starts and stops dead, which reads as mechanical.</li>
+    </ul>
+    <figure>
+      <img src="img/promo-cut-step2.webp" width="640" height="427" loading="lazy" alt="The podium held half a second, wiped away by the hills over one second, eased, the hills held">
+      <figcaption>Step 2. Half a second of podium, one second of wipe, eased; the loop cuts back to the podium.</figcaption>
+    </figure>
+
+    <h2 id="step-3"><span class="n">3.</span> Clock, iris and radial wipes</h2>
+    <p>
+      A promo is more than one cut. Here the three plates follow each other, one every 24 frames, and the last cut comes back to the first plate, so the animation loops.
+    </p>
+    <p class="file">step3_wipes.bn: <code>promo_cut</code>, <code>title_card</code></p>
+    <bn-view graph="promo_cut" height="480"><script type="text/bn">
+// @module promo_cut_step3
+// @title The promo cut, step 3: clock, iris and radial wipes
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use mask2d (circle_mask)
+use merge (keymix, over)
+use transitions
+
+compositor graph title_card() -> Color {
+  "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
+  title = Image(image: "promo-cut-plate-c.png").image
+  heart = circle_mask(title, 0.1, 1.1).mask
+  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+}
+
+compositor graph promo_cut() -> Color {
+  "The podium to the hills by a clock wipe, to the title by an iris, back to the podium by a radial wipe both ways: a cut every 24 frames"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  c = title_card()
+  ab = clock_wipe(a, b, frame_progress(7.0, 16.0, true), softness: 0.02).image
+  bc = iris_wipe(ab, c, frame_progress(31.0, 16.0, true), softness: 0.03).image
+  return radial_wipe(bc, a, frame_progress(55.0, 16.0, true), direction: Both, softness: 0.02).image
+}
+</script></bn-view>
+    <ul>
+      <li><strong>The chain.</strong> Each transition takes the cut so far as its <code>a</code>: <code>ab</code> goes into the iris, <code>bc</code> into the radial wipe. Before its start frame a transition shows its <code>a</code> alone, so the later cuts wait their turn; after its end it shows its <code>b</code>, so the earlier ones are done. The edit reads top to bottom, a line per cut.</li>
+      <li><strong>The clock wipe</strong> sweeps clockwise from twelve. <strong>The iris</strong> opens a circle from the centre, on the title: the eye is already there. <strong>The radial wipe</strong> with <code>direction: Both</code> sweeps both ways at once from the top.</li>
+      <li><strong>The title card.</strong> The title plate has an alpha; <code>over</code> lays it on a backdrop of two colours mixed by a soft <code>circle_mask</code>, magenta at the heart, a deep blue at the edges. It is a graph of its own, called like a node.</li>
+    </ul>
+    <figure>
+      <img src="img/promo-cut-step3.webp" width="640" height="427" loading="lazy" alt="The podium swept away by a clock hand to the hills, an iris opening on the title, a radial wipe both ways back to the podium">
+      <figcaption>Step 3. A clock wipe, an iris, a radial wipe both ways: three seconds that loop.</figcaption>
+    </figure>
+
+    <h2 id="step-4"><span class="n">4.</span> Dissolves</h2>
+    <p>
+      The same chain, three other transitions. A dissolve does not draw an edge: it mixes, everywhere at once, or in a scattered order.
+    </p>
+    <p class="file">step4_dissolves.bn: <code>promo_cut</code></p>
+    <bn-view graph="promo_cut" height="480"><script type="text/bn">
+// @module promo_cut_step4
+// @title The promo cut, step 4: dissolves
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use mask2d (circle_mask)
+use merge (keymix, over)
+use transitions
+
+compositor graph title_card() -> Color {
+  "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
+  title = Image(image: "promo-cut-plate-c.png").image
+  heart = circle_mask(title, 0.1, 1.1).mask
+  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+}
+
+compositor graph promo_cut() -> Color {
+  "The podium to the hills by a dissolve in cells of noise, to the title through orange, back to the podium by a cross dissolve"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  c = title_card()
+  ab = noise_dissolve(
+    a,
+    b,
+    frame_progress(7.0, 16.0, true),
+    size: 12.0,
+    softness: 0.1,
+    seed: 3.0).image
+  bc = dip_to_color(ab, c, frame_progress(31.0, 16.0), color: (1.0, 0.3, 0.02, 1.0)).image
+  return dissolve(bc, a, frame_progress(55.0, 16.0, true)).image
+}
+</script></bn-view>
+    <ul>
+      <li><strong><code>noise_dissolve</code></strong> lets the hills in by cells of 12 pixels, each at its own time: their ranks are a white noise, even from 0 to 1, so the share of cells that has turned is the progress. <code>seed</code> picks another order, <code>animated: true</code> another one each frame, a shimmer.</li>
+      <li><strong><code>dip_to_color</code></strong> fades the hills to orange in the first half and the orange to the title in the second: a dip to black by default, a flash of the brand's colour here. It is not eased: the colour should hit, not glide.</li>
+      <li><strong><code>dissolve</code></strong>, the cross dissolve, mixes the two images by the progress, on the four channels.</li>
+    </ul>
+    <figure>
+      <img src="img/promo-cut-step4.webp" width="640" height="427" loading="lazy" alt="The podium breaking into cells that turn to the hills, a flash of orange that becomes the title, a cross dissolve back to the podium">
+      <figcaption>Step 4. A dissolve by cells of noise, a dip through orange, a cross dissolve.</figcaption>
+    </figure>
+
+    <h2 id="step-5"><span class="n">5.</span> Push</h2>
+    <p>
+      A push moves both images: <code>b</code> slides in and shoves <code>a</code> out of the frame. It is the cut of social media promos, quick and physical.
+    </p>
+    <p class="file">step5_push.bn: <code>promo_cut</code></p>
+    <bn-view graph="promo_cut" height="480"><script type="text/bn">
+// @module promo_cut_step5
+// @title The promo cut, step 5: push
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use mask2d (circle_mask)
+use merge (keymix, over)
+use transitions
+
+compositor graph title_card() -> Color {
+  "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
+  title = Image(image: "promo-cut-plate-c.png").image
+  heart = circle_mask(title, 0.1, 1.1).mask
+  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+}
+
+compositor graph promo_cut() -> Color {
+  "The hills push the podium out to the left, the title pushes the hills up, the podium pushes the title out to the right: 12 frames each"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  c = title_card()
+  ab = push(a, b, frame_progress(11.0, 12.0, true), direction: Left).image
+  bc = push(ab, c, frame_progress(35.0, 12.0, true), direction: Up).image
+  return push(bc, a, frame_progress(59.0, 12.0, true), direction: Right).image
+}
+</script></bn-view>
+    <ul>
+      <li><strong>The direction</strong> is the way <code>a</code> leaves, by a whole width or height of the frame: <code>Left</code>, <code>Right</code>, <code>Up</code> or <code>Down</code>. <code>Left</code> here, the hills coming from the right; <code>Up</code>, the title coming from below.</li>
+      <li><strong>Twelve frames,</strong> half a second, eased: a push longer than that floats. The ease matters most here, since the whole frame moves: it is what gives the push its weight.</li>
+    </ul>
+    <figure>
+      <img src="img/promo-cut-step5.webp" width="640" height="427" loading="lazy" alt="The hills push the podium out to the left, the title pushes the hills up, the podium pushes the title out to the right">
+      <figcaption>Step 5. Three pushes, left, up, right, half a second each.</figcaption>
+    </figure>
+
+    <h2 id="step-6"><span class="n">6.</span> Print: posterize and halftone</h2>
+    <p>
+      Now the looks. The first one turns the hills into a printed comic, and a wipe develops them back into the render: the transition goes from one look of a plate to another, not from a plate to the next.
+    </p>
+    <p class="file">step6_print.bn: <code>promo_cut</code>, <code>comic</code></p>
+    <bn-view graph="promo_cut" height="480"><script type="text/bn">
+// @module promo_cut_step6
+// @title The promo cut, step 6: posterize and halftone
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use grade (exposure_stops, grade)
+use merge (keymix)
+use stylize (halftone, posterize)
+use transitions (frame_progress, linear_wipe)
+
+compositor graph comic(image: Color) -> Color {
+  "The image printed as a comic: its colours in four levels as the eye sees them, dots of ink in its shadows"
+  ink = (0.03, 0.01, 0.06, 1.0)
+  seen = grade(image, gamma: (2.2, 2.2, 2.2))
+  flat = seen
+    |> posterize(4)
+    |> grade(gamma: (0.4545, 0.4545, 0.4545))
+  dots = halftone(exposure_stops(seen, 1.0), cell: 7.0, ink: ink).mask
+  return keymix(ink, flat, dots * 0.85)
+}
+
+compositor graph promo_cut() -> Color {
+  "The hills printed as a comic, developed by a wipe from the left from frame 13 to frame 37"
+  b = Image(image: "promo-cut-plate-b.png").image
+  return linear_wipe(comic(b), b, frame_progress(13.0, 24.0, true), softness: 0.05).image
+}
+</script></bn-view>
+    <ul>
+      <li><strong>As the eye sees it.</strong> The compositor works on linear light, where most of a picture sits low: cut in four even levels there, the hills would be black. <code>grade</code> with a <code>gamma</code> of 2.2 lifts the image to about what a screen shows, <code>seen</code>; the levels are cut there, and a gamma of 1 / 2.2 brings the result back.</li>
+      <li><strong><code>posterize</code></strong> cuts each channel into 4 even levels: flat areas of colour, as an offset print with few inks.</li>
+      <li><strong><code>halftone</code></strong> draws a dot of ink in each cell of 7 pixels, its share of the cell 1 − the luma there: big dots in the dark, none in the light. Its <code>.mask</code> is the dots alone; <code>keymix</code> lays the ink through them, at 85 %, on the flat colours. The dots are measured on <code>seen</code> one stop brighter, <code>exposure_stops(seen, 1.0)</code>, so they stay in the shadows and the sky stays clean, as in a comic.</li>
+    </ul>
+    <figure>
+      <img src="img/promo-cut-step6.webp" width="640" height="427" loading="lazy" alt="The hills as a comic print, flat colours and dots of ink in the shadows, developed into the render by a soft wipe from the left">
+      <figcaption>Step 6. Printed, then developed: a wipe from one look of the plate to another.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> <code>color_halftone(image, 6.0)</code> in place of <code>comic(b)</code>: three screens of red, green and blue dots, turned so that they do not beat.</p>
+
+    <h2 id="step-7"><span class="n">7.</span> Tape and glitch</h2>
+    <p>
+      A hard cut needs something to hide it. Here a push of 8 frames, on a video tape, torn by glitch blocks for a quarter of a second around it.
+    </p>
+    <p class="file">step7_tape.bn: <code>promo_cut</code>, <code>burst</code></p>
+    <bn-view graph="promo_cut" height="480"><script type="text/bn">
+// @module promo_cut_step7
+// @title The promo cut, step 7: tape and glitch
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use stylize (glitch_blocks, scanlines, vhs)
+use transitions (frame_progress, push)
+
+compositor graph burst(at: Float, width: Float = 6.0 in 1.0..) -> Float {
+  "1 at the frame at, down to 0 width frames before and after"
+  return max(1.0 - abs(SceneTime().frame - at) / width, 0.0)
+}
+
+compositor graph promo_cut() -> Color {
+  "A hard push from the podium to the hills at frame 25, on a video tape, torn by glitch blocks around the cut"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  cut = push(a, b, frame_progress(21.0, 8.0, true), direction: Left).image
+  return cut
+    |> vhs(shift: 2.0, jitter: 1.0, noise: 0.02, lines: 0.0, seed: 1.0)
+    |> scanlines(spacing: 3.0, thickness: 0.4, darkness: 0.3, roll: 0.25).image
+    |> glitch_blocks(
+      block: (64.0, 10.0),
+      amount: 0.6 * burst(25.0),
+      shift: 48.0,
+      split: 6.0,
+      seed: 5.0,
+      animated: true).image
+}
+</script></bn-view>
+    <ul>
+      <li><strong><code>vhs</code></strong> moves each row sideways by up to <code>jitter</code> pixels, shifts red and blue apart by <code>shift</code>, and adds a noise of luminance. It is left still here: a fixed jitter reads as a worn tape under the rolling lines. <code>animated: true</code> makes it boil every frame, stronger, and best kept for a short beat.</li>
+      <li><strong><code>scanlines</code></strong> darkens one row in three, and <code>roll</code> moves them up a quarter of a pixel a frame: 12 pixels over the 48 frames, four rows, so the loop closes.</li>
+      <li><strong><code>glitch_blocks</code></strong> cuts the frame into blocks of 64 × 10 pixels and shoves about <code>amount</code> of them sideways, their red and blue split. <code>burst</code> drives that amount: 1 at frame 25, the middle of the push, down to 0 six frames before and after. Which blocks, and how far, is a noise of the seed and the frame: the same every render.</li>
+    </ul>
+    <figure>
+      <img src="img/promo-cut-step7.webp" width="640" height="427" loading="lazy" alt="The podium on a video tape, rows jittering and scanlines rolling; at the cut the frame tears into shifted blocks as the hills push in">
+      <figcaption>Step 7. The tape all along, the glitch only around the cut: an effect that marks the beat rather than covering everything.</figcaption>
+    </figure>
+
+    <h2 id="step-8"><span class="n">8.</span> The reel</h2>
+    <p>
+      Everything together, 96 frames that loop: a push into the printed hills, which develop; an iris onto the title, whose neon comes on; a dip through magenta back to the podium. The glitch marks the first two cuts, and a lens holds the frame together.
+    </p>
+    <p class="file">step8_reel.bn: <code>promo_cut</code>, <code>title_card</code>, <code>comic</code>, <code>burst</code></p>
+    <bn-view graph="promo_cut" height="480"><script type="text/bn">
+// @module promo_cut_step8
+// @title The promo cut, step 8: the reel
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use grade (exposure_stops, grade)
+use mask2d (circle_mask)
+use merge (alpha_of, keymix, over)
+use stylize
+use transitions
+
+compositor graph title_card() -> Color {
+  "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
+  title = Image(image: "promo-cut-plate-c.png").image
+  heart = circle_mask(title, 0.1, 1.1).mask
+  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+}
+
+compositor graph comic(image: Color) -> Color {
+  "The image printed as a comic: its colours in four levels as the eye sees them, dots of ink in its shadows"
+  ink = (0.03, 0.01, 0.06, 1.0)
+  seen = grade(image, gamma: (2.2, 2.2, 2.2))
+  flat = seen
+    |> posterize(4)
+    |> grade(gamma: (0.4545, 0.4545, 0.4545))
+  dots = halftone(exposure_stops(seen, 1.0), cell: 7.0, ink: ink).mask
+  return keymix(ink, flat, dots * 0.85)
+}
+
+compositor graph burst(at: Float, width: Float = 6.0 in 1.0..) -> Float {
+  "1 at the frame at, down to 0 width frames before and after"
+  return max(1.0 - abs(SceneTime().frame - at) / width, 0.0)
+}
+
+compositor graph promo_cut() -> Color {
+  "A loop of 96 frames: the podium pushed out by the hills in print, developed; an iris to the title, whose neon flickers on; a dip through magenta back to the podium; glitches at the cuts, scanlines, a lens"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  title = Image(image: "promo-cut-plate-c.png").image
+  // The hills come in printed, and a wipe develops them
+  hills = linear_wipe(comic(b), b, frame_progress(31.0, 14.0, true), softness: 0.05).image
+  // The title in a tube of light that comes on, flickers off and on again
+  f = SceneTime().frame
+  on = frame_progress(57.0, 3.0) * (1.0 - 0.9 * (f > 61.0) * (f < 64.0))
+  card = neon_outline(
+    title_card(),
+    matte: alpha_of(title),
+    color: (1.0, 0.25, 0.75, 1.0),
+    width: 2,
+    glow: 16.0,
+    intensity: 1.6 * on).image
+  // The cut
+  ab = push(a, hills, frame_progress(19.0, 8.0, true), direction: Left).image
+  bc = iris_wipe(ab, card, frame_progress(47.0, 10.0, true), softness: 0.03).image
+  ca = dip_to_color(bc, a, frame_progress(79.0, 14.0), color: (0.6, 0.02, 0.3, 1.0)).image
+  // Torn at the cuts, on a screen, through a lens
+  g = burst(23.0) + burst(52.0, 4.0)
+  return ca
+    |> glitch_blocks(
+      block: (64.0, 10.0),
+      amount: 0.6 * g,
+      shift: 48.0,
+      split: 6.0,
+      seed: 5.0,
+      animated: true).image
+    |> scanlines(spacing: 3.0, thickness: 0.4, darkness: 0.2, roll: 0.25).image
+    |> chromatic_aberration(amount: 3.0 + 12.0 * g)
+    |> vignette(amount: 0.6, radius: 0.55, softness: 0.8).image
+}
+</script></bn-view>
+    <ul>
+      <li><strong><code>neon_outline</code></strong> draws a tube of light along the edge of a matte, 2 pixels to each side, whitened at its core, with its glow, and adds it to the image. The matte is the alpha of the title plate, <code>alpha_of(title)</code>: the letters, exactly. <code>on</code> drives its intensity: on in 3 frames at frame 57, off at 62 and 63, on again, the flicker of a tube that starts.</li>
+      <li><strong>The order.</strong> The neon is on the title card, before the cut: the iris opens onto a lit sign. The glitch, the scanlines and the lens come after the whole cut, on every plate: they are the screen and the camera, not the shots.</li>
+      <li><strong><code>chromatic_aberration</code></strong> magnifies red and shrinks blue about the centre, 3 pixels at the corners, 15 at the glitches: the lens breaks with the picture. <strong><code>vignette</code></strong> darkens the edges by 60 %, from a radius of 0.55: the eye stays in the middle, where the title is.</li>
+    </ul>
+    <figure>
+      <img src="img/promo-cut-step8-frames.webp" width="1280" height="854" loading="lazy" alt="Four frames of the reel: the podium in its neon rings with scanlines; the hills half printed, half developed; the title SUMMER DROP in a pink neon outline on a magenta glow; the dip to magenta over the title">
+      <figcaption>Step 8. Four frames of the reel at the top of this page: the podium, the hills developing, the lit title, the dip back.</figcaption>
+    </figure>
+
+    <h2 id="tune">The knobs</h2>
+    <p>
+      The cut is in the frame numbers; the look is in a few inputs. The ones that change the promo most:
+    </p>
+    <table>
+      <tr><th>Where</th><th>Input</th><th>What it does</th></tr>
+      <tr><td><code>frame_progress</code></td><td><code>start</code>, <code>length</code>, <code>ease</code></td><td>When a transition starts, how many frames it lasts, and whether it eases in and out.</td></tr>
+      <tr><td>wipes</td><td><code>angle</code>, <code>start</code>, <code>direction</code>, <code>closing</code>, <code>softness</code></td><td>Where the edge comes from and which way it turns, an iris that opens or closes, how soft the edge is.</td></tr>
+      <tr><td><code>noise_dissolve</code></td><td><code>size</code>, <code>seed</code>, <code>animated</code></td><td>The size of the cells, their order, and whether it changes every frame.</td></tr>
+      <tr><td><code>push</code></td><td><code>direction</code></td><td>Which way the frame leaves: <code>Left</code>, <code>Right</code>, <code>Up</code> or <code>Down</code>.</td></tr>
+      <tr><td><code>posterize</code>, <code>halftone</code></td><td><code>levels</code>, <code>cell</code>, <code>ink</code></td><td>How few colours, how big the dots, which ink.</td></tr>
+      <tr><td><code>glitch_blocks</code></td><td><code>block</code>, <code>amount</code>, <code>shift</code>, <code>split</code></td><td>The size of the blocks, how many move, how far, how far their red and blue split.</td></tr>
+      <tr><td><code>neon_outline</code></td><td><code>color</code>, <code>width</code>, <code>glow</code>, <code>intensity</code></td><td>The colour of the tube, its thickness, the size of its halo, its strength.</td></tr>
+      <tr><td><code>vignette</code>, <code>chromatic_aberration</code></td><td><code>amount</code>, <code>radius</code></td><td>How dark the edges and from where, how far the colours part at the corners.</td></tr>
+    </table>
+    <p>
+      To cut your own promo, change the names of the plates and the frames of the cuts. Keep the last cut ending on the first plate, and the frame range a multiple of the scanlines' roll, and it loops.
+    </p>
+
+    <h2 id="files">Take it to Blender</h2>
+    <p>
+      The finished reel, in one file. Open the three plates first, then drag the card onto Blender and keep <em>Import into the .blend</em>: <code>promo_cut</code> becomes the scene's compositor, if it has none yet. Set the frame range from 1 to 96. A click on the card downloads the file.
+    </p>
+    <bn-file><script type="text/bn">
+// @module promo_cut_step8
+// @title The promo cut, step 8: the reel
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use grade (exposure_stops, grade)
+use mask2d (circle_mask)
+use merge (alpha_of, keymix, over)
+use stylize
+use transitions
+
+compositor graph title_card() -> Color {
+  "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
+  title = Image(image: "promo-cut-plate-c.png").image
+  heart = circle_mask(title, 0.1, 1.1).mask
+  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+}
+
+compositor graph comic(image: Color) -> Color {
+  "The image printed as a comic: its colours in four levels as the eye sees them, dots of ink in its shadows"
+  ink = (0.03, 0.01, 0.06, 1.0)
+  seen = grade(image, gamma: (2.2, 2.2, 2.2))
+  flat = seen
+    |> posterize(4)
+    |> grade(gamma: (0.4545, 0.4545, 0.4545))
+  dots = halftone(exposure_stops(seen, 1.0), cell: 7.0, ink: ink).mask
+  return keymix(ink, flat, dots * 0.85)
+}
+
+compositor graph burst(at: Float, width: Float = 6.0 in 1.0..) -> Float {
+  "1 at the frame at, down to 0 width frames before and after"
+  return max(1.0 - abs(SceneTime().frame - at) / width, 0.0)
+}
+
+compositor graph promo_cut() -> Color {
+  "A loop of 96 frames: the podium pushed out by the hills in print, developed; an iris to the title, whose neon flickers on; a dip through magenta back to the podium; glitches at the cuts, scanlines, a lens"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  title = Image(image: "promo-cut-plate-c.png").image
+  // The hills come in printed, and a wipe develops them
+  hills = linear_wipe(comic(b), b, frame_progress(31.0, 14.0, true), softness: 0.05).image
+  // The title in a tube of light that comes on, flickers off and on again
+  f = SceneTime().frame
+  on = frame_progress(57.0, 3.0) * (1.0 - 0.9 * (f > 61.0) * (f < 64.0))
+  card = neon_outline(
+    title_card(),
+    matte: alpha_of(title),
+    color: (1.0, 0.25, 0.75, 1.0),
+    width: 2,
+    glow: 16.0,
+    intensity: 1.6 * on).image
+  // The cut
+  ab = push(a, hills, frame_progress(19.0, 8.0, true), direction: Left).image
+  bc = iris_wipe(ab, card, frame_progress(47.0, 10.0, true), softness: 0.03).image
+  ca = dip_to_color(bc, a, frame_progress(79.0, 14.0), color: (0.6, 0.02, 0.3, 1.0)).image
+  // Torn at the cuts, on a screen, through a lens
+  g = burst(23.0) + burst(52.0, 4.0)
+  return ca
+    |> glitch_blocks(
+      block: (64.0, 10.0),
+      amount: 0.6 * g,
+      shift: 48.0,
+      split: 6.0,
+      seed: 5.0,
+      animated: true).image
+    |> scanlines(spacing: 3.0, thickness: 0.4, darkness: 0.2, roll: 0.25).image
+    |> chromatic_aberration(amount: 3.0 + 12.0 * g)
+    |> vignette(amount: 0.6, radius: 0.55, softness: 0.8).image
+}
+</script></bn-file>
+    <p>The steps before it, to start again from any of them:</p>
+    <div class="cards">
+      <bn-file><script type="text/bn">
+// @module promo_cut_step1
+// @title The promo cut, step 1: a linear wipe
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use transitions (linear_wipe)
+
+compositor graph wipe_at(progress: Float(subtype: FACTOR) = 0.5 in 0.0..1.0) -> Color {
+  "The podium wiped away by the hills, along 30°, a soft edge; progress 0 shows the podium, 1 the hills"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  return linear_wipe(a, b, progress, angle: 0.5235988, softness: 0.04).image
+}
+
+compositor graph promo_cut() -> Color {
+  "The cut, halfway through the wipe"
+  return wipe_at(0.5)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module promo_cut_step2
+// @title The promo cut, step 2: a wipe on the timeline
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use transitions (frame_progress, linear_wipe)
+
+compositor graph promo_cut() -> Color {
+  "The podium wiped away by the hills from frame 13 to frame 37, eased in and out"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  t = frame_progress(start: 13.0, length: 24.0, ease: true)
+  return linear_wipe(a, b, t, angle: 0.5235988, softness: 0.04).image
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module promo_cut_step3
+// @title The promo cut, step 3: clock, iris and radial wipes
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use mask2d (circle_mask)
+use merge (keymix, over)
+use transitions
+
+compositor graph title_card() -> Color {
+  "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
+  title = Image(image: "promo-cut-plate-c.png").image
+  heart = circle_mask(title, 0.1, 1.1).mask
+  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+}
+
+compositor graph promo_cut() -> Color {
+  "The podium to the hills by a clock wipe, to the title by an iris, back to the podium by a radial wipe both ways: a cut every 24 frames"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  c = title_card()
+  ab = clock_wipe(a, b, frame_progress(7.0, 16.0, true), softness: 0.02).image
+  bc = iris_wipe(ab, c, frame_progress(31.0, 16.0, true), softness: 0.03).image
+  return radial_wipe(bc, a, frame_progress(55.0, 16.0, true), direction: Both, softness: 0.02).image
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module promo_cut_step4
+// @title The promo cut, step 4: dissolves
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use mask2d (circle_mask)
+use merge (keymix, over)
+use transitions
+
+compositor graph title_card() -> Color {
+  "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
+  title = Image(image: "promo-cut-plate-c.png").image
+  heart = circle_mask(title, 0.1, 1.1).mask
+  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+}
+
+compositor graph promo_cut() -> Color {
+  "The podium to the hills by a dissolve in cells of noise, to the title through orange, back to the podium by a cross dissolve"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  c = title_card()
+  ab = noise_dissolve(
+    a,
+    b,
+    frame_progress(7.0, 16.0, true),
+    size: 12.0,
+    softness: 0.1,
+    seed: 3.0).image
+  bc = dip_to_color(ab, c, frame_progress(31.0, 16.0), color: (1.0, 0.3, 0.02, 1.0)).image
+  return dissolve(bc, a, frame_progress(55.0, 16.0, true)).image
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module promo_cut_step5
+// @title The promo cut, step 5: push
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use mask2d (circle_mask)
+use merge (keymix, over)
+use transitions
+
+compositor graph title_card() -> Color {
+  "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
+  title = Image(image: "promo-cut-plate-c.png").image
+  heart = circle_mask(title, 0.1, 1.1).mask
+  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+}
+
+compositor graph promo_cut() -> Color {
+  "The hills push the podium out to the left, the title pushes the hills up, the podium pushes the title out to the right: 12 frames each"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  c = title_card()
+  ab = push(a, b, frame_progress(11.0, 12.0, true), direction: Left).image
+  bc = push(ab, c, frame_progress(35.0, 12.0, true), direction: Up).image
+  return push(bc, a, frame_progress(59.0, 12.0, true), direction: Right).image
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module promo_cut_step6
+// @title The promo cut, step 6: posterize and halftone
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use grade (exposure_stops, grade)
+use merge (keymix)
+use stylize (halftone, posterize)
+use transitions (frame_progress, linear_wipe)
+
+compositor graph comic(image: Color) -> Color {
+  "The image printed as a comic: its colours in four levels as the eye sees them, dots of ink in its shadows"
+  ink = (0.03, 0.01, 0.06, 1.0)
+  seen = grade(image, gamma: (2.2, 2.2, 2.2))
+  flat = seen
+    |> posterize(4)
+    |> grade(gamma: (0.4545, 0.4545, 0.4545))
+  dots = halftone(exposure_stops(seen, 1.0), cell: 7.0, ink: ink).mask
+  return keymix(ink, flat, dots * 0.85)
+}
+
+compositor graph promo_cut() -> Color {
+  "The hills printed as a comic, developed by a wipe from the left from frame 13 to frame 37"
+  b = Image(image: "promo-cut-plate-b.png").image
+  return linear_wipe(comic(b), b, frame_progress(13.0, 24.0, true), softness: 0.05).image
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module promo_cut_step7
+// @title The promo cut, step 7: tape and glitch
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use stylize (glitch_blocks, scanlines, vhs)
+use transitions (frame_progress, push)
+
+compositor graph burst(at: Float, width: Float = 6.0 in 1.0..) -> Float {
+  "1 at the frame at, down to 0 width frames before and after"
+  return max(1.0 - abs(SceneTime().frame - at) / width, 0.0)
+}
+
+compositor graph promo_cut() -> Color {
+  "A hard push from the podium to the hills at frame 25, on a video tape, torn by glitch blocks around the cut"
+  a = Image(image: "promo-cut-plate-a.png").image
+  b = Image(image: "promo-cut-plate-b.png").image
+  cut = push(a, b, frame_progress(21.0, 8.0, true), direction: Left).image
+  return cut
+    |> vhs(shift: 2.0, jitter: 1.0, noise: 0.02, lines: 0.0, seed: 1.0)
+    |> scanlines(spacing: 3.0, thickness: 0.4, darkness: 0.3, roll: 0.25).image
+    |> glitch_blocks(
+      block: (64.0, 10.0),
+      amount: 0.6 * burst(25.0),
+      shift: 48.0,
+      split: 6.0,
+      seed: 5.0,
+      animated: true).image
+}
+</script></bn-file>
+    </div>
+    <p class="muted">
+      The files, with the script that renders this page's plates and animations, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/promo_cut"><code>examples/tutorials/promo_cut/</code></a>.
+    </p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

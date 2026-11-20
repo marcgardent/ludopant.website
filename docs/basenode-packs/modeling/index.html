@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modeling Tools — BaseNode Packs — Ludopant</title>
+<meta name="description" content="Modeling Tools, a pack of 3 Base Node modules for Blender 5.2+: bevels, extrusions, insets and panel lines for Geometry Nodes, every result grouped.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/modeling/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Modeling Tools — BaseNode Packs — Ludopant">
+<meta property="og:description" content="Modeling Tools, a pack of 3 Base Node modules for Blender 5.2+: bevels, extrusions, insets and panel lines for Geometry Nodes, every result grouped.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/modeling/">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/refuge-side.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › Modeling Tools</p>
+<p class="store">Coming soon on Superhive</p>
+<h1>Modeling Tools</h1>
+<p class="lead">Bevels, extrusions, insets and panel lines for Geometry Nodes, every result grouped.</p>
+<p class="cover"><img src="../tutorials/img/refuge-side.png" alt="Modeling Tools: Bevels, extrusions, insets and panel lines for Geometry Nodes, every result grouped"></p>
+<dl class="facts">
+<dt>For</dt><dd>Hard-surface modellers</dd>
+<dt>Modelled on</dt><dd>Houdini PolyExtrude and PolyBevel</dd>
+<dt>Modules</dt><dd>3</dd>
+<dt>Blender</dt><dd>5.2 and later, tested at each release</dd>
+<dt>Store</dt><dd>Coming soon on Superhive</dd>
+</dl>
+<p>Faces inset by a distance and extruded along their normals in divisions, twisted, tapered and random a face, one by one or as regions; edges extruded along a vector. Every edge of a closed mesh bevelled, flat or rounded on a circular profile in segments, and corners chamfered off the selected points. Holes filled, surfaces given thickness, booleans that mark the faces the cutter made and their seam, and grooved panel lines. Each tool stores what it made (front, sides, rows, strips, corners, rims, cuts) as attributes the next one selects.</p>
+
+<h2>The modules</h2>
+<p>A module is a <code>.bn</code> file of node groups. Once the pack is installed, a graph calls it with <code>use</code>, and Blender builds its groups.</p>
+<table>
+<tr><th>Module</th><th>What it gives</th></tr>
+<tr><td><code>modeling</code></td><td>Modelling helpers that keep their groups: a surface given thickness with its outer, inner and rim faces marked (solid_outer, solid_inner, solid_rim), a boolean of a mesh and a cutter that marks the faces the cutter made (bool_cut) and the seam where they meet the mesh (bool_seam), and grooved panel lines along a set of edges (panel_groove)</td></tr>
+<tr><td><code>poly_bevel</code></td><td>Bevels Geometry Nodes has no node for: every edge between two faces chamfered or rounded, an open mesh kept open, its segments laid on a profile from flat to square, each face inset, a strip an edge and a patch a corner (bevel_face, bevel_edge, bevel_corner); corners cut off the selected points of a mesh (chamfer_corner); the holes of a mesh filled, an n-gon or a fan of triangles a hole (fill_face)</td></tr>
+<tr><td><code>poly_extrude</code></td><td>Extrusions as a modelling package makes them: faces inset by a distance (exact on planar faces), pushed out along their normals in divisions, each step turned and tapered about the middle of its front, one by one or as regions, their distance random a face for a seed; edges pushed out along a vector; poly_front (faces), poly_front_edge (edges) and poly_side mark what they made, poly_layer the row of each side, the marks of earlier tools kept</td></tr>
+</table>
+
+<h2>Free in Base Node, and what the pack adds</h2>
+<p>Free and open source, on <a href="https://marcgardent.github.io/base-node-language/">the Base Node site</a>: the language, the Blender add-on, the formatter and parsers, and the free modules of the standard library. The pack adds the modules above, their showcase files and this tutorial.</p>
+<table>
+<tr><th>Capability</th><th>Blender's own nodes</th><th>With the pack</th></tr>
+<tr><td>Advanced modelling (PolyBevel, PolyExtrude)</td><td>Partial — Mesh Bevel node since 5.2</td><td>Covered — Insets and extrusions by region, bevels on a circular profile, panel lines; every result stored as an attribute<br><span class="mods"><code>poly_extrude</code> <code>poly_bevel</code> <code>modeling</code></span></td></tr>
+</table>
+
+<h2>Tutorial</h2>
+<a class="tuto-card" href="../tutorials/refuge.html">
+  <img src="../tutorials/img/refuge-side.png" alt="" loading="lazy">
+  <span class="body"><strong>The refuge</strong><span>Model a small hard-surface mountain refuge in Blender from a box, with the Modeling Tools pack: bevels, insets, extrusions, a boolean and panel lines, each tool selecting what the one before stored, in .bn.</span><span class="count">7 steps</span></span>
+</a>
+
+<h2>Compared</h2>
+<ul>
+<li><a href="../vs/houdini.html">Base Node VS Houdini</a></li>
+</ul>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

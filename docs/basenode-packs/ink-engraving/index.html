@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ink &amp; Engraving — BaseNode Packs — Ludopant</title>
+<meta name="description" content="Ink &amp; Engraving, a pack of 3 Base Node modules for Blender 5.2+: living ink, hatching and guilloché for Geometry Nodes and Grease Pencil.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/ink-engraving/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Ink &amp; Engraving — BaseNode Packs — Ludopant">
+<meta property="og:description" content="Ink &amp; Engraving, a pack of 3 Base Node modules for Blender 5.2+: living ink, hatching and guilloché for Geometry Nodes and Grease Pencil.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/ink-engraving/">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/engraved-map-step7.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › Ink &amp; Engraving</p>
+<p class="store">Coming soon on Superhive</p>
+<h1>Ink &amp; Engraving</h1>
+<p class="lead">Living ink, hatching and guilloché for Geometry Nodes and Grease Pencil.</p>
+<p class="cover"><img src="../tutorials/img/engraved-map-step7.png" alt="Ink &amp; Engraving: Living ink, hatching and guilloché for Geometry Nodes and Grease Pencil"></p>
+<dl class="facts">
+<dt>For</dt><dd>Illustrators and Grease Pencil artists</dd>
+<dt>Modelled on</dt><dd>Engraving and banknote guilloché</dd>
+<dt>Modules</dt><dd>3</dd>
+<dt>Blender</dt><dd>5.2 and later, tested at each release</dd>
+<dt>Store</dt><dd>Coming soon on Superhive</dd>
+</dl>
+<p>Strokes that live (taper, wobble, bleed, write-on), engraving cross-hatching, guilloché, halftone and Lehmann slope hachures, and deformation along curves with Frenet frames, ribbons and arrowheads.</p>
+
+<h2>The modules</h2>
+<p>A module is a <code>.bn</code> file of node groups. Once the pack is installed, a graph calls it with <code>use</code>, and Blender builds its groups.</p>
+<table>
+<tr><th>Module</th><th>What it gives</th></tr>
+<tr><td><code>deform2d</code></td><td>Frenet-Serret 2D moving frames, flow along curve deformation, ribbon outlines, and parametric arrowheads</td></tr>
+<tr><td><code>hachures2d</code></td><td>Engraving cross-hatching, guilloché security patterns, screentone halftone dots, and Lehmann slope hachures</td></tr>
+<tr><td><code>ink2d</code></td><td>Living ink, organic stroke dynamics, taper, wobble, bleed, and artistic drawing</td></tr>
+</table>
+
+<h2>Free in Base Node, and what the pack adds</h2>
+<p>Free and open source, on <a href="https://marcgardent.github.io/base-node-language/">the Base Node site</a>: the language, the Blender add-on, the formatter and parsers, and the free modules of the standard library. The pack's modules build on the free module <code>math</code>. The pack adds the modules above, their showcase files and this tutorial.</p>
+<table>
+<tr><th>Capability</th><th>Blender's own nodes</th><th>With the pack</th></tr>
+<tr><td>2D curves: fillets, deformation, planar maps</td><td>Partial</td><td>Covered<br><span class="mods"><code>deform2d</code></span></td></tr>
+<tr><td>Patterns, tilings, hatching, guilloché</td><td>No</td><td>Covered<br><span class="mods"><code>hachures2d</code></span></td></tr>
+<tr><td>Living ink, Grease Pencil v3 strokes</td><td>Partial</td><td>Covered<br><span class="mods"><code>ink2d</code></span></td></tr>
+</table>
+
+<h2>Tutorial</h2>
+<a class="tuto-card" href="../tutorials/engraved-map.html">
+  <img src="../tutorials/img/engraved-map-step7.png" alt="" loading="lazy">
+  <span class="body"><strong>Engraved map</strong><span>Draw an old engraved relief map of a small valley in Blender, step by step: contour lines, Lehmann hachures, cross-hatching, a guilloché border and living ink, as Grease Pencil strokes, in .bn.</span><span class="count">7 steps</span></span>
+</a>
+
+<h2>Compared</h2>
+<ul>
+<li><a href="../vs/illustrator.html">Base Node VS Illustrator</a></li>
+</ul>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

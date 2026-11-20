@@ -1,0 +1,1338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The clone wall — Motion Graphics tutorial — Ludopant</title>
+<meta name="description" content="Build a Cinema 4D style MoGraph wall in Blender Geometry Nodes with the Motion Graphics pack: a grid cloner, random and noise effectors, falloffs that sweep across, springs, and colour by the effect&#x27;s weight, in .bn.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/tutorials/clone-wall.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="The clone wall — Motion Graphics tutorial — Ludopant">
+<meta property="og:description" content="Build a Cinema 4D style MoGraph wall in Blender Geometry Nodes with the Motion Graphics pack: a grid cloner, random and noise effectors, falloffs that sweep across, springs, and colour by the effect&#x27;s weight, in .bn.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/tutorials/clone-wall.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/clone-wall-step8.webp">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-view.js"></script>
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-file.js"></script>
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs tuto">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › <a href="../motion-graphics/">Motion Graphics</a> › Tutorial: The clone wall</p>
+<h1>The clone wall</h1>
+    <p class="lead">
+      A wall of 180 clones, cubes, balls and pucks, that ripples as a wave passes through it: the clones it reaches jump out, turn and grow, light up, then spring back past their place and settle.
+      This is MoGraph as Cinema 4D taught it, a cloner, effectors and falloffs, made in Geometry Nodes. Each step adds one of them, in one or two lines.
+    </p>
+    <figure>
+      <img src="img/clone-wall-step8.webp" width="640" height="427" alt="A wall of cream cubes, coral balls and yellow pucks in front of a blue backdrop; a diagonal band sweeps across it, the clones it passes pop out, glow mint green and spring back">
+      <figcaption>Where we are going. Eight steps; the last five move.</figcaption>
+    </figure>
+
+    <h2 id="learn">You will learn</h2>
+    <ul>
+      <li><strong>The craft.</strong> Clone a shape on a grid, pick each clone from a collection, move them with effectors, decide where with falloffs that sweep across, give them inertia with a spring, and colour them by how much the effect weighs.</li>
+      <li><strong>The language.</strong> A pipe of <code>|&gt;</code> lines, one effector each, in the order they act; a falloff is a value, <code>w = …</code>, handed to the effectors as their <code>weight</code>; <code>SceneTime()</code> to animate; a value stored on each clone and read back by the material.</li>
+    </ul>
+    <p>
+      This page goes fast on the basics. If <code>.bn</code> is new to you, start with <a href="https://marcgardent.github.io/base-node-language/tutorials/lunar-ground.html">Lunar ground</a>: it explains a graph, its nodes as calls, fields, and the way a step file is read.
+    </p>
+
+    <h2 id="before">Before you start</h2>
+    <p>
+      You need Blender 5, the <a href="https://marcgardent.github.io/base-node-language/#blender">Base Node add-on</a>, and the <a href="../motion-graphics/">Motion Graphics</a> pack, version 0.13.1 or later.
+      The pack is sold by the author of Base Node, apart from the open source project: the steps below are free to read, copy and change; the modules they <code>use</code> come with the pack, and are not.
+    </p>
+    <table>
+      <tr><th>Module</th><th>Kind</th><th>What it gives</th></tr>
+      <tr><td><code>cloners</code></td><td>geometry</td><td>A geometry instanced on a line, a circle, a grid, a curve or a mesh, whole or picked from a collection; each clone stores its index and a factor from 0 to 1.</td></tr>
+      <tr><td><code>effectors</code></td><td>geometry</td><td>Move, turn and scale the clones: <code>random</code>, <code>plain</code>, <code>step</code>, <code>noise</code>, <code>oscillate</code>, <code>time</code>, and <code>delay</code> and <code>spring</code>, which follow over the frames. Each takes a <code>weight</code>.</td></tr>
+      <tr><td><code>falloffs</code></td><td>geometry</td><td>That weight, from where a clone is: in a sphere, a box, along an axis, in a sector; inverted or combined.</td></tr>
+    </table>
+    <p>
+      Every block below is a complete <code>.bn</code> file, its code beside the nodes it builds. Two ways to try a step:
+    </p>
+    <ul>
+      <li><strong>Drag it.</strong> Drag the file icon of its block, or its title, onto empty space in Blender's 3D Viewport, and keep <em>Instantiate the Example</em>: a new object carries <code>clone_wall</code> at the 3D cursor. A click on the file icon downloads the file instead.</li>
+      <li><strong>Paste it.</strong> Press the copy button of its block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>, on any mesh object: the graph makes its own wall and ignores the mesh it is given.</li>
+    </ul>
+    <p>
+      Press <kbd>Space</kbd> to play the steps that move. The springs of steps 6 to 8 are simulated from the first frame: play from there, not from a frame picked in the middle.
+      The pictures are rendered with EEVEE from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/clone_wall/render.py"><code>render.py</code></a>, in front of the same backdrop, under the same lights.
+    </p>
+
+    <h2 id="idea">Three kinds of node</h2>
+    <p>
+      MoGraph splits the work in three, and so does the pack:
+    </p>
+    <ul>
+      <li><strong>A cloner</strong> makes the clones, as instances: <code>shape |&gt; grid_cloner(…)</code>.</li>
+      <li><strong>An effector</strong> takes the clones and moves, turns or scales each one, then passes them on: one line each, <code>|&gt; random_effector(…)</code>, <code>|&gt; noise_effector(…)</code>. They add up in the order of the pipe.</li>
+      <li><strong>A falloff</strong> is a number from 0 to 1 for each clone, by where it is. Given to an effector as its <code>weight</code>, it says where the effect is full, where it fades, and where it is not.</li>
+    </ul>
+    <p>
+      The clones stay instances until the last line, <code>RealizeInstances()</code>: until then, an effector moves 180 transforms, not 180 meshes, and stays fast.
+    </p>
+
+    <h2 id="step-1"><span class="n">1.</span> A grid of clones</h2>
+    <p>
+      One rounded cube, 20 cm wide, cloned 18 × 10 times, 22 cm apart. <code>grid_cloner</code> lays the grid on the floor plane; <code>TransformGeometry</code> stands it up into a wall.
+    </p>
+    <p class="file">step1_grid.bn: <code>clone_wall</code>, <code>rounded_cube</code>, <code>clone_paint</code></p>
+    <bn-view graph="clone_wall" height="480"><script type="text/bn">
+// @module clone_wall_step1
+// @title The clone wall, step 1: a grid of clones
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall() -> Geometry {
+  "A wall of rounded cubes, 18 by 10, standing on the floor"
+  return rounded_cube()
+    |> SetMaterial(material: Cream)
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22))
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-view>
+    <ul>
+      <li><code>rounded_cube</code> is a graph of the file, not of the pack: a dense <code>Cube</code> whose every point is pulled to <code>radius</code> from a smaller cube inside it. Its edges and corners come out round, as a bevel would make them.</li>
+      <li>The wall is turned as a whole, at the end: the effectors to come work on the flat grid, where <em>out of the wall</em> is simply +Z.</li>
+      <li><code>clone_paint</code> is a shader group, satin plastic of the colour <code>paint</code>; the material <code>Cream</code> calls it.</li>
+    </ul>
+    <figure>
+      <img src="img/clone-wall-step1.png" width="640" height="427" loading="lazy" alt="A flat wall of cream rounded cubes, 18 by 10, in front of a blue backdrop">
+      <figcaption>Step 1. One shape, 180 times.</figcaption>
+    </figure>
+
+    <h2 id="step-2"><span class="n">2.</span> Picked from a collection</h2>
+    <p>
+      A wall of one shape is a pattern; a wall of a few is a design. <code>GeometryToInstance</code> makes a collection of three shapes, each with its material, and the cloner picks one for each clone.
+    </p>
+    <p class="file">step2_pick.bn: <code>clone_wall</code></p>
+    <bn-view graph="clone_wall" height="480"><script type="text/bn">
+// @module clone_wall_step2
+// @title The clone wall, step 2: picked from a collection
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall(seed: Int = 4) -> Geometry {
+  "A wall of 18 by 10 clones, each picked at random from three shapes"
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: seed)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-view>
+    <ul>
+      <li><code>pick: Random</code> picks one at random, the same one for a given <code>seed</code>: change the seed for another wall. <code>pick: Cycle</code> takes them in turn, cube, ball, puck, cube…; <code>Whole</code> clones the whole collection each time.</li>
+      <li>The ball is <code>rounded_cube(radius: 0.1)</code>: a cube rounded by half its size is a sphere.</li>
+      <li>The materials are <code>clone_paint</code> three times, with three colours: one group to change, three materials that follow.</li>
+    </ul>
+    <figure>
+      <img src="img/clone-wall-step2.png" width="640" height="427" loading="lazy" alt="The wall made of cream cubes, coral balls and yellow pucks mixed at random">
+      <figcaption>Step 2. Cubes, balls and pucks, mixed by a seed.</figcaption>
+    </figure>
+
+    <h2 id="step-3"><span class="n">3.</span> A random effector</h2>
+    <p>
+      The first effector: <code>random_effector</code> moves each clone by up to <code>offset</code>, turns it by up to <code>rotation</code> and scales it by up to <code>scale</code>, either way, at random.
+    </p>
+    <p class="file">step3_random.bn: <code>clone_wall</code></p>
+    <bn-view graph="clone_wall" height="480"><script type="text/bn">
+// @module clone_wall_step3
+// @title The clone wall, step 3: a random effector
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall() -> Geometry {
+  "A wall of clones picked at random, each moved, turned and scaled at random"
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    |> random_effector(offset: (0.02, 0.02, 0.1), rotation: (0.5, 0.5, 0.8), scale: 0.3, seed: 7)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-view>
+    <ul>
+      <li>The offset is mostly on Z, out of the wall: a few centimetres sideways would make the clones collide; out of the wall, they only stand at different depths.</li>
+      <li>Random is not noise: two neighbours get unrelated values. That is what makes the wall look scattered rather than wavy.</li>
+      <li>Its <code>seed</code> is its own, apart from the cloner's: the same mix of shapes, jumbled another way.</li>
+    </ul>
+    <figure>
+      <img src="img/clone-wall-step3.png" width="640" height="427" loading="lazy" alt="The wall jumbled: every clone turned, sized and set forward at random">
+      <figcaption>Step 3. Each clone moved, turned and scaled on its own.</figcaption>
+    </figure>
+
+    <h2 id="step-4"><span class="n">4.</span> A noise in time</h2>
+    <p>
+      <code>noise_effector</code> moves the clones by a noise of space: unlike random, neighbours move together, in patches about <code>size</code> wide. Its <code>speed</code> makes the noise flow with the time of the scene: the wall starts to breathe.
+    </p>
+    <p class="file">step4_noise.bn: <code>clone_wall</code></p>
+    <bn-view graph="clone_wall" height="480"><script type="text/bn">
+// @module clone_wall_step4
+// @title The clone wall, step 4: a noise in time
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall() -> Geometry {
+  "A wall of clones jumbled at random, a noise flowing through it with the time"
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    |> random_effector(offset: (0.02, 0.02, 0.1), rotation: (0.5, 0.5, 0.8), scale: 0.3, seed: 7)
+    |> noise_effector(offset: (0.0, 0.0, 0.12), rotation: (0.25, 0.25, 0.0), size: 0.9, speed: 0.35)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-view>
+    <ul>
+      <li>It comes after <code>random_effector</code> and adds to it: the wall stays jumbled, and the jumble swells.</li>
+      <li>The noise is read where each clone is, after the effectors before it moved them. Put the noise first to read it on the regular grid.</li>
+      <li>The effector reads <code>SceneTime()</code> itself: no keyframe. Press <kbd>Space</kbd>.</li>
+    </ul>
+    <figure>
+      <img src="img/clone-wall-step4.webp" width="640" height="427" loading="lazy" alt="The jumbled wall swelling and turning in slow patches, as a noise flows through it">
+      <figcaption>Step 4. Patches of clones lean out and back as the noise flows.</figcaption>
+    </figure>
+
+    <h2 id="step-5"><span class="n">5.</span> A falloff sweeps across</h2>
+    <p>
+      An effector everywhere is a texture; an effector somewhere is an event. <code>spherical_falloff</code> is 1 within a sphere and fades to 0 at its edge. Given as the <code>weight</code> of every effector, the random one, the noise and a new <code>plain_effector</code>, it decides where the clones come out of the wall.
+    </p>
+    <p class="file">step5_falloff.bn: <code>clone_wall</code></p>
+    <bn-view graph="clone_wall" height="480"><script type="text/bn">
+// @module clone_wall_step5
+// @title The clone wall, step 5: a falloff sweeps across
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+use falloffs
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall(period: Float = 3.0 in 0.1..) -> Geometry {
+  "A wall of clones that come out, jumbled and grown, where a sphere sweeps across it"
+  // Once across the wall every period seconds, from off its left side to off its right
+  front = fract(SceneTime().seconds / period) * 6.0 - 3.0
+  w = spherical_falloff(
+    center: CombineXYZ(x: front, y: sin(front * 1.4) * 0.5),
+    radius: 1.0,
+    softness: 0.8)
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    |> random_effector(
+      offset: (0.02, 0.02, 0.1),
+      rotation: (0.5, 0.5, 0.8),
+      scale: 0.3,
+      seed: 7,
+      weight: w)
+    |> plain_effector(offset: (0.0, 0.0, 0.5), scale: (0.35, 0.35, 0.35), weight: w)
+    |> noise_effector(
+      offset: (0.0, 0.0, 0.12),
+      rotation: (0.25, 0.25, 0.0),
+      size: 0.9,
+      speed: 0.35,
+      weight: w)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-view>
+    <ul>
+      <li><code>w</code> is a field: it is computed for each clone, from its position, inside each effector that takes it. One line of falloff, as many effectors as you like.</li>
+      <li><code>front</code> moves the sphere across the wall, from off its left side to off its right, once every <code>period</code> seconds, by <code>fract</code> of the time: as the sphere leaves on the right, it comes back on the left, out of sight, and the animation loops.</li>
+      <li><code>plain_effector</code> pushes every clone by the same amount; weighed, it is a bump that follows the sphere. The random and noise effectors, weighed too, now only stir the clones in it: out of the sphere the wall is at rest, flat again.</li>
+    </ul>
+    <figure>
+      <img src="img/clone-wall-step5.webp" width="640" height="427" loading="lazy" alt="A round patch of the wall comes out, its clones jumbled and grown, and travels from left to right">
+      <figcaption>Step 5. The clones come out where the sphere is, and go back as soon as it leaves.</figcaption>
+    </figure>
+
+    <h2 id="step-6"><span class="n">6.</span> A spring behind</h2>
+    <p>
+      Step 5 is exact, and stiff: a clone is where the falloff says, frame by frame. <code>spring_effector</code> gives it a mass: pulled toward where the effectors before put it, it leaves late, overshoots, and swings back.
+    </p>
+    <p class="file">step6_spring.bn: <code>clone_wall</code></p>
+    <bn-view graph="clone_wall" height="480"><script type="text/bn">
+// @module clone_wall_step6
+// @title The clone wall, step 6: a spring behind
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+use falloffs
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall(period: Float = 3.0 in 0.1..) -> Geometry {
+  "The sweeping sphere, the clones on springs: late out, overshooting back"
+  // Once across the wall every period seconds, from off its left side to off its right
+  front = fract(SceneTime().seconds / period) * 6.0 - 3.0
+  w = spherical_falloff(
+    center: CombineXYZ(x: front, y: sin(front * 1.4) * 0.5),
+    radius: 1.0,
+    softness: 0.8)
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    |> random_effector(
+      offset: (0.02, 0.02, 0.1),
+      rotation: (0.5, 0.5, 0.8),
+      scale: 0.3,
+      seed: 7,
+      weight: w)
+    |> plain_effector(offset: (0.0, 0.0, 0.5), scale: (0.35, 0.35, 0.35), weight: w)
+    |> noise_effector(
+      offset: (0.0, 0.0, 0.12),
+      rotation: (0.25, 0.25, 0.0),
+      size: 0.9,
+      speed: 0.35,
+      weight: w)
+    |> spring_effector(stiffness: 70.0, damping: 3.5)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-view>
+    <ul>
+      <li>It comes last, after the effectors it follows: it does not move the clones somewhere, it moves them <em>toward</em> where the pipe before it says, a little each frame.</li>
+      <li><code>stiffness</code> pulls, <code>damping</code> brakes. Less damping, more swings; less stiffness, slower and later.</li>
+      <li>It is a simulation, frame after frame from the first: play the scene from its start. Its position springs; its rotation and scale follow at once.</li>
+      <li><code>delay_effector</code> is its calm sibling: late, never past.</li>
+    </ul>
+    <figure>
+      <img src="img/clone-wall-step6.webp" width="640" height="427" loading="lazy" alt="The patch of clones travels across the wall, its clones bouncing in and out behind it before they settle">
+      <figcaption>Step 6. A wake: behind the sphere, the clones bounce before they settle.</figcaption>
+    </figure>
+
+    <h2 id="step-7"><span class="n">7.</span> A band of two falloffs</h2>
+    <p>
+      A wave is a band, not a ball. <code>linear_falloff</code> is a ramp along an axis: 0 behind its origin, 1 a <code>length</code> further on. Two of them make a band: one rises up to the front, the other, inverted, falls down past it; where both are high is the band.
+    </p>
+    <p class="file">step7_band.bn: <code>clone_wall</code></p>
+    <bn-view graph="clone_wall" height="480"><script type="text/bn">
+// @module clone_wall_step7
+// @title The clone wall, step 7: a band of two falloffs
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+use falloffs
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall(
+    period: Float = 3.0 in 0.1..,
+    across: Vector = (1.0, 0.35, 0.0)
+) -> Geometry {
+  "A band of two linear falloffs sweeps across the wall; the clones it passes ripple on springs"
+  // Once across the wall every period seconds, from off its left side to off its right
+  front = fract(SceneTime().seconds / period) * 6.0 - 3.0
+  // A band: up a ramp to the front, down an inverted ramp behind it; their minimum is a tent
+  rise = linear_falloff(origin: CombineXYZ(x: front - 0.5), direction: across, length: 0.5)
+  fall = invert_falloff(
+    linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
+  w = combine_falloffs(rise, fall, mode: Minimum)
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    |> random_effector(
+      offset: (0.02, 0.02, 0.1),
+      rotation: (0.5, 0.5, 0.8),
+      scale: 0.3,
+      seed: 7,
+      weight: w)
+    |> plain_effector(offset: (0.0, 0.0, 0.5), scale: (0.35, 0.35, 0.35), weight: w)
+    |> noise_effector(
+      offset: (0.0, 0.0, 0.12),
+      rotation: (0.25, 0.25, 0.0),
+      size: 0.9,
+      speed: 0.35,
+      weight: w)
+    |> spring_effector(stiffness: 70.0, damping: 3.5)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-view>
+    <ul>
+      <li><code>invert_falloff</code> turns a ramp up into a ramp down: 1 where it was 0.</li>
+      <li><code>combine_falloffs(…, mode: Minimum)</code> keeps the lower of the two at each clone: a tent, 0 on both sides and 1 at <code>front</code>. <code>Maximum</code> would give their union, here the whole wall.</li>
+      <li><code>across</code> tilts the axis: the band crosses the wall on a slant, so that it reaches the bottom of a column before its top.</li>
+      <li>The rest of the pipe is step 6: only <code>w</code> changed. That is the point of falloffs: the shape of the event is apart from what happens in it.</li>
+    </ul>
+    <figure>
+      <img src="img/clone-wall-step7.webp" width="640" height="427" loading="lazy" alt="A slanted band sweeps across the wall; the clones it passes jump out and ripple behind it">
+      <figcaption>Step 7. A ripple: the band lifts a slanted line of clones, the springs carry it on behind.</figcaption>
+    </figure>
+
+    <h2 id="step-8"><span class="n">8.</span> Coloured by the weight</h2>
+    <p>
+      The last touch: the clones light up where the effect weighs. <code>StoreNamedAttribute</code> keeps <code>w</code> on each clone as <code>weight</code>; the material reads it back with <code>Attribute</code> and mixes the clone's colour toward <code>hot</code>, with a glow.
+    </p>
+    <p class="file">step8_color.bn: <code>clone_wall</code>, <code>clone_paint</code></p>
+    <bn-view graph="clone_wall" height="480"><script type="text/bn">
+// @module clone_wall_step8
+// @title The clone wall, step 8: coloured by the weight
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+use falloffs
+
+shader graph clone_paint(
+    paint: Color = (1.0, 0.9, 0.78),
+    hot: Color = (0.25, 0.95, 0.85),
+    glow: Float = 0.6 in 0.0..
+) -> Shader {
+  "Satin plastic of the colour paint at rest, hot and glowing where the effect weighs"
+  // weight, which the geometry stored on each clone: 0 at rest, 1 under the falloff
+  w = Attribute(attribute_name: "weight").factor
+  color = Mix(factor: w, a: paint, b: hot, data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: color,
+    roughness: 0.32,
+    coat_weight: 0.4,
+    emission_color: hot,
+    emission_strength: w * w * glow)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall(
+    period: Float = 3.0 in 0.1..,
+    across: Vector = (1.0, 0.35, 0.0)
+) -> Geometry {
+  "The rippling wall, each clone coloured by the weight of the band where it is"
+  // Once across the wall every period seconds, from off its left side to off its right
+  front = fract(SceneTime().seconds / period) * 6.0 - 3.0
+  // A band: up a ramp to the front, down an inverted ramp behind it; their minimum is a tent
+  rise = linear_falloff(origin: CombineXYZ(x: front - 0.5), direction: across, length: 0.5)
+  fall = invert_falloff(
+    linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
+  w = combine_falloffs(rise, fall, mode: Minimum)
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    // The weight where each clone stands, kept on it for the material
+    |> StoreNamedAttribute(name: "weight", value: w, domain: INSTANCE)
+    |> random_effector(
+      offset: (0.02, 0.02, 0.1),
+      rotation: (0.5, 0.5, 0.8),
+      scale: 0.3,
+      seed: 7,
+      weight: w)
+    |> plain_effector(offset: (0.0, 0.0, 0.5), scale: (0.35, 0.35, 0.35), weight: w)
+    |> noise_effector(
+      offset: (0.0, 0.0, 0.12),
+      rotation: (0.25, 0.25, 0.0),
+      size: 0.9,
+      speed: 0.35,
+      weight: w)
+    |> spring_effector(stiffness: 70.0, damping: 3.5)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-view>
+    <ul>
+      <li>The weight is stored on the instances; <code>RealizeInstances</code> hands it to every point of each clone's mesh, where the material finds it.</li>
+      <li>It is stored right after the cloner, where each clone stands on the grid. The effectors move, turn and scale the clones and keep what they carry, the spring too: it moves the clones of each frame.</li>
+      <li>The glow is <code>w * w</code>: weak on the sides of the band, bright only at its crest.</li>
+    </ul>
+    <figure>
+      <img src="img/clone-wall-step8.webp" width="640" height="427" loading="lazy" alt="The rippling wall, the clones in the band glowing mint green as they jump out">
+      <figcaption>Step 8. The wave, lit.</figcaption>
+    </figure>
+
+    <h2 id="tune">The knobs</h2>
+    <p>
+      A few to start with, on the last step:
+    </p>
+    <table>
+      <tr><th>Where</th><th>Input</th><th>What it does</th></tr>
+      <tr><td><code>clone_wall</code></td><td><code>period</code></td><td>Seconds for the band to cross the wall: the tempo.</td></tr>
+      <tr><td><code>clone_wall</code></td><td><code>across</code></td><td>The direction the band sweeps: <code>(1, 0, 0)</code> straight across, <code>(0, 1, 0)</code> from the floor up.</td></tr>
+      <tr><td><code>grid_cloner</code></td><td><code>count_x</code>, <code>count_y</code>, <code>spacing</code>, <code>pick</code>, <code>seed</code></td><td>How many clones, how far apart, which shape each one is.</td></tr>
+      <tr><td><code>plain_effector</code></td><td><code>offset</code>, <code>scale</code></td><td>How far out the clones in the band come, and how much they grow.</td></tr>
+      <tr><td><code>spring_effector</code></td><td><code>stiffness</code>, <code>damping</code></td><td>How fast and how springy they follow.</td></tr>
+      <tr><td><code>clone_paint</code></td><td><code>paint</code>, <code>hot</code>, <code>glow</code></td><td>The colour at rest, under the band, and how bright it glows there.</td></tr>
+    </table>
+    <p class="try"><strong>Try:</strong> on step 8, set <code>damping</code> to 1.5: the wall rings long after the band. Give the effectors <code>invert_falloff(w)</code> instead of <code>w</code>: the whole wall stands out, and the band is a trough that runs through it. Swap <code>grid_cloner</code> for <code>radial_cloner(count: 48, radius: 1.5)</code> and the band sweeps a ring.</p>
+
+    <h2 id="files">Take it to Blender</h2>
+    <p>
+      The finished wall, in one file. Drag the card onto empty space in Blender's 3D Viewport and keep <em>Instantiate the Example</em>: a new object carries <code>clone_wall</code>. A click on the card downloads the file.
+    </p>
+    <bn-file><script type="text/bn">
+// @module clone_wall_step8
+// @title The clone wall, step 8: coloured by the weight
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+use falloffs
+
+shader graph clone_paint(
+    paint: Color = (1.0, 0.9, 0.78),
+    hot: Color = (0.25, 0.95, 0.85),
+    glow: Float = 0.6 in 0.0..
+) -> Shader {
+  "Satin plastic of the colour paint at rest, hot and glowing where the effect weighs"
+  // weight, which the geometry stored on each clone: 0 at rest, 1 under the falloff
+  w = Attribute(attribute_name: "weight").factor
+  color = Mix(factor: w, a: paint, b: hot, data_type: RGBA)
+  return PrincipledBSDF(
+    base_color: color,
+    roughness: 0.32,
+    coat_weight: 0.4,
+    emission_color: hot,
+    emission_strength: w * w * glow)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall(
+    period: Float = 3.0 in 0.1..,
+    across: Vector = (1.0, 0.35, 0.0)
+) -> Geometry {
+  "The rippling wall, each clone coloured by the weight of the band where it is"
+  // Once across the wall every period seconds, from off its left side to off its right
+  front = fract(SceneTime().seconds / period) * 6.0 - 3.0
+  // A band: up a ramp to the front, down an inverted ramp behind it; their minimum is a tent
+  rise = linear_falloff(origin: CombineXYZ(x: front - 0.5), direction: across, length: 0.5)
+  fall = invert_falloff(
+    linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
+  w = combine_falloffs(rise, fall, mode: Minimum)
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    // The weight where each clone stands, kept on it for the material
+    |> StoreNamedAttribute(name: "weight", value: w, domain: INSTANCE)
+    |> random_effector(
+      offset: (0.02, 0.02, 0.1),
+      rotation: (0.5, 0.5, 0.8),
+      scale: 0.3,
+      seed: 7,
+      weight: w)
+    |> plain_effector(offset: (0.0, 0.0, 0.5), scale: (0.35, 0.35, 0.35), weight: w)
+    |> noise_effector(
+      offset: (0.0, 0.0, 0.12),
+      rotation: (0.25, 0.25, 0.0),
+      size: 0.9,
+      speed: 0.35,
+      weight: w)
+    |> spring_effector(stiffness: 70.0, damping: 3.5)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-file>
+    <p>The steps before it, to start again from any of them:</p>
+    <div class="cards">
+      <bn-file><script type="text/bn">
+// @module clone_wall_step1
+// @title The clone wall, step 1: a grid of clones
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall() -> Geometry {
+  "A wall of rounded cubes, 18 by 10, standing on the floor"
+  return rounded_cube()
+    |> SetMaterial(material: Cream)
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22))
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module clone_wall_step2
+// @title The clone wall, step 2: picked from a collection
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall(seed: Int = 4) -> Geometry {
+  "A wall of 18 by 10 clones, each picked at random from three shapes"
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: seed)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module clone_wall_step3
+// @title The clone wall, step 3: a random effector
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall() -> Geometry {
+  "A wall of clones picked at random, each moved, turned and scaled at random"
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    |> random_effector(offset: (0.02, 0.02, 0.1), rotation: (0.5, 0.5, 0.8), scale: 0.3, seed: 7)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module clone_wall_step4
+// @title The clone wall, step 4: a noise in time
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall() -> Geometry {
+  "A wall of clones jumbled at random, a noise flowing through it with the time"
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    |> random_effector(offset: (0.02, 0.02, 0.1), rotation: (0.5, 0.5, 0.8), scale: 0.3, seed: 7)
+    |> noise_effector(offset: (0.0, 0.0, 0.12), rotation: (0.25, 0.25, 0.0), size: 0.9, speed: 0.35)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module clone_wall_step5
+// @title The clone wall, step 5: a falloff sweeps across
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+use falloffs
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall(period: Float = 3.0 in 0.1..) -> Geometry {
+  "A wall of clones that come out, jumbled and grown, where a sphere sweeps across it"
+  // Once across the wall every period seconds, from off its left side to off its right
+  front = fract(SceneTime().seconds / period) * 6.0 - 3.0
+  w = spherical_falloff(
+    center: CombineXYZ(x: front, y: sin(front * 1.4) * 0.5),
+    radius: 1.0,
+    softness: 0.8)
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    |> random_effector(
+      offset: (0.02, 0.02, 0.1),
+      rotation: (0.5, 0.5, 0.8),
+      scale: 0.3,
+      seed: 7,
+      weight: w)
+    |> plain_effector(offset: (0.0, 0.0, 0.5), scale: (0.35, 0.35, 0.35), weight: w)
+    |> noise_effector(
+      offset: (0.0, 0.0, 0.12),
+      rotation: (0.25, 0.25, 0.0),
+      size: 0.9,
+      speed: 0.35,
+      weight: w)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module clone_wall_step6
+// @title The clone wall, step 6: a spring behind
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+use falloffs
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall(period: Float = 3.0 in 0.1..) -> Geometry {
+  "The sweeping sphere, the clones on springs: late out, overshooting back"
+  // Once across the wall every period seconds, from off its left side to off its right
+  front = fract(SceneTime().seconds / period) * 6.0 - 3.0
+  w = spherical_falloff(
+    center: CombineXYZ(x: front, y: sin(front * 1.4) * 0.5),
+    radius: 1.0,
+    softness: 0.8)
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    |> random_effector(
+      offset: (0.02, 0.02, 0.1),
+      rotation: (0.5, 0.5, 0.8),
+      scale: 0.3,
+      seed: 7,
+      weight: w)
+    |> plain_effector(offset: (0.0, 0.0, 0.5), scale: (0.35, 0.35, 0.35), weight: w)
+    |> noise_effector(
+      offset: (0.0, 0.0, 0.12),
+      rotation: (0.25, 0.25, 0.0),
+      size: 0.9,
+      speed: 0.35,
+      weight: w)
+    |> spring_effector(stiffness: 70.0, damping: 3.5)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module clone_wall_step7
+// @title The clone wall, step 7: a band of two falloffs
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example clone_wall
+
+use cloners
+use effectors
+use falloffs
+
+shader graph clone_paint(paint: Color = (1.0, 0.9, 0.78)) -> Shader {
+  "Satin plastic"
+  return PrincipledBSDF(base_color: paint, roughness: 0.32, coat_weight: 0.4)
+}
+
+shader(material: true) graph Cream() -> (surface: Shader) {
+  return (surface: clone_paint())
+}
+
+shader(material: true) graph Coral() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.95, 0.4, 0.3)))
+}
+
+shader(material: true) graph Mustard() -> (surface: Shader) {
+  return (surface: clone_paint(paint: (0.98, 0.68, 0.18)))
+}
+
+geometry graph rounded_cube(
+    size: Float(subtype: DISTANCE) = 0.2,
+    radius: Float(subtype: DISTANCE) = 0.04
+) -> Geometry {
+  "A cube of size, its edges and corners rounded by radius"
+  // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
+  h = size * 0.5 - radius
+  p = Position()
+  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
+  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+    |> SetPosition(position: core + normalize(p - core) * radius)
+    |> SetShadeSmooth()
+}
+
+geometry graph clone_wall(
+    period: Float = 3.0 in 0.1..,
+    across: Vector = (1.0, 0.35, 0.0)
+) -> Geometry {
+  "A band of two linear falloffs sweeps across the wall; the clones it passes ripple on springs"
+  // Once across the wall every period seconds, from off its left side to off its right
+  front = fract(SceneTime().seconds / period) * 6.0 - 3.0
+  // A band: up a ramp to the front, down an inverted ramp behind it; their minimum is a tent
+  rise = linear_falloff(origin: CombineXYZ(x: front - 0.5), direction: across, length: 0.5)
+  fall = invert_falloff(
+    linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
+  w = combine_falloffs(rise, fall, mode: Minimum)
+  // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
+  shapes = GeometryToInstance(
+    rounded_cube() |> SetMaterial(material: Cream),
+    rounded_cube(radius: 0.1) |> SetMaterial(material: Coral),
+    Cylinder(vertices: 32, radius: 0.1, depth: 0.12).mesh |> SetMaterial(material: Mustard))
+  return shapes
+    |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
+    |> random_effector(
+      offset: (0.02, 0.02, 0.1),
+      rotation: (0.5, 0.5, 0.8),
+      scale: 0.3,
+      seed: 7,
+      weight: w)
+    |> plain_effector(offset: (0.0, 0.0, 0.5), scale: (0.35, 0.35, 0.35), weight: w)
+    |> noise_effector(
+      offset: (0.0, 0.0, 0.12),
+      rotation: (0.25, 0.25, 0.0),
+      size: 0.9,
+      speed: 0.35,
+      weight: w)
+    |> spring_effector(stiffness: 70.0, damping: 3.5)
+    // The grid lies on XY: stand it up, its face toward -Y, its bottom row on the floor
+    |> TransformGeometry(translation: (0.0, 0.0, 1.14), rotation: (1.5707964, 0.0, 0.0))
+    |> RealizeInstances()
+}
+</script></bn-file>
+    </div>
+    <p class="muted">
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/clone_wall"><code>examples/tutorials/clone_wall/</code></a>.
+    </p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

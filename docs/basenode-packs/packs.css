@@ -1,0 +1,75 @@
+/* The BaseNode Packs pages of ludopant.com, on top of assets/style.css (its tokens: --bg, --surface,
+   --text, --muted, --line, --accent, --accent-soft, --radius). Written by studio/ludopant.py of
+   base-node-studio from studio/ludopant.css: edit that, not this file. */
+
+.doc { padding: 40px 0 80px; }
+.doc .wrap { max-width: 960px; }
+.doc .crumb { font-size: 14px; color: var(--muted); margin: 0 0 12px; }
+.doc .crumb a { color: var(--muted); }
+.doc h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 16px; }
+.doc h2 { font-size: 26px; letter-spacing: -.01em; margin: 56px 0 12px; line-height: 1.2; }
+.doc h3 { font-size: 19px; margin: 32px 0 10px; line-height: 1.3; }
+.doc p, .doc li { max-width: 72ch; }
+.doc .lead { font-size: 19px; color: var(--muted); }
+.doc .meta { margin: 20px 0 0; }
+.doc code { font: .86em ui-monospace, "SF Mono", Menlo, monospace; overflow-wrap: anywhere; }
+.doc p code, .doc li code, .doc td code {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px;
+}
+.doc kbd { font: 600 .82em ui-monospace, "SF Mono", Menlo, monospace; padding: 1px 6px; border: 1px solid var(--line);
+  border-bottom-width: 2px; border-radius: 5px; background: var(--surface); }
+.doc table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 12px 0; }
+.doc th, .doc td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.doc th { color: var(--muted); font-weight: 600; }
+@media (max-width: 760px) { .doc table { font-size: 14px; } .doc th, .doc td { padding: 6px 6px; } }
+.doc .mods { color: var(--muted); }
+.doc .mods code { overflow-wrap: normal; }
+.doc ul { padding-left: 20px; }
+
+/* The packs, as cards */
+.pack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin: 36px 0 0; }
+.pack-card, .tuto-card {
+  display: flex; flex-direction: column; text-decoration: none; color: var(--text);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+}
+.pack-card:hover, .tuto-card:hover { border-color: var(--accent); }
+.pack-card img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; border-bottom: 1px solid var(--line); background: #000; }
+.pack-card .body, .tuto-card .body { display: flex; flex-direction: column; gap: 6px; padding: 18px 20px 20px; }
+.pack-card strong, .tuto-card strong { font-size: 20px; letter-spacing: -.01em; }
+.pack-card .pitch { color: var(--muted); font-size: 15px; line-height: 1.5; }
+.pack-card .who { font-size: 15px; line-height: 1.5; }
+.pack-card .count, .tuto-card .count { font-size: 13px; font-weight: 600; color: var(--accent); margin-top: auto; padding-top: 6px; }
+.tuto-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); max-width: 860px; }
+.tuto-card img { width: 100%; height: 100%; object-fit: cover; display: block; background: #000; }
+.tuto-card .body span { color: var(--muted); font-size: 15px; line-height: 1.5; }
+@media (max-width: 760px) { .tuto-card { grid-template-columns: 1fr; } .tuto-card img { aspect-ratio: 4 / 3; height: auto; } }
+
+/* A pack */
+.store {
+  display: inline-block; margin: 0 0 16px; padding: 5px 12px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 600;
+}
+.doc .cover { margin: 24px 0; max-width: none; }
+.doc .cover img { display: block; width: 100%; height: auto; border-radius: var(--radius); border: 1px solid var(--line); background: #000; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 24px; margin: 0 0 20px; font-size: 15px; }
+.facts dt { font-weight: 600; color: var(--muted); }
+.facts dd { margin: 0; }
+@media (max-width: 760px) { .facts { grid-template-columns: 1fr; gap: 0; } .facts dd { margin-bottom: 8px; } }
+
+/* A tutorial (its page.html in examples/tutorials/ of base-node-studio) */
+.tuto h2 .n { color: var(--muted); font-weight: 400; }
+.tuto figure { margin: 16px 0; }
+.tuto figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; background: #000; }
+.tuto figcaption { margin-top: 6px; font-size: 14px; color: var(--muted); }
+.tuto .square img, .tuto .square figcaption { max-width: 560px; margin-left: auto; margin-right: auto; }
+.tuto .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.tuto .pair figure { margin: 0; }
+.tuto .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.tuto .cards bn-file { display: block; }
+.tuto .try { margin: 16px 0; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; }
+.tuto .muted { color: var(--muted); }
+.tuto p.file { margin: 20px 0 -4px; font: 13px ui-monospace, "SF Mono", Menlo, monospace; color: var(--muted); }
+.tuto p.file code { background: none; border: 0; padding: 0; }
+.tuto bn-view, .tuto bn-file { display: block; margin: 12px 0; max-width: 100%; }
+
+footer .tm { flex-basis: 100%; margin: 0; font-size: 13px; }

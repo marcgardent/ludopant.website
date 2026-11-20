@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scatter &amp; Biomes — BaseNode Packs — Ludopant</title>
+<meta name="description" content="Scatter &amp; Biomes, a pack of 2 Base Node modules for Blender 5.2+: rule-based scattering and layered biomes for Geometry Nodes.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/scatter/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Scatter &amp; Biomes — BaseNode Packs — Ludopant">
+<meta property="og:description" content="Scatter &amp; Biomes, a pack of 2 Base Node modules for Blender 5.2+: rule-based scattering and layered biomes for Geometry Nodes.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/scatter/">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/img/biomes.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › Scatter &amp; Biomes</p>
+<p class="store">Coming soon on Superhive</p>
+<h1>Scatter &amp; Biomes</h1>
+<p class="lead">Rule-based scattering and layered biomes for Geometry Nodes.</p>
+<p class="cover"><img src="../img/biomes.png" alt="Scatter &amp; Biomes: Rule-based scattering and layered biomes for Geometry Nodes"></p>
+<dl class="facts">
+<dt>For</dt><dd>Environment artists</dd>
+<dt>Modelled on</dt><dd>Unreal PCG, Geo-Scatter</dd>
+<dt>Modules</dt><dd>2</dd>
+<dt>Blender</dt><dd>5.2 and later, tested at each release</dd>
+<dt>Store</dt><dd>Coming soon on Superhive</dd>
+</dl>
+<p>Points on a surface by density with Poisson-disk spacing, kept by slope, altitude, a vertex group, clearance from paths and noise; instances aligned, spun and scaled at random for a seed, smaller at the edge of their mask; layers of trees, bushes, rocks and grass that keep off one another, with level of detail by distance to the camera and view-frustum culling.</p>
+
+<h2>The modules</h2>
+<p>A module is a <code>.bn</code> file of node groups. Once the pack is installed, a graph calls it with <code>use</code>, and Blender builds its groups.</p>
+<table>
+<tr><th>Module</th><th>What it gives</th></tr>
+<tr><td><code>biomes</code></td><td>Biomes of several scatter layers in one graph (trees, bushes, rocks and grass from collections), each with its own density, spacing, slope and altitude rules, kept its radius off the layers before it; level of detail by distance to the camera with a proxy, thinning and culling far away, and view-frustum culling from a camera's own projection or a field of view</td></tr>
+<tr><td><code>scatter</code></td><td>Rule-based scattering on a surface: points by density per square metre with Poisson-disk spacing, weighted by a named attribute or vertex group, kept where the rules allow (slope range, altitude band, clearance from paths, curves or points, noise patches), their mask soft at its edges; instances aligned to the normal or up, spun, tilted and scaled at random for a seed, smaller at the edge of the mask; a later layer kept a radius off an earlier one</td></tr>
+</table>
+
+<h2>Free in Base Node, and what the pack adds</h2>
+<p>Free and open source, on <a href="https://marcgardent.github.io/base-node-language/">the Base Node site</a>: the language, the Blender add-on, the formatter and parsers, and the free modules of the standard library. The pack adds the modules above, their showcase files and this tutorial.</p>
+<table>
+<tr><th>Capability</th><th>Blender's own nodes</th><th>With the pack</th></tr>
+<tr><td>Rule-based scattering and biomes</td><td>Partial</td><td>Covered — Poisson-disk spacing, layers, LOD and frustum culling<br><span class="mods"><code>scatter</code> <code>biomes</code></span></td></tr>
+</table>
+
+<h2>Tutorial</h2>
+<a class="tuto-card" href="../tutorials/forest-edge.html">
+  <img src="../tutorials/img/forest-edge-close.png" alt="" loading="lazy">
+  <span class="body"><strong>Forest edge</strong><span>Scatter a forest edge on a hillside in Blender with the Scatter &amp; Biomes pack: Poisson-disk points, slope, altitude and path rules, glades of noise, varied instances, biome layers that keep off one another, level of detail and view-frustum culling, in .bn.</span><span class="count">7 steps</span></span>
+</a>
+
+<h2>Compared</h2>
+<ul>
+<li><a href="../vs/geo-scatter.html">Base Node VS Geo-Scatter</a></li>
+</ul>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>
