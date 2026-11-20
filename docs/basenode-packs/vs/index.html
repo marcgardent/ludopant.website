@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base Node VS the commercial tools — Ludopant</title>
+<meta name="description" content="Base Node and its packs for Blender compared with Nuke, Substance Designer, Substance Painter, Cinema 4D MoGraph, After Effects, Houdini, Geo-Scatter and Illustrator, with what each tool does better.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/vs/">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Base Node VS the commercial tools">
+<meta property="og:description" content="Base Node and its packs for Blender compared with Nuke, Substance Designer, Substance Painter, Cinema 4D MoGraph, After Effects, Houdini, Geo-Scatter and Illustrator, with what each tool does better.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/vs/">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/vs/img/nuke.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Base Node VS the commercial tools">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Base Node VS the commercial tools">
+<meta name="twitter:description" content="Base Node and its packs for Blender compared with Nuke, Substance Designer, Substance Painter, Cinema 4D MoGraph, After Effects, Houdini, Geo-Scatter and Illustrator, with what each tool does better.">
+<meta name="twitter:image" content="https://ludopant.com/basenode-packs/vs/img/nuke.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Base Node VS the commercial tools",
+  "description": "Base Node and its packs for Blender compared with Nuke, Substance Designer, Substance Painter, Cinema 4D MoGraph, After Effects, Houdini, Geo-Scatter and Illustrator, with what each tool does better.",
+  "url": "https://ludopant.com/basenode-packs/vs/",
+  "inLanguage": "en",
+  "dateModified": "2026-11-20",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ludopant",
+    "url": "https://ludopant.com/"
+  },
+  "hasPart": [
+    {
+      "@type": "TechArticle",
+      "headline": "Base Node VS Nuke",
+      "url": "https://ludopant.com/basenode-packs/vs/nuke.html"
+    },
+    {
+      "@type": "TechArticle",
+      "headline": "Base Node VS Substance Designer",
+      "url": "https://ludopant.com/basenode-packs/vs/substance-designer.html"
+    },
+    {
+      "@type": "TechArticle",
+      "headline": "Base Node VS Substance Painter",
+      "url": "https://ludopant.com/basenode-packs/vs/substance-painter.html"
+    },
+    {
+      "@type": "TechArticle",
+      "headline": "Base Node VS Cinema 4D MoGraph",
+      "url": "https://ludopant.com/basenode-packs/vs/cinema-4d-mograph.html"
+    },
+    {
+      "@type": "TechArticle",
+      "headline": "Base Node VS After Effects",
+      "url": "https://ludopant.com/basenode-packs/vs/after-effects.html"
+    },
+    {
+      "@type": "TechArticle",
+      "headline": "Base Node VS Houdini",
+      "url": "https://ludopant.com/basenode-packs/vs/houdini.html"
+    },
+    {
+      "@type": "TechArticle",
+      "headline": "Base Node VS Geo-Scatter",
+      "url": "https://ludopant.com/basenode-packs/vs/geo-scatter.html"
+    },
+    {
+      "@type": "TechArticle",
+      "headline": "Base Node VS Illustrator",
+      "url": "https://ludopant.com/basenode-packs/vs/illustrator.html"
+    }
+  ]
+}
+</script>
+<style>
+.doc { padding: 40px 0 80px; }
+.doc .wrap { max-width: 980px; }
+.doc .crumb { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
+.doc .crumb a { color: var(--muted); }
+.doc h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 24px; }
+.doc h2 { font-size: 28px; letter-spacing: -.01em; margin: 56px 0 12px; line-height: 1.2; }
+.doc p, .doc li { max-width: 72ch; }
+.doc code { font: .88em ui-monospace, "SF Mono", Menlo, monospace; }
+.doc .lead { font-size: 19px; color: var(--muted); }
+.doc .cover { margin: 0 0 32px; }
+.doc .cover img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); }
+.vs-table table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.vs-table th, .vs-table td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.vs-table thead th { color: var(--muted); font-weight: 600; font-size: 14px; }
+.vs-table tbody th { font-weight: 600; width: 20%; }
+.cite { font-size: 11px; margin-left: 2px; color: var(--muted); }
+.cite a { color: var(--muted); text-decoration: none; }
+.mods { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.mod { font-size: 13px; border: 1px solid var(--line); border-radius: 6px; padding: 1px 7px; background: var(--surface); white-space: nowrap; }
+.mod .pk { color: var(--muted); }
+.st { display: inline-block; font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.st-covered { background: var(--ready-soft); color: var(--ready); }
+.st-partial { background: var(--accent-soft); color: var(--accent); }
+.st-not-covered { border: 1px solid var(--line); color: var(--muted); }
+.ahead li, .choose li { margin-bottom: 8px; }
+.choose { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 0; list-style: none; }
+.choose li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; margin: 0; max-width: none; }
+.choose h3 { margin: 0 0 6px; font-size: 18px; }
+.choose p { margin: 0; color: var(--muted); }
+.packs { list-style: none; padding: 0; }
+.packs li { border-top: 1px solid var(--line); padding: 14px 0; display: grid; gap: 2px; }
+.packs .pack-name { font-weight: 600; font-size: 18px; text-decoration: none; }
+.packs .pack-name:hover { color: var(--accent); }
+.packs .tagline { color: var(--muted); }
+.packs .meta { font-size: 14px; color: var(--muted); }
+.sources { font-size: 14px; color: var(--muted); padding-left: 24px; }
+.sources li { overflow-wrap: anywhere; margin-bottom: 4px; }
+.tm { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; margin-top: 48px; }
+.tools { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.tools li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; max-width: none; }
+.tools a.card { display: block; text-decoration: none; color: inherit; }
+.tools img { display: block; width: 100%; height: auto; }
+.tools .body { padding: 16px 20px 20px; }
+.tools h2 { font-size: 21px; margin: 0 0 6px; }
+.tools p { margin: 0 0 8px; color: var(--muted); font-size: 15px; }
+@media (max-width: 760px) {
+  .choose, .tools { grid-template-columns: 1fr; }
+  .vs-table thead { display: none; }
+  .vs-table table, .vs-table tbody, .vs-table tr, .vs-table th, .vs-table td { display: block; width: auto; }
+  .vs-table tr { border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .vs-table tbody th { width: auto; border: 0; padding: 0 0 6px; font-size: 16px; }
+  .vs-table td { border: 0; padding: 4px 0; }
+  .vs-table td::before { content: attr(data-label); display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .vs-table td[data-label="Status"]::before { display: none; }
+}
+</style>
+</head>
+<body>
+<!-- Generated by base-node-studio studio/ludopant_vs.py from studio/market/vs.toml: edit that, not this. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">Base Node Packs</a> › VS</p>
+<h1>Base Node VS the commercial tools</h1>
+<p class="lead">Each pack of Base Node follows a commercial tool. These pages put them side by side: what the tool does, how Base Node does it inside Blender, and where the tool is ahead.</p>
+<ul class="tools">
+<li><a class="card" href="nuke.html"><img src="img/nuke.webp" alt="Base Node VS Nuke" width="1200" height="630" loading="lazy"><div class="body"><h2>Base Node VS Nuke</h2><p>Foundry · answered by Compositing Pro, Motion Compositing</p><p>7 covered, 5 partial, 2 not covered</p></div></a></li>
+<li><a class="card" href="substance-designer.html"><img src="img/substance-designer.webp" alt="Base Node VS Substance Designer" width="1200" height="630" loading="lazy"><div class="body"><h2>Base Node VS Substance Designer</h2><p>Adobe · answered by Texture Lab, Smart Materials</p><p>5 covered, 3 partial, 1 not covered</p></div></a></li>
+<li><a class="card" href="substance-painter.html"><img src="img/substance-painter.webp" alt="Base Node VS Substance Painter" width="1200" height="630" loading="lazy"><div class="body"><h2>Base Node VS Substance Painter</h2><p>Adobe · answered by Material Layers, Smart Materials</p><p>2 covered, 3 partial, 2 not covered</p></div></a></li>
+<li><a class="card" href="cinema-4d-mograph.html"><img src="img/cinema-4d-mograph.webp" alt="Base Node VS Cinema 4D MoGraph" width="1200" height="630" loading="lazy"><div class="body"><h2>Base Node VS Cinema 4D MoGraph</h2><p>Maxon · answered by Motion Graphics</p><p>2 covered, 3 partial, 1 not covered</p></div></a></li>
+<li><a class="card" href="after-effects.html"><img src="img/after-effects.webp" alt="Base Node VS After Effects" width="1200" height="630" loading="lazy"><div class="body"><h2>Base Node VS After Effects</h2><p>Adobe · answered by Motion Design 2D, Motion Compositing</p><p>5 covered, 1 partial, 1 not covered</p></div></a></li>
+<li><a class="card" href="houdini.html"><img src="img/houdini.webp" alt="Base Node VS Houdini" width="1200" height="630" loading="lazy"><div class="body"><h2>Base Node VS Houdini</h2><p>SideFX · answered by Procedural Toolkit, Game Art Tools, Modeling Tools</p><p>8 covered, 2 partial, 2 not covered</p></div></a></li>
+<li><a class="card" href="geo-scatter.html"><img src="img/geo-scatter.webp" alt="Base Node VS Geo-Scatter" width="1200" height="630" loading="lazy"><div class="body"><h2>Base Node VS Geo-Scatter</h2><p>BD3D Digital Design · answered by Scatter &amp; Biomes</p><p>1 covered, 4 partial, 0 not covered</p></div></a></li>
+<li><a class="card" href="illustrator.html"><img src="img/illustrator.webp" alt="Base Node VS Illustrator" width="1200" height="630" loading="lazy"><div class="body"><h2>Base Node VS Illustrator</h2><p>Adobe · answered by Ink &amp; Engraving</p><p>5 covered, 2 partial, 1 not covered</p></div></a></li>
+</ul>
+<p class="tm">Trademarks of their owners: Nuke, NukeX, Nuke Studio of Foundry; Adobe Substance 3D Designer of Adobe; Adobe Substance 3D Painter of Adobe; Cinema 4D (MoGraph) of Maxon; Adobe After Effects of Adobe; Houdini of SideFX; Geo-Scatter of BD3D Digital Design; Adobe Illustrator of Adobe. Ludopant and Base Node are not affiliated with or endorsed by them.</p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

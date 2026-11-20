@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base Node VS Cinema 4D MoGraph — Ludopant</title>
+<meta name="description" content="Cinema 4D MoGraph compared with Base Node and its packs for Blender: what Cinema 4D MoGraph does, how Base Node does it, and where Cinema 4D MoGraph is ahead.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/vs/cinema-4d-mograph.html">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Base Node VS Cinema 4D MoGraph">
+<meta property="og:description" content="Cinema 4D MoGraph compared with Base Node and its packs for Blender: what Cinema 4D MoGraph does, how Base Node does it, and where Cinema 4D MoGraph is ahead.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/vs/cinema-4d-mograph.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/vs/img/cinema-4d-mograph.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Base Node VS Cinema 4D MoGraph">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Base Node VS Cinema 4D MoGraph">
+<meta name="twitter:description" content="Cinema 4D MoGraph compared with Base Node and its packs for Blender: what Cinema 4D MoGraph does, how Base Node does it, and where Cinema 4D MoGraph is ahead.">
+<meta name="twitter:image" content="https://ludopant.com/basenode-packs/vs/img/cinema-4d-mograph.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Base Node VS Cinema 4D MoGraph",
+  "description": "Cinema 4D MoGraph compared with Base Node and its packs for Blender: what Cinema 4D MoGraph does, how Base Node does it, and where Cinema 4D MoGraph is ahead.",
+  "url": "https://ludopant.com/basenode-packs/vs/cinema-4d-mograph.html",
+  "mainEntityOfPage": "https://ludopant.com/basenode-packs/vs/cinema-4d-mograph.html",
+  "image": "https://ludopant.com/basenode-packs/vs/img/cinema-4d-mograph.png",
+  "inLanguage": "en",
+  "dateModified": "2026-11-20",
+  "author": {
+    "@type": "Organization",
+    "name": "Ludopant",
+    "url": "https://ludopant.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ludopant",
+    "url": "https://ludopant.com/"
+  },
+  "about": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Cinema 4D (MoGraph)",
+      "author": {
+        "@type": "Organization",
+        "name": "Maxon"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Base Node",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Blender"
+    }
+  ],
+  "citation": [
+    "https://www.maxon.net/en/cinema-4d",
+    "https://help.maxon.net/c4d/en-us/Content/html/7439.html",
+    "https://developers.maxon.net/docs/py/2025_1_0/modules/c4d.storage/HyperFile/index.html",
+    "https://help.maxon.net/c4d/en-us/Content/html/Introduction_Scene_Nodes.html",
+    "https://help.maxon.net/c4d/en-us/Content/html/OMOGRAPH_CLONER-ID_OBJECTPROPERTIES.html",
+    "https://help.maxon.net/c4d/en-us/Content/html/7443.html",
+    "https://help.maxon.net/c4d/en-us/Content/html/58091.html",
+    "https://www.maxon.net/en/cinema-4d/features/fields-system",
+    "https://help.maxon.net/c4d/2025/en-us/Content/html/42854.html",
+    "https://help.maxon.net/c4d/r25/en-us/Content/html/OESOUND.html",
+    "https://help.maxon.net/c4d/en-us/Content/html/FSOUND.html",
+    "https://help.maxon.net/c4d/en-us/Content/html/OMOGRAPH_FRACTUREVORONOI.html"
+  ]
+}
+</script>
+<style>
+.doc { padding: 40px 0 80px; }
+.doc .wrap { max-width: 980px; }
+.doc .crumb { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
+.doc .crumb a { color: var(--muted); }
+.doc h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 24px; }
+.doc h2 { font-size: 28px; letter-spacing: -.01em; margin: 56px 0 12px; line-height: 1.2; }
+.doc p, .doc li { max-width: 72ch; }
+.doc code { font: .88em ui-monospace, "SF Mono", Menlo, monospace; }
+.doc .lead { font-size: 19px; color: var(--muted); }
+.doc .cover { margin: 0 0 32px; }
+.doc .cover img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); }
+.vs-table table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.vs-table th, .vs-table td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.vs-table thead th { color: var(--muted); font-weight: 600; font-size: 14px; }
+.vs-table tbody th { font-weight: 600; width: 20%; }
+.cite { font-size: 11px; margin-left: 2px; color: var(--muted); }
+.cite a { color: var(--muted); text-decoration: none; }
+.mods { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.mod { font-size: 13px; border: 1px solid var(--line); border-radius: 6px; padding: 1px 7px; background: var(--surface); white-space: nowrap; }
+.mod .pk { color: var(--muted); }
+.st { display: inline-block; font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.st-covered { background: var(--ready-soft); color: var(--ready); }
+.st-partial { background: var(--accent-soft); color: var(--accent); }
+.st-not-covered { border: 1px solid var(--line); color: var(--muted); }
+.ahead li, .choose li { margin-bottom: 8px; }
+.choose { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 0; list-style: none; }
+.choose li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; margin: 0; max-width: none; }
+.choose h3 { margin: 0 0 6px; font-size: 18px; }
+.choose p { margin: 0; color: var(--muted); }
+.packs { list-style: none; padding: 0; }
+.packs li { border-top: 1px solid var(--line); padding: 14px 0; display: grid; gap: 2px; }
+.packs .pack-name { font-weight: 600; font-size: 18px; text-decoration: none; }
+.packs .pack-name:hover { color: var(--accent); }
+.packs .tagline { color: var(--muted); }
+.packs .meta { font-size: 14px; color: var(--muted); }
+.sources { font-size: 14px; color: var(--muted); padding-left: 24px; }
+.sources li { overflow-wrap: anywhere; margin-bottom: 4px; }
+.tm { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; margin-top: 48px; }
+.tools { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.tools li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; max-width: none; }
+.tools a.card { display: block; text-decoration: none; color: inherit; }
+.tools img { display: block; width: 100%; height: auto; }
+.tools .body { padding: 16px 20px 20px; }
+.tools h2 { font-size: 21px; margin: 0 0 6px; }
+.tools p { margin: 0 0 8px; color: var(--muted); font-size: 15px; }
+@media (max-width: 760px) {
+  .choose, .tools { grid-template-columns: 1fr; }
+  .vs-table thead { display: none; }
+  .vs-table table, .vs-table tbody, .vs-table tr, .vs-table th, .vs-table td { display: block; width: auto; }
+  .vs-table tr { border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .vs-table tbody th { width: auto; border: 0; padding: 0 0 6px; font-size: 16px; }
+  .vs-table td { border: 0; padding: 4px 0; }
+  .vs-table td::before { content: attr(data-label); display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .vs-table td[data-label="Status"]::before { display: none; }
+}
+</style>
+</head>
+<body>
+<!-- Generated by base-node-studio studio/ludopant_vs.py from studio/market/vs.toml: edit that, not this. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">Base Node Packs</a> › <a href="./">VS</a> › Cinema 4D MoGraph</p>
+<h1>Base Node VS Cinema 4D MoGraph</h1>
+<p class="cover"><img src="img/cinema-4d-mograph.webp" alt="Base Node VS Cinema 4D MoGraph" width="1200" height="630"></p>
+
+<p class="lead"><strong>Cinema 4D (MoGraph)</strong>, by Maxon. Cinema 4D is a 3D application; MoGraph is its procedural motion design toolset of cloners, effectors and fields. It is sold by subscription, alone or in Maxon One.<sup class="cite">[<a href="#src-1">1</a>,<a href="#src-2">2</a>]</sup></p>
+<p>Base Node is a text language for Blender's node trees, with a free add-on and paid packs of tested node groups. MoGraph lives in a separate 3D application, with objects, tags and a fields list you set in panels. Base Node follows the same model in Blender's Geometry Nodes: a cloner pipes into effectors, each weighed by falloffs, as in <code>Cube() |&gt; grid_cloner() |&gt; random_effector()</code>. The pack Motion Graphics holds the cloners, effectors and falloffs.</p>
+<p>Of the 6 capabilities below, Base Node covers 2, covers 3 in part and does not cover 1. The Cinema 4D MoGraph side of each row was checked on Maxon's pages on 2026-11-20; the numbers link to them.</p>
+
+<h2 id="comparison">What Cinema 4D MoGraph does, and how Base Node does it</h2>
+<div class="vs-table"><table>
+<thead><tr><th scope="col">What Cinema 4D MoGraph does</th><th scope="col">Cinema 4D MoGraph</th><th scope="col">Base Node + pack</th><th scope="col">Status</th></tr></thead>
+<tbody>
+<tr><th scope="row">The scene as text</th><td data-label="Cinema 4D MoGraph">Scenes are <code>.c4d</code> files, read and written through the SDK's HyperFile class. Scene Nodes is Cinema 4D's node system.<sup class="cite">[<a href="#src-3">3</a>,<a href="#src-4">4</a>]</sup></td><td data-label="Base Node">The node tree is a <code>.bn</code> text file that the add-on reads into Blender and writes back.</td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Cloners</th><td data-label="Cinema 4D MoGraph">The Cloner has Object, Linear, Radial, Grid and Honeycomb modes.<sup class="cite">[<a href="#src-5">5</a>]</sup></td><td data-label="Base Node">Linear, radial, grid (rows and layers), curve and object cloners (points, faces or surface), picking the clone whole, in turn or at random. No honeycomb mode.<p class="mods"><span class="mod"><code>cloners</code> <a class="pk" href="../motion-graphics/">Motion Graphics</a></span></p></td><td data-label="Status"><span class="st st-covered">Covered</span></td></tr>
+<tr><th scope="row">Effectors</th><td data-label="Cinema 4D MoGraph">Plain, Random, Shader, Step, Delay, Formula, Time, Target, Sound, Spline, Inheritance, Group, Volume, Push Apart and ReEffector.<sup class="cite">[<a href="#src-6">6</a>]</sup></td><td data-label="Base Node">Plain, random, step, noise, oscillate, time, delay and spring. No shader, formula, target, sound, spline, inheritance, volume or push apart effector.<p class="mods"><span class="mod"><code>effectors</code> <a class="pk" href="../motion-graphics/">Motion Graphics</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Fields and falloffs</th><td data-label="Cinema 4D MoGraph">Fields such as Spherical, Box, Linear, Radial, Random, Formula, Torus and Sound, stacked as layers that blend.<sup class="cite">[<a href="#src-7">7</a>,<a href="#src-8">8</a>]</sup></td><td data-label="Base Node">Spherical, box, linear and radial falloffs, softened by a smoothstep, inverted, and combined by maximum, minimum, multiply, add or subtract. No random, formula or sound field, no modifier layers.<p class="mods"><span class="mod"><code>falloffs</code> <a class="pk" href="../motion-graphics/">Motion Graphics</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Text, fracture and tracer objects</th><td data-label="Cinema 4D MoGraph">MoGraph includes the Text object, Voronoi Fracture, MoSpline, Tracer, MoExtrude and PolyFX.<sup class="cite">[<a href="#src-2">2</a>]</sup></td><td data-label="Base Node">Text animated per character, word or line; Voronoi fracture of a closed mesh; motion trails through where points went. No MoSpline, MoExtrude or PolyFX.<p class="mods"><span class="mod"><code>text_animate</code> <a class="pk" href="../motion-design/">Motion Design 2D</a></span> <span class="mod"><code>fracture</code> <a class="pk" href="../procedural/">Procedural Toolkit</a></span> <span class="mod"><code>echoes</code> <a class="pk" href="../motion-design/">Motion Design 2D</a></span></p></td><td data-label="Status"><span class="st st-partial">Partial</span></td></tr>
+<tr><th scope="row">Clones as rigid bodies</th><td data-label="Cinema 4D MoGraph">A Dynamics Body tag on a Cloner makes each clone a rigid body.<sup class="cite">[<a href="#src-9">9</a>]</sup></td><td data-label="Base Node">No rigid bodies on clones. Delay and spring effectors lag behind by a simulation zone.</td><td data-label="Status"><span class="st st-not-covered">Not covered</span></td></tr>
+</tbody>
+</table></div>
+
+<h2 id="ahead">Where Cinema 4D MoGraph is ahead</h2>
+<ul class="ahead">
+<li>The Sound Effector and Sound Field drive clones from frequency ranges of an audio file.<sup class="cite">[<a href="#src-10">10</a>,<a href="#src-11">11</a>]</sup></li>
+<li>Voronoi Fracture splits a mesh from points of polygons, splines, particles or textures.<sup class="cite">[<a href="#src-12">12</a>]</sup></li>
+<li>One Dynamics Body tag turns every clone into a rigid body.<sup class="cite">[<a href="#src-9">9</a>]</sup></li>
+<li>Fields stack as layers in a list, with modifier layers such as Decay, Quantize and Freeze.<sup class="cite">[<a href="#src-8">8</a>]</sup></li>
+<li>Redshift comes with every Cinema 4D subscription.<sup class="cite">[<a href="#src-1">1</a>]</sup></li>
+</ul>
+
+<h2 id="choose">When to choose which</h2>
+<ul class="choose">
+<li><h3>Choose Cinema 4D MoGraph when</h3><p>You want a mature motion design application: Fields layers, Sound and Shader effectors, Voronoi Fracture, MoGraph dynamics and Redshift in one place.</p></li>
+<li><h3>Choose Base Node when</h3><p>You already work in Blender and want the cloner and effector workflow there, as Geometry Nodes you can read, version and render with Cycles or EEVEE.</p></li>
+</ul>
+
+<h2 id="packs">The packs</h2>
+<ul class="packs">
+<li><a class="pack-name" href="../motion-graphics/">Motion Graphics</a><span class="tagline">Cloners, effectors and falloffs for motion design in Geometry Nodes.</span><span class="meta"><a href="../motion-graphics/">The pack</a> · <a href="../tutorials/clone-wall.html">Tutorial: The clone wall</a> · Coming soon on Superhive</span></li>
+<li><a class="pack-name" href="../motion-design/">Motion Design 2D</a><span class="tagline">2D particles, text animators and time echoes for motion design in Geometry Nodes.</span><span class="meta"><a href="../motion-design/">The pack</a> · <a href="../tutorials/title-sequence.html">Tutorial: A title sequence</a> · Coming soon on Superhive</span></li>
+<li><a class="pack-name" href="../procedural/">Procedural Toolkit</a><span class="tagline">Terrains, Voronoi fracture and L-system trees in Geometry Nodes.</span><span class="meta"><a href="../procedural/">The pack</a> · <a href="../tutorials/valley.html">Tutorial: The valley</a> · Coming soon on Superhive</span></li>
+</ul>
+
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li id="src-1"><a href="https://www.maxon.net/en/cinema-4d">https://www.maxon.net/en/cinema-4d</a></li>
+<li id="src-2"><a href="https://help.maxon.net/c4d/en-us/Content/html/7439.html">https://help.maxon.net/c4d/en-us/Content/html/7439.html</a></li>
+<li id="src-3"><a href="https://developers.maxon.net/docs/py/2025_1_0/modules/c4d.storage/HyperFile/index.html">https://developers.maxon.net/docs/py/2025_1_0/modules/c4d.storage/HyperFile/index.html</a></li>
+<li id="src-4"><a href="https://help.maxon.net/c4d/en-us/Content/html/Introduction_Scene_Nodes.html">https://help.maxon.net/c4d/en-us/Content/html/Introduction_Scene_Nodes.html</a></li>
+<li id="src-5"><a href="https://help.maxon.net/c4d/en-us/Content/html/OMOGRAPH_CLONER-ID_OBJECTPROPERTIES.html">https://help.maxon.net/c4d/en-us/Content/html/OMOGRAPH_CLONER-ID_OBJECTPROPERTIES.html</a></li>
+<li id="src-6"><a href="https://help.maxon.net/c4d/en-us/Content/html/7443.html">https://help.maxon.net/c4d/en-us/Content/html/7443.html</a></li>
+<li id="src-7"><a href="https://help.maxon.net/c4d/en-us/Content/html/58091.html">https://help.maxon.net/c4d/en-us/Content/html/58091.html</a></li>
+<li id="src-8"><a href="https://www.maxon.net/en/cinema-4d/features/fields-system">https://www.maxon.net/en/cinema-4d/features/fields-system</a></li>
+<li id="src-9"><a href="https://help.maxon.net/c4d/2025/en-us/Content/html/42854.html">https://help.maxon.net/c4d/2025/en-us/Content/html/42854.html</a></li>
+<li id="src-10"><a href="https://help.maxon.net/c4d/r25/en-us/Content/html/OESOUND.html">https://help.maxon.net/c4d/r25/en-us/Content/html/OESOUND.html</a></li>
+<li id="src-11"><a href="https://help.maxon.net/c4d/en-us/Content/html/FSOUND.html">https://help.maxon.net/c4d/en-us/Content/html/FSOUND.html</a></li>
+<li id="src-12"><a href="https://help.maxon.net/c4d/en-us/Content/html/OMOGRAPH_FRACTUREVORONOI.html">https://help.maxon.net/c4d/en-us/Content/html/OMOGRAPH_FRACTUREVORONOI.html</a></li>
+</ol>
+
+<p class="tm">Cinema 4D (MoGraph) is a trademark of Maxon, or of its owner. Other product names are trademarks of their owners. Ludopant and Base Node are not affiliated with or endorsed by them; the names are used only to compare. <a href="./">All comparisons</a>.</p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
