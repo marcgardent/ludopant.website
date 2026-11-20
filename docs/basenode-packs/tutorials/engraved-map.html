@@ -1,0 +1,3546 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engraved map — Ink &amp; Engraving tutorial — Ludopant</title>
+<meta name="description" content="Draw an old engraved relief map of a small valley in Blender, step by step: contour lines, Lehmann hachures, cross-hatching, a guilloché border and living ink, as Grease Pencil strokes, in .bn.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/tutorials/engraved-map.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Engraved map — Ink &amp; Engraving tutorial — Ludopant">
+<meta property="og:description" content="Draw an old engraved relief map of a small valley in Blender, step by step: contour lines, Lehmann hachures, cross-hatching, a guilloché border and living ink, as Grease Pencil strokes, in .bn.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/tutorials/engraved-map.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/engraved-map-step7.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-view.js"></script>
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-file.js"></script>
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs tuto">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › <a href="../ink-engraving/">Ink &amp; Engraving</a> › Tutorial: Engraved map</p>
+<h1>Engraved map</h1>
+    <p class="lead">
+      An old engraved map of a small valley: a river in a gorge, two summits, a path, a border and a title.
+      Every mark on it is a line of ink, and every line comes from one function, the height of the ground.
+      The map is drawn as Grease Pencil strokes, and at the end it draws itself.
+    </p>
+    <figure>
+      <img src="img/engraved-map-step7.png" width="1000" height="750" alt="An engraved map on cream paper: two summits ringed by contour lines and short slope strokes, a dark cross-hatched north bank, a black river, a dashed path with an arrow, a braided border and a cartouche titled The Little Valley">
+      <figcaption>Where we are going. Seven steps, each one a few lines more.</figcaption>
+    </figure>
+
+    <h2 id="learn">You will learn</h2>
+    <ul>
+      <li><strong>The craft.</strong> How an engraver shows relief with lines only: contours for the height, Lehmann's hachures for the slope, cross-hatching for the shade, and why each one says something the others do not.</li>
+      <li><strong>The language.</strong> One <code>.bn</code> file that grows a little at each step: small graphs that call each other, pipes (<code>|&gt;</code>) that pass a geometry from one node to the next, a <code>repeat</code> zone, and modules brought in with <code>use</code>. Compare two steps: the new lines are the step.</li>
+    </ul>
+
+    <h2 id="before">Before you start</h2>
+    <p>
+      You need three things:
+    </p>
+    <ul>
+      <li>Blender 5.</li>
+      <li>The <a href="https://marcgardent.github.io/base-node-language/#blender">Base Node add-on</a>, version 0.13.1 or later.</li>
+      <li>The <a href="../ink-engraving/"><strong>Ink &amp; Engraving</strong></a> pack, sold by the author of Base Node apart from the open source project. It carries the three modules this tutorial uses. The steps on this page are free to read, copy and change; the modules they call are not.</li>
+    </ul>
+    <table>
+      <tr><th>Module</th><th>Pack</th><th>What it gives</th></tr>
+      <tr><td><code>hachures2d</code></td><td>Ink &amp; Engraving</td><td>Lehmann slope hachures, engraving cross-hatching (<code>hatch_cross</code>), guilloché curves, halftone dots.</td></tr>
+      <tr><td><code>deform2d</code></td><td>Ink &amp; Engraving</td><td>A pattern bent along a curve (<code>flow_along_curve</code>), ribbons, arrowheads.</td></tr>
+      <tr><td><code>ink2d</code></td><td>Ink &amp; Engraving</td><td>Living ink: tapered ends, wobble, bleed, and strokes that write themselves on.</td></tr>
+      <tr><td><code>sdf2d</code>, <code>curves2d</code></td><td>free, in the add-on</td><td>A distance to a segment, for a side stream; a wave along a curve, for the border.</td></tr>
+    </table>
+    <p>
+      This is not a first tutorial. If Geometry Nodes or <code>.bn</code> are new to you, start with <a href="https://marcgardent.github.io/base-node-language/tutorials/lunar-ground.html">Lunar ground</a>: it explains a height made from a function, <code>SetPosition</code>, <code>CombineXYZ</code> and the way a step file is read.
+    </p>
+    <p>
+      Every block below is a complete <code>.bn</code> file, its code beside the nodes it builds. It opens on the graph the step adds or changes; the others are in the menu at the top of the block. Two ways to try a step:
+    </p>
+    <ul>
+      <li><strong>Drag it.</strong> Drag the file icon of its block, or its title, onto empty space in Blender's 3D Viewport, and keep <em>Instantiate the Example</em>: a new object carries <code>engraved_map</code> at the 3D cursor. A click on the file icon downloads the file instead.</li>
+      <li><strong>Paste it.</strong> Press the copy button of its block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>, on any mesh object: the graph draws its own map and ignores the mesh it is given.</li>
+    </ul>
+    <p>
+      Look at the map from above (<kbd>Numpad 7</kbd>), in <em>Material Preview</em>. The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/engraved_map/render.py"><code>render.py</code></a>, which adds a sheet of paper under the map and an orthographic camera straight above it.
+    </p>
+
+    <h2 id="idea">One height, three readings</h2>
+    <p>
+      An engraver has no grey: only black lines on white paper. To show a valley, they read the ground in three ways, and each reading becomes lines of its own:
+    </p>
+    <ul>
+      <li><strong>The height</strong>: contour lines, one per level, like the waterline of a rising flood.</li>
+      <li><strong>The slope</strong>: hachures, short strokes that run downhill. Steep ground gets thick, close strokes; flat ground stays white.</li>
+      <li><strong>The light</strong>: hatching on the slopes that turn away from a light in the north-west, crossed where the shade is deepest.</li>
+    </ul>
+    <p>
+      In the file, these three are one function and its gradient. <code>valley_height</code> gives the height at any point; <code>valley_slope</code> measures how it changes. Contours, hachures and shade all call them, so they always agree.
+    </p>
+
+    <h2 id="step-1"><span class="n">1.</span> A valley and its contour lines</h2>
+    <p>
+      The ground is a function, not a mesh: <code>valley_height(p)</code> is the height at the point <code>p</code> of the map. It adds a few simple shapes:
+    </p>
+    <ul>
+      <li><strong>A gorge</strong> along <code>river_course</code>: <code>d</code> is how far north of the river <code>p</code> is. <code>1 - exp(-d²·8)</code> is 0 on the river and climbs fast to 1: steep walls, then gentle shoulders.</li>
+      <li><strong>Two summits</strong>, each a <code>summit</code>: a round hill, high at its centre.</li>
+      <li><strong>A side stream</strong>: <code>sdf_segment_2d</code> gives the distance to a segment; the ground sinks near it.</li>
+      <li><strong>Some noise</strong>, faded out on the floor of the gorge, so that the river has a flat bed to run in (step 5).</li>
+    </ul>
+    <p class="file">step1_contours.bn: <code>contours</code>, <code>valley_height</code>, <code>valley_slope</code>, <code>river_course</code>, <code>summit</code>, <code>ink</code>, <code>engraved_map</code></p>
+    <bn-view graph="contours" height="480"><script type="text/bn">
+// @module engraved_map_step1
+// @title Engraved map, step 1: a valley and its contour lines
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  return contours()
+    |> ink()
+}
+</script></bn-view>
+    <p>
+      <code>contours</code> draws one level per turn of a <code>repeat</code> zone. At each turn it takes a grid, deletes the faces below the level, and keeps the edges that are left with one face only: the border of the high ground, which is the contour.
+      Those edges follow the grid, in small stairs. One step of Newton's method moves each point onto the exact level: down the slope by <code>(height − level) / slope²</code>. That is what <code>valley_slope</code> is for here; the next steps use it again.
+    </p>
+    <p>
+      <code>ink</code> turns the curves into Grease Pencil strokes and gives them their colour. Their width is the curve's radius: every fifth contour, the <em>index contour</em>, is twice as thick, so the eye can count the levels.
+      Mind <code>instances_as_layers: false</code>: with <code>true</code>, <code>CurvesToGreasePencil</code> makes a layer per instance, and plain curves give nothing at all.
+    </p>
+    <figure>
+      <img src="img/engraved-map-step1.png" width="1000" height="750" loading="lazy" alt="Contour lines on paper: rings around two summits, bands along a valley, a side valley coming in from the top">
+      <figcaption>Step 1. Sixteen levels, 0.1 apart. Where the lines crowd, the ground is steep.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> on the <code>contours</code> node, set <code>interval</code> to 0.05 and <code>levels</code> to 32: twice as many lines, the same ground.</p>
+
+    <h2 id="step-2"><span class="n">2.</span> Lehmann's hachures</h2>
+    <p>
+      Contours tell the height, but the eye reads them slowly. In 1799 Johann Georg Lehmann gave the slope its own sign: short strokes that run straight downhill, as water would.
+      His rule: the steeper the ground, the thicker the stroke and the darker the slope. Flat ground stays white; a slope of 45° is nearly black.
+    </p>
+    <p class="file">step2_hachures.bn: <code>hachures</code>, <code>engraved_map</code>, <code>Ink</code></p>
+    <bn-view graph="hachures" height="480"><script type="text/bn">
+// @module engraved_map_step2
+// @title Engraved map, step 2: Lehmann hachures
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use hachures2d (lehmann_hachures)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  lines = contours()
+  return ink(lines) + hachures(lines)
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>Where.</strong> The strokes start on the contours, every <code>spacing</code> along them: <code>ResampleCurve</code> puts a point there. They fill the band down to the next contour, as on the old maps.</li>
+      <li><strong>Which way.</strong> <code>valley_slope</code> points uphill; downhill is its opposite. <code>atan2</code> turns it into an angle for the rotation of each stroke.</li>
+      <li><strong>How long.</strong> The next contour is <code>interval</code> lower, so it is <code>interval / steep</code> away. Each stroke covers 80 % of that and leaves a thin gap.</li>
+      <li><strong>How thick.</strong> <code>lehmann_hachures</code> makes one stroke, along X, one unit long. <code>InstanceOnPoints</code> scales it to its length along X and to <code>steep / steepest</code> across. Below <code>flat</code>, no stroke at all.</li>
+    </ol>
+    <p>
+      The strokes are flat meshes, not curves, so they cannot be Grease Pencil strokes. <code>Ink</code> is their material: an emission of the strokes' colour, unlit like a print.
+    </p>
+    <figure>
+      <img src="img/engraved-map-step2.png" width="1000" height="750" loading="lazy" alt="The contour map with short strokes between the contours, dark and thick in the gorge and on the summits, absent on the flat valley floor">
+      <figcaption>Step 2. The gorge and the summits come out dark; the plateaus and the valley floor stay white.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> set <code>steepest</code> of <code>hachures</code> to 1.0: every slope steeper than 1 is drawn at full weight, and the map darkens.</p>
+
+    <h2 id="step-3"><span class="n">3.</span> Cross-hatching in the shade</h2>
+    <p>
+      Hachures show how steep a slope is, not which way it faces. Light does that: on maps it comes from the north-west, the top left, by convention.
+      <code>shade</code> compares the ground's normal with that light: 0 on the flat and the lit slopes, up to 1 on the slopes that turn away.
+    </p>
+    <p class="file">step3_shade.bn: <code>cross_hatching</code>, <code>shade</code>, <code>ruling</code>, <code>engrave</code>, <code>engraved_map</code></p>
+    <bn-view graph="cross_hatching" height="480"><script type="text/bn">
+// @module engraved_map_step3
+// @title Engraved map, step 3: cross-hatching in the shade
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use hachures2d (hatch_cross, lehmann_hachures)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph shade(
+    p: Vector = Position(),
+    light: Vector = (-1.0, 1.0, 1.2),
+    flat: Float = 0.55
+) -> Float {
+  "How much the ground at p turns away from a light from the north-west: 0 on the flat, 1 in deep shade"
+  g = valley_slope(p)
+  facing = normalize(CombineXYZ(-g.x, -g.y, 1.0)) ⋅ normalize(light)
+  return Clamp((flat - facing) * 2.0, 0.0, 1.0)
+}
+
+geometry graph ruling(
+    angle: Float = 30.0,
+    spacing: Float = 0.03 in 0.001..,
+    size: Float = 4.6 in 0.1..
+) -> Geometry {
+  "Parallel lines across a square of size, spacing apart, at angle: where hatch_cross puts its lines"
+  // One line of 460 segments, copied every spacing; hatch_cross inks around its whole steps
+  line = MeshLine(
+    count: 461,
+    start_location: CombineXYZ(y: size * -0.5),
+    offset: CombineXYZ(y: size / 460.0))
+  count = ceil(size / spacing)
+  first = floor(count * -0.5) * spacing
+  return MeshLine(
+      count: count,
+      start_location: CombineXYZ(x: first),
+      offset: CombineXYZ(x: spacing))
+    |> InstanceOnPoints(instance: line)
+    |> RealizeInstances()
+    |> TransformGeometry(rotation: CombineXYZ(z: radians(-angle)))
+}
+
+geometry graph engrave(
+    lines: Geometry,
+    amount: Float,
+    weight: Float = 0.0045 in 0.0..,
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..
+) -> Geometry {
+  "Cuts lines where amount, the ink they hold, is low or off the map; elsewhere amount sets their width"
+  p = Position()
+  off = amount < 0.05 or abs(p.x) > width * 0.5 or abs(p.y) > height * 0.5
+  return lines
+    |> DeleteGeometry(off)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: amount * weight)
+}
+
+geometry graph cross_hatching(spacing: Float = 0.03 in 0.001.., angle: Float = 30.0) -> Geometry {
+  "Engraved lines over the slopes in shade, and a second pass across them where the shade is deepest"
+  s = shade()
+  first = engrave(
+    ruling(angle, spacing),
+    hatch_cross(angle: angle, spacing: spacing, cross_angle: 0.0, shade: s) * Clamp(s * 2.0))
+  across = angle + 90.0
+  second = engrave(
+    ruling(across, spacing),
+    hatch_cross(angle: across, spacing: spacing, cross_angle: 0.0, shade: s * 2.0 - 1.0)
+      * Clamp(s * 4.0 - 2.0))
+  return first + second
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  lines = contours()
+  return ink(lines + cross_hatching()) + hachures(lines)
+}
+</script></bn-view>
+    <p>
+      <code>hatch_cross</code> is an engraver's tool: at a point and for a shade, it says whether the point is ink, 1, or paper, 0. Its lines lie on whole steps of <code>(x cos a − y sin a) / spacing</code>, and thicken with the shade: half the spacing wide at shade 0.5.
+      <code>ruling</code> draws those lines, as the ruling machine of an engraver did: parallel, <code>spacing</code> apart, at <code>angle</code>. <code>engrave</code> then reads <code>hatch_cross</code> along each line: it cuts the line where it is paper. Elsewhere the amount it is given sets the width, here <code>Clamp(s * 2.0)</code>, which grows with the shade as the lines of <code>hatch_cross</code> do.
+    </p>
+    <ul>
+      <li><strong>Why cut a mesh, not a curve?</strong> Deleting points from the middle of a curve joins the points around the gap. The lines are meshes of edges until they are cut; <code>MeshToCurve</code> then makes one curve per piece.</li>
+      <li><strong>Two passes.</strong> The first pass covers all the shade. The second, at 90°, gets <code>s * 2.0 - 1.0</code>: nothing below half shade, then its lines thicken in turn, by <code>Clamp(s * 4.0 - 2.0)</code>. <code>cross_angle: 0.0</code> keeps each call of <code>hatch_cross</code> to its own family of lines, since we draw the crossing ones ourselves.</li>
+    </ul>
+    <figure>
+      <img src="img/engraved-map-step3.png" width="1000" height="750" loading="lazy" alt="The map with oblique hatching over the north bank and the east side of the southern summit, crossed in the darkest places">
+      <figcaption>Step 3. The north bank faces south-east, away from the light: it is hatched, then crossed. The south bank, lit, keeps only its hachures.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> on the <code>shade</code> node, set <code>light</code> to (1.0, −1.0, 1.2): the light comes from the south-east, and the hatching moves to the other banks.</p>
+
+    <h2 id="step-4"><span class="n">4.</span> A guilloché border and a cartouche</h2>
+    <p>
+      A map needs a frame and a title. Engravers used <em>guilloché</em> for both: patterns of fine, interlaced curves, cut by a lathe, that were hard to forge. Banknotes still carry them.
+    </p>
+    <p class="file">step4_border.bn: <code>frame</code>, <code>rosette</code>, <code>cartouche</code>, <code>clear</code>, <code>engraved_map</code></p>
+    <bn-view graph="frame" height="480"><script type="text/bn">
+// @module engraved_map_step4
+// @title Engraved map, step 4: a guilloché border and a cartouche
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use curves2d (wave_curve_2d)
+use hachures2d (guilloche, hatch_cross, lehmann_hachures)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph shade(
+    p: Vector = Position(),
+    light: Vector = (-1.0, 1.0, 1.2),
+    flat: Float = 0.55
+) -> Float {
+  "How much the ground at p turns away from a light from the north-west: 0 on the flat, 1 in deep shade"
+  g = valley_slope(p)
+  facing = normalize(CombineXYZ(-g.x, -g.y, 1.0)) ⋅ normalize(light)
+  return Clamp((flat - facing) * 2.0, 0.0, 1.0)
+}
+
+geometry graph ruling(
+    angle: Float = 30.0,
+    spacing: Float = 0.03 in 0.001..,
+    size: Float = 4.6 in 0.1..
+) -> Geometry {
+  "Parallel lines across a square of size, spacing apart, at angle: where hatch_cross puts its lines"
+  // One line of 460 segments, copied every spacing; hatch_cross inks around its whole steps
+  line = MeshLine(
+    count: 461,
+    start_location: CombineXYZ(y: size * -0.5),
+    offset: CombineXYZ(y: size / 460.0))
+  count = ceil(size / spacing)
+  first = floor(count * -0.5) * spacing
+  return MeshLine(
+      count: count,
+      start_location: CombineXYZ(x: first),
+      offset: CombineXYZ(x: spacing))
+    |> InstanceOnPoints(instance: line)
+    |> RealizeInstances()
+    |> TransformGeometry(rotation: CombineXYZ(z: radians(-angle)))
+}
+
+geometry graph engrave(
+    lines: Geometry,
+    amount: Float,
+    weight: Float = 0.0045 in 0.0..,
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..
+) -> Geometry {
+  "Cuts lines where amount, the ink they hold, is low or off the map; elsewhere amount sets their width"
+  p = Position()
+  off = amount < 0.05 or abs(p.x) > width * 0.5 or abs(p.y) > height * 0.5
+  return lines
+    |> DeleteGeometry(off)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: amount * weight)
+}
+
+geometry graph cross_hatching(spacing: Float = 0.03 in 0.001.., angle: Float = 30.0) -> Geometry {
+  "Engraved lines over the slopes in shade, and a second pass across them where the shade is deepest"
+  s = shade()
+  first = engrave(
+    ruling(angle, spacing),
+    hatch_cross(angle: angle, spacing: spacing, cross_angle: 0.0, shade: s) * Clamp(s * 2.0))
+  across = angle + 90.0
+  second = engrave(
+    ruling(across, spacing),
+    hatch_cross(angle: across, spacing: spacing, cross_angle: 0.0, shade: s * 2.0 - 1.0)
+      * Clamp(s * 4.0 - 2.0))
+  return first + second
+}
+
+geometry graph frame(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    band: Float = 0.1 in 0.0..,
+    waves: Float = 150.0 in 1.0..,
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "The neat line around the map, a guilloché band, and a thick outer line"
+  inner = Quadrilateral(width, height).curve
+  outer = Quadrilateral(width + band * 2.0, height + band * 2.0).curve
+  // Three waves along the middle of the band, a third of a wave apart, braid into a guilloché
+  middle = Quadrilateral(width + band, height + band).curve
+    |> FilletCurve(radius: band * 0.5, mode: "Poly", count: 8)
+  braid = wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.333, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.667, resolution: 2048)
+  return SetCurveRadius(inner + braid, radius: radius) + SetCurveRadius(outer, radius: radius * 2.5)
+}
+
+geometry graph rosette(
+    centre: Vector,
+    size: Float = 0.2 in 0.0..,
+    waves: Float = 16.0 in 1.0..
+) -> Geometry {
+  "A guilloché rosette: four of the curves guilloche traces, one inside the other"
+  r = repeat(4, curves: JoinGeometry()) {
+    t = SplineParameter().factor
+    k = iteration / 3.0
+    // r2 at 0 keeps the loops round; r1 and p change from one curve to the next
+    shape = guilloche(t, r1: 0.95 - k * 0.45, r2: 0.0, p: 0.12 + k * 0.06, waves: waves)
+    ring = CurveCircle(resolution: 900).curve
+      |> SetPosition(position: centre + shape * size)
+    return (curves: curves + ring)
+  }
+  return r.curves
+}
+
+geometry graph cartouche(
+    centre: Vector = (-1.12, -0.95, 0.0),
+    width: Float = 1.2 in 0.1..,
+    height: Float = 0.52 in 0.1..,
+    title: String = "THE LITTLE VALLEY",
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "A framed label in a corner of the map: a rosette and the title"
+  box = Quadrilateral(width, height).curve
+    |> FilletCurve(radius: 0.05, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  inner = Quadrilateral(width - 0.05, height - 0.05).curve
+    |> FilletCurve(radius: 0.03, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  rose = rosette(centre + CombineXYZ(x: width * -0.31), size: height * 0.34)
+  words = StringToCurves(title, size: 0.07, align_x: "Center", align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: 0.04))
+    |> SetMaterial(material: Ink)
+  subtitle = StringToCurves(
+      "engraved relief",
+      size: 0.05,
+      align_x: "Center",
+      align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: -0.07))
+    |> SetMaterial(material: Ink)
+  lines = SetCurveRadius(box + inner, radius: radius) + SetCurveRadius(rose, radius: radius * 0.6)
+  return ink(lines) + words + subtitle
+}
+
+geometry graph clear(strokes: Geometry, under: Bool) -> Geometry {
+  "Strokes and meshes cut away where under is true: where something else is drawn"
+  // A curve whose middle points are deleted would join its ends: as edges of a mesh, it splits.
+  // The mesh has no radius: it keeps it as an attribute of its own
+  parts = SeparateComponents(strokes)
+  curves = parts.curve
+    |> StoreNamedAttribute(name: "width", value: Radius())
+    |> CurveToMesh()
+    |> DeleteGeometry(under)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: NamedAttribute(name: "width", data_type: FLOAT))
+  return curves + DeleteGeometry(parts.mesh, under, domain: FACE)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  lines = contours()
+  label = (-1.12, -0.95, 0.0)
+  // The relief stops a little before the cartouche's box
+  p = Position() - label
+  under = abs(p.x) < 0.63 and abs(p.y) < 0.29
+  strokes = clear(lines + cross_hatching(), under)
+  return ink(strokes + frame()) + clear(hachures(lines), under) + cartouche(label)
+}
+</script></bn-view>
+    <ul>
+      <li><strong>The border</strong>: three waves along the same rounded rectangle, a third of a wave apart, braid into a chain. <code>wave_curve_2d</code> pushes each point of the curve sideways by a sine; <code>phase</code> shifts it.</li>
+      <li><strong>The rosette</strong>: <code>guilloche</code> gives the point of a rosette at <code>t</code>, from 0 to 1 around it. Set on every point of a <code>CurveCircle</code>, it bends the circle into loops. Four of them, one inside the other, make the rosette.</li>
+      <li><strong>The title</strong>: <code>StringToCurves</code> writes it as outlines, <code>FillCurve</code> fills them.</li>
+      <li><strong>Room for the cartouche</strong>: <code>clear</code> cuts the relief where <code>under</code> is true. It is the same trick as in step 3: the curves become edges, lose their points under the box, and come back as curves. A mesh has no radius, so the width of each point travels as an attribute, <code>width</code>.</li>
+    </ul>
+    <figure>
+      <img src="img/engraved-map-step4.png" width="1000" height="750" loading="lazy" alt="The map framed by a braided border between a thin and a thick line; a cartouche in the lower left with a rosette and the title The Little Valley">
+      <figcaption>Step 4. The relief stops short of the cartouche, as an engraver would leave the plate clean there.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> on <code>rosette</code>, set <code>waves</code> to 9: fewer, larger loops. On <code>frame</code>, set <code>waves</code> to 80: a looser braid.</p>
+
+    <h2 id="step-5"><span class="n">5.</span> A river and a path, along their curves</h2>
+    <p>
+      The river runs on the floor of the gorge, on <code>river_course</code>, the same curve that dug it in step 1. The path climbs from the river to the southern summit.
+      Both are drawn straight, then bent along a curve: that is what <code>deform2d</code> is for.
+    </p>
+    <p class="file">step5_river.bn: <code>engraved_map</code>, <code>river</code>, <code>path</code>, <code>path_line</code></p>
+    <bn-view graph="engraved_map" height="480"><script type="text/bn">
+// @module engraved_map_step5
+// @title Engraved map, step 5: a river and a path, along their curves
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use curves2d (wave_curve_2d)
+use deform2d (arrow_head, flow_along_curve, ribbon_outline)
+use hachures2d (guilloche, hatch_cross, lehmann_hachures)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph shade(
+    p: Vector = Position(),
+    light: Vector = (-1.0, 1.0, 1.2),
+    flat: Float = 0.55
+) -> Float {
+  "How much the ground at p turns away from a light from the north-west: 0 on the flat, 1 in deep shade"
+  g = valley_slope(p)
+  facing = normalize(CombineXYZ(-g.x, -g.y, 1.0)) ⋅ normalize(light)
+  return Clamp((flat - facing) * 2.0, 0.0, 1.0)
+}
+
+geometry graph ruling(
+    angle: Float = 30.0,
+    spacing: Float = 0.03 in 0.001..,
+    size: Float = 4.6 in 0.1..
+) -> Geometry {
+  "Parallel lines across a square of size, spacing apart, at angle: where hatch_cross puts its lines"
+  // One line of 460 segments, copied every spacing; hatch_cross inks around its whole steps
+  line = MeshLine(
+    count: 461,
+    start_location: CombineXYZ(y: size * -0.5),
+    offset: CombineXYZ(y: size / 460.0))
+  count = ceil(size / spacing)
+  first = floor(count * -0.5) * spacing
+  return MeshLine(
+      count: count,
+      start_location: CombineXYZ(x: first),
+      offset: CombineXYZ(x: spacing))
+    |> InstanceOnPoints(instance: line)
+    |> RealizeInstances()
+    |> TransformGeometry(rotation: CombineXYZ(z: radians(-angle)))
+}
+
+geometry graph engrave(
+    lines: Geometry,
+    amount: Float,
+    weight: Float = 0.0045 in 0.0..,
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..
+) -> Geometry {
+  "Cuts lines where amount, the ink they hold, is low or off the map; elsewhere amount sets their width"
+  p = Position()
+  off = amount < 0.05 or abs(p.x) > width * 0.5 or abs(p.y) > height * 0.5
+  return lines
+    |> DeleteGeometry(off)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: amount * weight)
+}
+
+geometry graph cross_hatching(spacing: Float = 0.03 in 0.001.., angle: Float = 30.0) -> Geometry {
+  "Engraved lines over the slopes in shade, and a second pass across them where the shade is deepest"
+  s = shade()
+  first = engrave(
+    ruling(angle, spacing),
+    hatch_cross(angle: angle, spacing: spacing, cross_angle: 0.0, shade: s) * Clamp(s * 2.0))
+  across = angle + 90.0
+  second = engrave(
+    ruling(across, spacing),
+    hatch_cross(angle: across, spacing: spacing, cross_angle: 0.0, shade: s * 2.0 - 1.0)
+      * Clamp(s * 4.0 - 2.0))
+  return first + second
+}
+
+geometry graph frame(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    band: Float = 0.1 in 0.0..,
+    waves: Float = 150.0 in 1.0..,
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "The neat line around the map, a guilloché band, and a thick outer line"
+  inner = Quadrilateral(width, height).curve
+  outer = Quadrilateral(width + band * 2.0, height + band * 2.0).curve
+  // Three waves along the middle of the band, a third of a wave apart, braid into a guilloché
+  middle = Quadrilateral(width + band, height + band).curve
+    |> FilletCurve(radius: band * 0.5, mode: "Poly", count: 8)
+  braid = wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.333, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.667, resolution: 2048)
+  return SetCurveRadius(inner + braid, radius: radius) + SetCurveRadius(outer, radius: radius * 2.5)
+}
+
+geometry graph rosette(
+    centre: Vector,
+    size: Float = 0.2 in 0.0..,
+    waves: Float = 16.0 in 1.0..
+) -> Geometry {
+  "A guilloché rosette: four of the curves guilloche traces, one inside the other"
+  r = repeat(4, curves: JoinGeometry()) {
+    t = SplineParameter().factor
+    k = iteration / 3.0
+    // r2 at 0 keeps the loops round; r1 and p change from one curve to the next
+    shape = guilloche(t, r1: 0.95 - k * 0.45, r2: 0.0, p: 0.12 + k * 0.06, waves: waves)
+    ring = CurveCircle(resolution: 900).curve
+      |> SetPosition(position: centre + shape * size)
+    return (curves: curves + ring)
+  }
+  return r.curves
+}
+
+geometry graph cartouche(
+    centre: Vector = (-1.12, -0.95, 0.0),
+    width: Float = 1.2 in 0.1..,
+    height: Float = 0.52 in 0.1..,
+    title: String = "THE LITTLE VALLEY",
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "A framed label in a corner of the map: a rosette and the title"
+  box = Quadrilateral(width, height).curve
+    |> FilletCurve(radius: 0.05, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  inner = Quadrilateral(width - 0.05, height - 0.05).curve
+    |> FilletCurve(radius: 0.03, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  rose = rosette(centre + CombineXYZ(x: width * -0.31), size: height * 0.34)
+  words = StringToCurves(title, size: 0.07, align_x: "Center", align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: 0.04))
+    |> SetMaterial(material: Ink)
+  subtitle = StringToCurves(
+      "engraved relief",
+      size: 0.05,
+      align_x: "Center",
+      align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: -0.07))
+    |> SetMaterial(material: Ink)
+  lines = SetCurveRadius(box + inner, radius: radius) + SetCurveRadius(rose, radius: radius * 0.6)
+  return ink(lines) + words + subtitle
+}
+
+geometry graph clear(strokes: Geometry, under: Bool) -> Geometry {
+  "Strokes and meshes cut away where under is true: where something else is drawn"
+  // A curve whose middle points are deleted would join its ends: as edges of a mesh, it splits.
+  // The mesh has no radius: it keeps it as an attribute of its own
+  parts = SeparateComponents(strokes)
+  curves = parts.curve
+    |> StoreNamedAttribute(name: "width", value: Radius())
+    |> CurveToMesh()
+    |> DeleteGeometry(under)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: NamedAttribute(name: "width", data_type: FLOAT))
+  return curves + DeleteGeometry(parts.mesh, under, domain: FACE)
+}
+
+geometry graph river(width: Float = 0.045 in 0.0.., spring: Float = 0.6 in 0.0..1.0) -> Geometry {
+  "The river on the valley floor: a ribbon that widens from its spring, in the west, as it flows east"
+  p = Position()
+  spine = CurveLine((-1.8, 0.0, 0.0), (1.8, 0.0, 0.0))
+    |> ResampleCurve(count: 200)
+    |> SetPosition(position: CombineXYZ(p.x, river_course(p.x)))
+  return ribbon_outline(spine, width: width, taper_start: spring, resolution: 400)
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph path_line() -> Geometry {
+  "The course of a path: from the river, south, up to the summit"
+  return BezierSegment(
+    64,
+    (-0.05, 0.12, 0.0),
+    (0.0, -0.55, 0.0),
+    (0.3, -0.95, 0.0),
+    (0.82, -0.76, 0.0))
+}
+
+geometry graph path(spine: Geometry, gap: Float = 0.035 in 0.001..) -> Geometry {
+  "A dashed path along spine: a row of dashes, drawn straight, then bent along it"
+  dash = ResampleCurve(CurveLine((0.0, 0.0, 0.0), CombineXYZ(x: gap * 0.6)), count: 4)
+  dashes = MeshLine(count: 50, offset: CombineXYZ(x: gap))
+    |> InstanceOnPoints(instance: dash)
+    |> RealizeInstances()
+  return flow_along_curve(dashes, spine, resolution: 1024)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  lines = contours()
+  label = (-1.12, -0.95, 0.0)
+  way = path_line()
+  // The relief stops a little before the cartouche's box, at the banks, and on each side of the path
+  p = Position()
+  box = abs(p.x - label.x) < 0.63 and abs(p.y - label.y) < 0.29
+  banks = abs(p.y - river_course(p.x)) < 0.05
+  gap = GeometryProximity(CurveToMesh(way), sample_position: p, target_element: EDGES).distance
+  near = gap < 0.045
+  under = box or banks or near
+  strokes = clear(lines + cross_hatching(), under)
+  // arrow_head with fill: false is an outline, a curve: ink makes it a stroke like the path
+  route = path(way) + arrow_head(way, size: 0.07, angle: 28.0, fill: false)
+  meshes = clear(hachures(lines), under) + river()
+  return ink(strokes + frame() + SetCurveRadius(route, radius: 0.004)) + meshes + cartouche(label)
+}
+</script></bn-view>
+    <ul>
+      <li><strong>The river</strong>: <code>ribbon_outline</code> makes a ribbon along the course. <code>taper_start: 0.6</code> starts it at width 0, at the spring in the west, and widens it over 60 % of its length, as a river grows downstream.</li>
+      <li><strong>The path</strong>: a row of dashes along X, then <code>flow_along_curve</code>. It maps the X of the row, from one end to the other, onto the length of <code>path_line</code>, and its Y onto the side of the curve. Any pattern drawn along X can follow a curve this way.</li>
+      <li><strong>The arrow</strong>: <code>arrow_head</code> sits at the end of the curve and points along it. With <code>fill: false</code> it is an outline: a curve, inked like the path.</li>
+      <li><strong>Room again</strong>: <code>under</code> now also holds the banks and a corridor along the path. <code>GeometryProximity</code> gives each point its distance to the path.</li>
+    </ul>
+    <figure>
+      <img src="img/engraved-map-step5.png" width="1000" height="750" loading="lazy" alt="The map with a black river widening from west to east along the valley floor, and a dashed path from the river to the southern summit, ending in an arrowhead">
+      <figcaption>Step 5. The river widens as it flows east. The relief steps back from the banks and from the path.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> change the handles of <code>path_line</code>, its second and third points: the dashes follow any course you give it.</p>
+
+    <h2 id="step-6"><span class="n">6.</span> Living ink</h2>
+    <p>
+      The map is exact, and that is its flaw: a machine drew it. A hand presses harder or lighter, and a burin's cut starts and ends in a point.
+      <code>ink2d</code> adds that, without changing what the lines say.
+    </p>
+    <p class="file">step6_living_ink.bn: <code>engraved_map</code></p>
+    <bn-view graph="engraved_map" height="480"><script type="text/bn">
+// @module engraved_map_step6
+// @title Engraved map, step 6: living ink
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use curves2d (wave_curve_2d)
+use deform2d (arrow_head, flow_along_curve, ribbon_outline)
+use hachures2d (guilloche, hatch_cross, lehmann_hachures)
+use ink2d (ink_bleed, ink_wobble, living_ink, taper_ends)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph shade(
+    p: Vector = Position(),
+    light: Vector = (-1.0, 1.0, 1.2),
+    flat: Float = 0.55
+) -> Float {
+  "How much the ground at p turns away from a light from the north-west: 0 on the flat, 1 in deep shade"
+  g = valley_slope(p)
+  facing = normalize(CombineXYZ(-g.x, -g.y, 1.0)) ⋅ normalize(light)
+  return Clamp((flat - facing) * 2.0, 0.0, 1.0)
+}
+
+geometry graph ruling(
+    angle: Float = 30.0,
+    spacing: Float = 0.03 in 0.001..,
+    size: Float = 4.6 in 0.1..
+) -> Geometry {
+  "Parallel lines across a square of size, spacing apart, at angle: where hatch_cross puts its lines"
+  // One line of 460 segments, copied every spacing; hatch_cross inks around its whole steps
+  line = MeshLine(
+    count: 461,
+    start_location: CombineXYZ(y: size * -0.5),
+    offset: CombineXYZ(y: size / 460.0))
+  count = ceil(size / spacing)
+  first = floor(count * -0.5) * spacing
+  return MeshLine(
+      count: count,
+      start_location: CombineXYZ(x: first),
+      offset: CombineXYZ(x: spacing))
+    |> InstanceOnPoints(instance: line)
+    |> RealizeInstances()
+    |> TransformGeometry(rotation: CombineXYZ(z: radians(-angle)))
+}
+
+geometry graph engrave(
+    lines: Geometry,
+    amount: Float,
+    weight: Float = 0.0045 in 0.0..,
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..
+) -> Geometry {
+  "Cuts lines where amount, the ink they hold, is low or off the map; elsewhere amount sets their width"
+  p = Position()
+  off = amount < 0.05 or abs(p.x) > width * 0.5 or abs(p.y) > height * 0.5
+  return lines
+    |> DeleteGeometry(off)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: amount * weight)
+}
+
+geometry graph cross_hatching(spacing: Float = 0.03 in 0.001.., angle: Float = 30.0) -> Geometry {
+  "Engraved lines over the slopes in shade, and a second pass across them where the shade is deepest"
+  s = shade()
+  first = engrave(
+    ruling(angle, spacing),
+    hatch_cross(angle: angle, spacing: spacing, cross_angle: 0.0, shade: s) * Clamp(s * 2.0))
+  across = angle + 90.0
+  second = engrave(
+    ruling(across, spacing),
+    hatch_cross(angle: across, spacing: spacing, cross_angle: 0.0, shade: s * 2.0 - 1.0)
+      * Clamp(s * 4.0 - 2.0))
+  return first + second
+}
+
+geometry graph frame(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    band: Float = 0.1 in 0.0..,
+    waves: Float = 150.0 in 1.0..,
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "The neat line around the map, a guilloché band, and a thick outer line"
+  inner = Quadrilateral(width, height).curve
+  outer = Quadrilateral(width + band * 2.0, height + band * 2.0).curve
+  // Three waves along the middle of the band, a third of a wave apart, braid into a guilloché
+  middle = Quadrilateral(width + band, height + band).curve
+    |> FilletCurve(radius: band * 0.5, mode: "Poly", count: 8)
+  braid = wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.333, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.667, resolution: 2048)
+  return SetCurveRadius(inner + braid, radius: radius) + SetCurveRadius(outer, radius: radius * 2.5)
+}
+
+geometry graph rosette(
+    centre: Vector,
+    size: Float = 0.2 in 0.0..,
+    waves: Float = 16.0 in 1.0..
+) -> Geometry {
+  "A guilloché rosette: four of the curves guilloche traces, one inside the other"
+  r = repeat(4, curves: JoinGeometry()) {
+    t = SplineParameter().factor
+    k = iteration / 3.0
+    // r2 at 0 keeps the loops round; r1 and p change from one curve to the next
+    shape = guilloche(t, r1: 0.95 - k * 0.45, r2: 0.0, p: 0.12 + k * 0.06, waves: waves)
+    ring = CurveCircle(resolution: 900).curve
+      |> SetPosition(position: centre + shape * size)
+    return (curves: curves + ring)
+  }
+  return r.curves
+}
+
+geometry graph cartouche(
+    centre: Vector = (-1.12, -0.95, 0.0),
+    width: Float = 1.2 in 0.1..,
+    height: Float = 0.52 in 0.1..,
+    title: String = "THE LITTLE VALLEY",
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "A framed label in a corner of the map: a rosette and the title"
+  box = Quadrilateral(width, height).curve
+    |> FilletCurve(radius: 0.05, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  inner = Quadrilateral(width - 0.05, height - 0.05).curve
+    |> FilletCurve(radius: 0.03, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  rose = rosette(centre + CombineXYZ(x: width * -0.31), size: height * 0.34)
+  words = StringToCurves(title, size: 0.07, align_x: "Center", align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: 0.04))
+    |> SetMaterial(material: Ink)
+  subtitle = StringToCurves(
+      "engraved relief",
+      size: 0.05,
+      align_x: "Center",
+      align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: -0.07))
+    |> SetMaterial(material: Ink)
+  lines = SetCurveRadius(box + inner, radius: radius) + SetCurveRadius(rose, radius: radius * 0.6)
+  return ink(lines) + words + subtitle
+}
+
+geometry graph clear(strokes: Geometry, under: Bool) -> Geometry {
+  "Strokes and meshes cut away where under is true: where something else is drawn"
+  // A curve whose middle points are deleted would join its ends: as edges of a mesh, it splits.
+  // The mesh has no radius: it keeps it as an attribute of its own
+  parts = SeparateComponents(strokes)
+  curves = parts.curve
+    |> StoreNamedAttribute(name: "width", value: Radius())
+    |> CurveToMesh()
+    |> DeleteGeometry(under)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: NamedAttribute(name: "width", data_type: FLOAT))
+  return curves + DeleteGeometry(parts.mesh, under, domain: FACE)
+}
+
+geometry graph river(width: Float = 0.045 in 0.0.., spring: Float = 0.6 in 0.0..1.0) -> Geometry {
+  "The river on the valley floor: a ribbon that widens from its spring, in the west, as it flows east"
+  p = Position()
+  spine = CurveLine((-1.8, 0.0, 0.0), (1.8, 0.0, 0.0))
+    |> ResampleCurve(count: 200)
+    |> SetPosition(position: CombineXYZ(p.x, river_course(p.x)))
+  return ribbon_outline(spine, width: width, taper_start: spring, resolution: 400)
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph path_line() -> Geometry {
+  "The course of a path: from the river, south, up to the summit"
+  return BezierSegment(
+    64,
+    (-0.05, 0.12, 0.0),
+    (0.0, -0.55, 0.0),
+    (0.3, -0.95, 0.0),
+    (0.82, -0.76, 0.0))
+}
+
+geometry graph path(spine: Geometry, gap: Float = 0.035 in 0.001..) -> Geometry {
+  "A dashed path along spine: a row of dashes, drawn straight, then bent along it"
+  dash = ResampleCurve(CurveLine((0.0, 0.0, 0.0), CombineXYZ(x: gap * 0.6)), count: 4)
+  dashes = MeshLine(count: 50, offset: CombineXYZ(x: gap))
+    |> InstanceOnPoints(instance: dash)
+    |> RealizeInstances()
+  return flow_along_curve(dashes, spine, resolution: 1024)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  lines = contours()
+  label = (-1.12, -0.95, 0.0)
+  way = path_line()
+  // The relief stops a little before the cartouche's box, at the banks, and on each side of the path
+  p = Position()
+  box = abs(p.x - label.x) < 0.63 and abs(p.y - label.y) < 0.29
+  banks = abs(p.y - river_course(p.x)) < 0.05
+  gap = GeometryProximity(CurveToMesh(way), sample_position: p, target_element: EDGES).distance
+  near = gap < 0.045
+  under = box or banks or near
+  // A hand, not a machine: the short lines of the shade taper at both ends, as a burin cuts them;
+  // every line of the relief swells, thins and wanders a little as it goes
+  shading = clear(cross_hatching(), under)
+    |> taper_ends(smoothness: 0.3)
+  relief = clear(lines, under) + shading
+    |> living_ink(amplitude: 0.03, frequency: 5.0, radius_variation: 0.8)
+  // arrow_head with fill: false is an outline, a curve: ink makes it a stroke like the path
+  route = path(way) + arrow_head(way, size: 0.07, angle: 28.0, fill: false)
+  // The ruled lines waver a little, and the ink spreads into the paper
+  drawn = frame() + SetCurveRadius(route, radius: 0.004)
+    |> ink_wobble(amplitude: 0.012, frequency: 3.0)
+    |> ink_bleed(radius: 0.004, roughness: 40.0)
+  meshes = clear(hachures(lines), under) + river()
+  return ink(relief + drawn) + meshes + cartouche(label)
+}
+</script></bn-view>
+    <ul>
+      <li><code>taper_ends</code> thins both ends of each stroke, over 30 % of its length. Only the hatching gets it: on a long contour, 30 % at each end would erase most of the line.</li>
+      <li><code>living_ink</code> moves each point a little sideways and changes its radius with a fractal noise: the lines swell, thin and wander.</li>
+      <li><code>ink_wobble</code> shakes the ruled lines, the border and the path, more slowly; <code>ink_bleed</code> adds a fine roughness, as ink spreading into the paper.</li>
+    </ul>
+    <p>
+      These act on the radius and the position of curve points: the meshes, hachures and river, stay as they are. Grease Pencil draws each stroke with the radius of each of its points, so the swelling shows.
+    </p>
+    <div class="pair">
+      <figure>
+        <img src="img/engraved-map-step5-close.png" width="1000" height="750" loading="lazy" alt="Close to the northern summit before living ink: even contour lines, hatching of even width">
+        <figcaption>Step 5, close to the northern summit: every line of even width.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/engraved-map-step6-close.png" width="1000" height="750" loading="lazy" alt="The same place after living ink: contours that swell and thin, hatch strokes tapered at both ends">
+        <figcaption>Step 6, the same place: the contours swell and thin, each hatch stroke tapers.</figcaption>
+      </figure>
+    </div>
+    <figure>
+      <img src="img/engraved-map-step6.png" width="1000" height="750" loading="lazy" alt="The whole map with living ink: the same map, its lines less regular">
+      <figcaption>Step 6, the whole map.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> set <code>radius_variation</code> of <code>living_ink</code> to 0.0, then to 1.0, and watch the contours.</p>
+
+    <h2 id="step-7"><span class="n">7.</span> The map draws itself</h2>
+    <p>
+      Grease Pencil strokes are made to be animated. <code>write_on</code> trims each stroke to a part of its length, from 0 (nothing drawn) to 1 (all of it).
+      Driven by the frame, it draws the map in 72 frames, three seconds at 24 frames per second.
+    </p>
+    <p class="file">step7_write_on.bn: <code>engraver</code>, <code>engraved_map</code></p>
+    <bn-view graph="engraver" height="480"><script type="text/bn">
+// @module engraved_map_step7
+// @title Engraved map, step 7: the map draws itself
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use curves2d (wave_curve_2d)
+use deform2d (arrow_head, flow_along_curve, ribbon_outline)
+use hachures2d (guilloche, hatch_cross, lehmann_hachures)
+use ink2d (ink_bleed, ink_wobble, living_ink, taper_ends, write_on)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph shade(
+    p: Vector = Position(),
+    light: Vector = (-1.0, 1.0, 1.2),
+    flat: Float = 0.55
+) -> Float {
+  "How much the ground at p turns away from a light from the north-west: 0 on the flat, 1 in deep shade"
+  g = valley_slope(p)
+  facing = normalize(CombineXYZ(-g.x, -g.y, 1.0)) ⋅ normalize(light)
+  return Clamp((flat - facing) * 2.0, 0.0, 1.0)
+}
+
+geometry graph ruling(
+    angle: Float = 30.0,
+    spacing: Float = 0.03 in 0.001..,
+    size: Float = 4.6 in 0.1..
+) -> Geometry {
+  "Parallel lines across a square of size, spacing apart, at angle: where hatch_cross puts its lines"
+  // One line of 460 segments, copied every spacing; hatch_cross inks around its whole steps
+  line = MeshLine(
+    count: 461,
+    start_location: CombineXYZ(y: size * -0.5),
+    offset: CombineXYZ(y: size / 460.0))
+  count = ceil(size / spacing)
+  first = floor(count * -0.5) * spacing
+  return MeshLine(
+      count: count,
+      start_location: CombineXYZ(x: first),
+      offset: CombineXYZ(x: spacing))
+    |> InstanceOnPoints(instance: line)
+    |> RealizeInstances()
+    |> TransformGeometry(rotation: CombineXYZ(z: radians(-angle)))
+}
+
+geometry graph engrave(
+    lines: Geometry,
+    amount: Float,
+    weight: Float = 0.0045 in 0.0..,
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..
+) -> Geometry {
+  "Cuts lines where amount, the ink they hold, is low or off the map; elsewhere amount sets their width"
+  p = Position()
+  off = amount < 0.05 or abs(p.x) > width * 0.5 or abs(p.y) > height * 0.5
+  return lines
+    |> DeleteGeometry(off)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: amount * weight)
+}
+
+geometry graph cross_hatching(spacing: Float = 0.03 in 0.001.., angle: Float = 30.0) -> Geometry {
+  "Engraved lines over the slopes in shade, and a second pass across them where the shade is deepest"
+  s = shade()
+  first = engrave(
+    ruling(angle, spacing),
+    hatch_cross(angle: angle, spacing: spacing, cross_angle: 0.0, shade: s) * Clamp(s * 2.0))
+  across = angle + 90.0
+  second = engrave(
+    ruling(across, spacing),
+    hatch_cross(angle: across, spacing: spacing, cross_angle: 0.0, shade: s * 2.0 - 1.0)
+      * Clamp(s * 4.0 - 2.0))
+  return first + second
+}
+
+geometry graph frame(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    band: Float = 0.1 in 0.0..,
+    waves: Float = 150.0 in 1.0..,
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "The neat line around the map, a guilloché band, and a thick outer line"
+  inner = Quadrilateral(width, height).curve
+  outer = Quadrilateral(width + band * 2.0, height + band * 2.0).curve
+  // Three waves along the middle of the band, a third of a wave apart, braid into a guilloché
+  middle = Quadrilateral(width + band, height + band).curve
+    |> FilletCurve(radius: band * 0.5, mode: "Poly", count: 8)
+  braid = wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.333, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.667, resolution: 2048)
+  return SetCurveRadius(inner + braid, radius: radius) + SetCurveRadius(outer, radius: radius * 2.5)
+}
+
+geometry graph rosette(
+    centre: Vector,
+    size: Float = 0.2 in 0.0..,
+    waves: Float = 16.0 in 1.0..
+) -> Geometry {
+  "A guilloché rosette: four of the curves guilloche traces, one inside the other"
+  r = repeat(4, curves: JoinGeometry()) {
+    t = SplineParameter().factor
+    k = iteration / 3.0
+    // r2 at 0 keeps the loops round; r1 and p change from one curve to the next
+    shape = guilloche(t, r1: 0.95 - k * 0.45, r2: 0.0, p: 0.12 + k * 0.06, waves: waves)
+    ring = CurveCircle(resolution: 900).curve
+      |> SetPosition(position: centre + shape * size)
+    return (curves: curves + ring)
+  }
+  return r.curves
+}
+
+geometry graph cartouche(
+    centre: Vector = (-1.12, -0.95, 0.0),
+    width: Float = 1.2 in 0.1..,
+    height: Float = 0.52 in 0.1..,
+    title: String = "THE LITTLE VALLEY",
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "A framed label in a corner of the map: a rosette and the title"
+  box = Quadrilateral(width, height).curve
+    |> FilletCurve(radius: 0.05, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  inner = Quadrilateral(width - 0.05, height - 0.05).curve
+    |> FilletCurve(radius: 0.03, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  rose = rosette(centre + CombineXYZ(x: width * -0.31), size: height * 0.34)
+  words = StringToCurves(title, size: 0.07, align_x: "Center", align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: 0.04))
+    |> SetMaterial(material: Ink)
+  subtitle = StringToCurves(
+      "engraved relief",
+      size: 0.05,
+      align_x: "Center",
+      align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: -0.07))
+    |> SetMaterial(material: Ink)
+  lines = SetCurveRadius(box + inner, radius: radius) + SetCurveRadius(rose, radius: radius * 0.6)
+  return ink(lines) + words + subtitle
+}
+
+geometry graph clear(strokes: Geometry, under: Bool) -> Geometry {
+  "Strokes and meshes cut away where under is true: where something else is drawn"
+  // A curve whose middle points are deleted would join its ends: as edges of a mesh, it splits.
+  // The mesh has no radius: it keeps it as an attribute of its own
+  parts = SeparateComponents(strokes)
+  curves = parts.curve
+    |> StoreNamedAttribute(name: "width", value: Radius())
+    |> CurveToMesh()
+    |> DeleteGeometry(under)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: NamedAttribute(name: "width", data_type: FLOAT))
+  return curves + DeleteGeometry(parts.mesh, under, domain: FACE)
+}
+
+geometry graph river(width: Float = 0.045 in 0.0.., spring: Float = 0.6 in 0.0..1.0) -> Geometry {
+  "The river on the valley floor: a ribbon that widens from its spring, in the west, as it flows east"
+  p = Position()
+  spine = CurveLine((-1.8, 0.0, 0.0), (1.8, 0.0, 0.0))
+    |> ResampleCurve(count: 200)
+    |> SetPosition(position: CombineXYZ(p.x, river_course(p.x)))
+  return ribbon_outline(spine, width: width, taper_start: spring, resolution: 400)
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph path_line() -> Geometry {
+  "The course of a path: from the river, south, up to the summit"
+  return BezierSegment(
+    64,
+    (-0.05, 0.12, 0.0),
+    (0.0, -0.55, 0.0),
+    (0.3, -0.95, 0.0),
+    (0.82, -0.76, 0.0))
+}
+
+geometry graph path(spine: Geometry, gap: Float = 0.035 in 0.001..) -> Geometry {
+  "A dashed path along spine: a row of dashes, drawn straight, then bent along it"
+  dash = ResampleCurve(CurveLine((0.0, 0.0, 0.0), CombineXYZ(x: gap * 0.6)), count: 4)
+  dashes = MeshLine(count: 50, offset: CombineXYZ(x: gap))
+    |> InstanceOnPoints(instance: dash)
+    |> RealizeInstances()
+  return flow_along_curve(dashes, spine, resolution: 1024)
+}
+
+geometry graph engraver(p: Vector = Position(), drawing: Float = 72.0 in 1.0..) -> Float {
+  "How far the engraver has got with the line at p, at this frame, from 0 to 1: the work goes west to east"
+  t = SceneTime().frame / drawing
+  start = (p.x + 1.9) / 3.8
+  return Clamp((t * 1.5 - start) * 2.0)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley, drawn over 72 frames"
+  lines = contours()
+  label = (-1.12, -0.95, 0.0)
+  way = path_line()
+  // The relief stops a little before the cartouche's box, at the banks, and on each side of the path
+  p = Position()
+  box = abs(p.x - label.x) < 0.63 and abs(p.y - label.y) < 0.29
+  banks = abs(p.y - river_course(p.x)) < 0.05
+  gap = GeometryProximity(CurveToMesh(way), sample_position: p, target_element: EDGES).distance
+  near = gap < 0.045
+  under = box or banks or near
+  // A hand, not a machine: the short lines of the shade taper at both ends, as a burin cuts them;
+  // every line of the relief swells, thins and wanders a little as it goes
+  shading = clear(cross_hatching(), under)
+    |> taper_ends(smoothness: 0.3)
+  relief = clear(lines, under) + shading
+    |> living_ink(amplitude: 0.03, frequency: 5.0, radius_variation: 0.8)
+  // arrow_head with fill: false is an outline, a curve: ink makes it a stroke like the path
+  route = path(way) + arrow_head(way, size: 0.07, angle: 28.0, fill: false)
+  // The ruled lines waver a little, and the ink spreads into the paper
+  drawn = frame() + SetCurveRadius(route, radius: 0.004)
+    |> ink_wobble(amplitude: 0.012, frequency: 3.0)
+    |> ink_bleed(radius: 0.004, roughness: 40.0)
+  // The hachures and the river have no line to trim: they appear when the engraver is halfway there
+  meshes = clear(hachures(lines), under) + river()
+    |> DeleteGeometry(engraver() < 0.5, domain: FACE)
+  // write_on draws nothing of a line not started, not even a dot
+  strokes = relief + drawn
+    |> write_on(progress: engraver())
+  return ink(strokes) + meshes + cartouche(label)
+}
+</script></bn-view>
+    <ul>
+      <li><code>engraver</code> gives each line its own progress: a line starts when the work, sweeping from west to east, reaches its middle, and takes a third of the time to finish. A field is computed per curve here, so <code>Position()</code> is the middle of each curve.</li>
+      <li>A line not yet started is not drawn at all: at progress 0, <code>write_on</code> deletes the stroke rather than leave a dot of it.</li>
+      <li>The hachures and the river are meshes, with no length to trim: each face appears when the work is halfway through its line.</li>
+    </ul>
+    <div class="pair">
+      <figure>
+        <img src="img/engraved-map-write-18.png" width="1000" height="750" loading="lazy" alt="Frame 18: only the western edge of the map is drawn, beside the cartouche">
+        <figcaption>Frame 18.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/engraved-map-write-36.png" width="1000" height="750" loading="lazy" alt="Frame 36: the western half of the map is drawn, the border half done">
+        <figcaption>Frame 36.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/engraved-map-write-54.png" width="1000" height="750" loading="lazy" alt="Frame 54: nearly all the map is drawn; the last strokes in the east are still short">
+        <figcaption>Frame 54.</figcaption>
+      </figure>
+    </div>
+    <p>
+      Press <kbd>Space</kbd> in Blender to play it. From frame 72 on, the map is whole: the picture at the top of this page.
+    </p>
+
+    <h2 id="tune">The knobs</h2>
+    <p>
+      Every graph has its inputs, on its node. A few to start with:
+    </p>
+    <table>
+      <tr><th>Where</th><th>Input</th><th>What it does</th></tr>
+      <tr><td><code>contours</code></td><td><code>interval</code>, <code>levels</code></td><td>The height between two contours, and how many there are. <code>hachures</code> has its own <code>interval</code>: keep the two equal.</td></tr>
+      <tr><td><code>hachures</code></td><td><code>spacing</code>, <code>weight</code>, <code>steepest</code>, <code>flat</code></td><td>How close the strokes are, how thick at most, the slope that gets full weight, the slope below which nothing is drawn.</td></tr>
+      <tr><td><code>shade</code></td><td><code>light</code>, <code>flat</code></td><td>Where the light comes from, and how far a slope must turn from it to be hatched.</td></tr>
+      <tr><td><code>cross_hatching</code></td><td><code>spacing</code>, <code>angle</code></td><td>The distance between hatch lines, and their direction.</td></tr>
+      <tr><td><code>frame</code>, <code>rosette</code></td><td><code>band</code>, <code>waves</code></td><td>The width of the border, and how many loops the braid and the rosette make.</td></tr>
+      <tr><td><code>cartouche</code></td><td><code>title</code></td><td>The name of your valley.</td></tr>
+      <tr><td><code>river</code></td><td><code>width</code>, <code>spring</code></td><td>How wide the river ends, and over how much of its course it widens.</td></tr>
+      <tr><td><code>engraver</code></td><td><code>drawing</code></td><td>How many frames the map takes to draw itself.</td></tr>
+    </table>
+    <p class="try"><strong>Try:</strong> change <code>valley_height</code>: move a summit, add a third one with another <code>summit</code>. The contours, the hachures and the shade all follow, since they all read the same height.</p>
+
+    <h2 id="files">Take it to Blender</h2>
+    <p>
+      The finished map, in one file. Drag the card onto empty space in Blender's 3D Viewport and keep <em>Instantiate the Example</em>: a new object carries <code>engraved_map</code>. A click on the card downloads the file.
+    </p>
+    <bn-file><script type="text/bn">
+// @module engraved_map_step7
+// @title Engraved map, step 7: the map draws itself
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use curves2d (wave_curve_2d)
+use deform2d (arrow_head, flow_along_curve, ribbon_outline)
+use hachures2d (guilloche, hatch_cross, lehmann_hachures)
+use ink2d (ink_bleed, ink_wobble, living_ink, taper_ends, write_on)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph shade(
+    p: Vector = Position(),
+    light: Vector = (-1.0, 1.0, 1.2),
+    flat: Float = 0.55
+) -> Float {
+  "How much the ground at p turns away from a light from the north-west: 0 on the flat, 1 in deep shade"
+  g = valley_slope(p)
+  facing = normalize(CombineXYZ(-g.x, -g.y, 1.0)) ⋅ normalize(light)
+  return Clamp((flat - facing) * 2.0, 0.0, 1.0)
+}
+
+geometry graph ruling(
+    angle: Float = 30.0,
+    spacing: Float = 0.03 in 0.001..,
+    size: Float = 4.6 in 0.1..
+) -> Geometry {
+  "Parallel lines across a square of size, spacing apart, at angle: where hatch_cross puts its lines"
+  // One line of 460 segments, copied every spacing; hatch_cross inks around its whole steps
+  line = MeshLine(
+    count: 461,
+    start_location: CombineXYZ(y: size * -0.5),
+    offset: CombineXYZ(y: size / 460.0))
+  count = ceil(size / spacing)
+  first = floor(count * -0.5) * spacing
+  return MeshLine(
+      count: count,
+      start_location: CombineXYZ(x: first),
+      offset: CombineXYZ(x: spacing))
+    |> InstanceOnPoints(instance: line)
+    |> RealizeInstances()
+    |> TransformGeometry(rotation: CombineXYZ(z: radians(-angle)))
+}
+
+geometry graph engrave(
+    lines: Geometry,
+    amount: Float,
+    weight: Float = 0.0045 in 0.0..,
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..
+) -> Geometry {
+  "Cuts lines where amount, the ink they hold, is low or off the map; elsewhere amount sets their width"
+  p = Position()
+  off = amount < 0.05 or abs(p.x) > width * 0.5 or abs(p.y) > height * 0.5
+  return lines
+    |> DeleteGeometry(off)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: amount * weight)
+}
+
+geometry graph cross_hatching(spacing: Float = 0.03 in 0.001.., angle: Float = 30.0) -> Geometry {
+  "Engraved lines over the slopes in shade, and a second pass across them where the shade is deepest"
+  s = shade()
+  first = engrave(
+    ruling(angle, spacing),
+    hatch_cross(angle: angle, spacing: spacing, cross_angle: 0.0, shade: s) * Clamp(s * 2.0))
+  across = angle + 90.0
+  second = engrave(
+    ruling(across, spacing),
+    hatch_cross(angle: across, spacing: spacing, cross_angle: 0.0, shade: s * 2.0 - 1.0)
+      * Clamp(s * 4.0 - 2.0))
+  return first + second
+}
+
+geometry graph frame(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    band: Float = 0.1 in 0.0..,
+    waves: Float = 150.0 in 1.0..,
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "The neat line around the map, a guilloché band, and a thick outer line"
+  inner = Quadrilateral(width, height).curve
+  outer = Quadrilateral(width + band * 2.0, height + band * 2.0).curve
+  // Three waves along the middle of the band, a third of a wave apart, braid into a guilloché
+  middle = Quadrilateral(width + band, height + band).curve
+    |> FilletCurve(radius: band * 0.5, mode: "Poly", count: 8)
+  braid = wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.333, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.667, resolution: 2048)
+  return SetCurveRadius(inner + braid, radius: radius) + SetCurveRadius(outer, radius: radius * 2.5)
+}
+
+geometry graph rosette(
+    centre: Vector,
+    size: Float = 0.2 in 0.0..,
+    waves: Float = 16.0 in 1.0..
+) -> Geometry {
+  "A guilloché rosette: four of the curves guilloche traces, one inside the other"
+  r = repeat(4, curves: JoinGeometry()) {
+    t = SplineParameter().factor
+    k = iteration / 3.0
+    // r2 at 0 keeps the loops round; r1 and p change from one curve to the next
+    shape = guilloche(t, r1: 0.95 - k * 0.45, r2: 0.0, p: 0.12 + k * 0.06, waves: waves)
+    ring = CurveCircle(resolution: 900).curve
+      |> SetPosition(position: centre + shape * size)
+    return (curves: curves + ring)
+  }
+  return r.curves
+}
+
+geometry graph cartouche(
+    centre: Vector = (-1.12, -0.95, 0.0),
+    width: Float = 1.2 in 0.1..,
+    height: Float = 0.52 in 0.1..,
+    title: String = "THE LITTLE VALLEY",
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "A framed label in a corner of the map: a rosette and the title"
+  box = Quadrilateral(width, height).curve
+    |> FilletCurve(radius: 0.05, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  inner = Quadrilateral(width - 0.05, height - 0.05).curve
+    |> FilletCurve(radius: 0.03, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  rose = rosette(centre + CombineXYZ(x: width * -0.31), size: height * 0.34)
+  words = StringToCurves(title, size: 0.07, align_x: "Center", align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: 0.04))
+    |> SetMaterial(material: Ink)
+  subtitle = StringToCurves(
+      "engraved relief",
+      size: 0.05,
+      align_x: "Center",
+      align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: -0.07))
+    |> SetMaterial(material: Ink)
+  lines = SetCurveRadius(box + inner, radius: radius) + SetCurveRadius(rose, radius: radius * 0.6)
+  return ink(lines) + words + subtitle
+}
+
+geometry graph clear(strokes: Geometry, under: Bool) -> Geometry {
+  "Strokes and meshes cut away where under is true: where something else is drawn"
+  // A curve whose middle points are deleted would join its ends: as edges of a mesh, it splits.
+  // The mesh has no radius: it keeps it as an attribute of its own
+  parts = SeparateComponents(strokes)
+  curves = parts.curve
+    |> StoreNamedAttribute(name: "width", value: Radius())
+    |> CurveToMesh()
+    |> DeleteGeometry(under)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: NamedAttribute(name: "width", data_type: FLOAT))
+  return curves + DeleteGeometry(parts.mesh, under, domain: FACE)
+}
+
+geometry graph river(width: Float = 0.045 in 0.0.., spring: Float = 0.6 in 0.0..1.0) -> Geometry {
+  "The river on the valley floor: a ribbon that widens from its spring, in the west, as it flows east"
+  p = Position()
+  spine = CurveLine((-1.8, 0.0, 0.0), (1.8, 0.0, 0.0))
+    |> ResampleCurve(count: 200)
+    |> SetPosition(position: CombineXYZ(p.x, river_course(p.x)))
+  return ribbon_outline(spine, width: width, taper_start: spring, resolution: 400)
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph path_line() -> Geometry {
+  "The course of a path: from the river, south, up to the summit"
+  return BezierSegment(
+    64,
+    (-0.05, 0.12, 0.0),
+    (0.0, -0.55, 0.0),
+    (0.3, -0.95, 0.0),
+    (0.82, -0.76, 0.0))
+}
+
+geometry graph path(spine: Geometry, gap: Float = 0.035 in 0.001..) -> Geometry {
+  "A dashed path along spine: a row of dashes, drawn straight, then bent along it"
+  dash = ResampleCurve(CurveLine((0.0, 0.0, 0.0), CombineXYZ(x: gap * 0.6)), count: 4)
+  dashes = MeshLine(count: 50, offset: CombineXYZ(x: gap))
+    |> InstanceOnPoints(instance: dash)
+    |> RealizeInstances()
+  return flow_along_curve(dashes, spine, resolution: 1024)
+}
+
+geometry graph engraver(p: Vector = Position(), drawing: Float = 72.0 in 1.0..) -> Float {
+  "How far the engraver has got with the line at p, at this frame, from 0 to 1: the work goes west to east"
+  t = SceneTime().frame / drawing
+  start = (p.x + 1.9) / 3.8
+  return Clamp((t * 1.5 - start) * 2.0)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley, drawn over 72 frames"
+  lines = contours()
+  label = (-1.12, -0.95, 0.0)
+  way = path_line()
+  // The relief stops a little before the cartouche's box, at the banks, and on each side of the path
+  p = Position()
+  box = abs(p.x - label.x) < 0.63 and abs(p.y - label.y) < 0.29
+  banks = abs(p.y - river_course(p.x)) < 0.05
+  gap = GeometryProximity(CurveToMesh(way), sample_position: p, target_element: EDGES).distance
+  near = gap < 0.045
+  under = box or banks or near
+  // A hand, not a machine: the short lines of the shade taper at both ends, as a burin cuts them;
+  // every line of the relief swells, thins and wanders a little as it goes
+  shading = clear(cross_hatching(), under)
+    |> taper_ends(smoothness: 0.3)
+  relief = clear(lines, under) + shading
+    |> living_ink(amplitude: 0.03, frequency: 5.0, radius_variation: 0.8)
+  // arrow_head with fill: false is an outline, a curve: ink makes it a stroke like the path
+  route = path(way) + arrow_head(way, size: 0.07, angle: 28.0, fill: false)
+  // The ruled lines waver a little, and the ink spreads into the paper
+  drawn = frame() + SetCurveRadius(route, radius: 0.004)
+    |> ink_wobble(amplitude: 0.012, frequency: 3.0)
+    |> ink_bleed(radius: 0.004, roughness: 40.0)
+  // The hachures and the river have no line to trim: they appear when the engraver is halfway there
+  meshes = clear(hachures(lines), under) + river()
+    |> DeleteGeometry(engraver() < 0.5, domain: FACE)
+  // write_on draws nothing of a line not started, not even a dot
+  strokes = relief + drawn
+    |> write_on(progress: engraver())
+  return ink(strokes) + meshes + cartouche(label)
+}
+</script></bn-file>
+    <p>The steps before it, to start again from any of them:</p>
+    <div class="cards">
+      <bn-file><script type="text/bn">
+// @module engraved_map_step1
+// @title Engraved map, step 1: a valley and its contour lines
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  return contours()
+    |> ink()
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module engraved_map_step2
+// @title Engraved map, step 2: Lehmann hachures
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use hachures2d (lehmann_hachures)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  lines = contours()
+  return ink(lines) + hachures(lines)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module engraved_map_step3
+// @title Engraved map, step 3: cross-hatching in the shade
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use hachures2d (hatch_cross, lehmann_hachures)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph shade(
+    p: Vector = Position(),
+    light: Vector = (-1.0, 1.0, 1.2),
+    flat: Float = 0.55
+) -> Float {
+  "How much the ground at p turns away from a light from the north-west: 0 on the flat, 1 in deep shade"
+  g = valley_slope(p)
+  facing = normalize(CombineXYZ(-g.x, -g.y, 1.0)) ⋅ normalize(light)
+  return Clamp((flat - facing) * 2.0, 0.0, 1.0)
+}
+
+geometry graph ruling(
+    angle: Float = 30.0,
+    spacing: Float = 0.03 in 0.001..,
+    size: Float = 4.6 in 0.1..
+) -> Geometry {
+  "Parallel lines across a square of size, spacing apart, at angle: where hatch_cross puts its lines"
+  // One line of 460 segments, copied every spacing; hatch_cross inks around its whole steps
+  line = MeshLine(
+    count: 461,
+    start_location: CombineXYZ(y: size * -0.5),
+    offset: CombineXYZ(y: size / 460.0))
+  count = ceil(size / spacing)
+  first = floor(count * -0.5) * spacing
+  return MeshLine(
+      count: count,
+      start_location: CombineXYZ(x: first),
+      offset: CombineXYZ(x: spacing))
+    |> InstanceOnPoints(instance: line)
+    |> RealizeInstances()
+    |> TransformGeometry(rotation: CombineXYZ(z: radians(-angle)))
+}
+
+geometry graph engrave(
+    lines: Geometry,
+    amount: Float,
+    weight: Float = 0.0045 in 0.0..,
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..
+) -> Geometry {
+  "Cuts lines where amount, the ink they hold, is low or off the map; elsewhere amount sets their width"
+  p = Position()
+  off = amount < 0.05 or abs(p.x) > width * 0.5 or abs(p.y) > height * 0.5
+  return lines
+    |> DeleteGeometry(off)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: amount * weight)
+}
+
+geometry graph cross_hatching(spacing: Float = 0.03 in 0.001.., angle: Float = 30.0) -> Geometry {
+  "Engraved lines over the slopes in shade, and a second pass across them where the shade is deepest"
+  s = shade()
+  first = engrave(
+    ruling(angle, spacing),
+    hatch_cross(angle: angle, spacing: spacing, cross_angle: 0.0, shade: s) * Clamp(s * 2.0))
+  across = angle + 90.0
+  second = engrave(
+    ruling(across, spacing),
+    hatch_cross(angle: across, spacing: spacing, cross_angle: 0.0, shade: s * 2.0 - 1.0)
+      * Clamp(s * 4.0 - 2.0))
+  return first + second
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  lines = contours()
+  return ink(lines + cross_hatching()) + hachures(lines)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module engraved_map_step4
+// @title Engraved map, step 4: a guilloché border and a cartouche
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use curves2d (wave_curve_2d)
+use hachures2d (guilloche, hatch_cross, lehmann_hachures)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph shade(
+    p: Vector = Position(),
+    light: Vector = (-1.0, 1.0, 1.2),
+    flat: Float = 0.55
+) -> Float {
+  "How much the ground at p turns away from a light from the north-west: 0 on the flat, 1 in deep shade"
+  g = valley_slope(p)
+  facing = normalize(CombineXYZ(-g.x, -g.y, 1.0)) ⋅ normalize(light)
+  return Clamp((flat - facing) * 2.0, 0.0, 1.0)
+}
+
+geometry graph ruling(
+    angle: Float = 30.0,
+    spacing: Float = 0.03 in 0.001..,
+    size: Float = 4.6 in 0.1..
+) -> Geometry {
+  "Parallel lines across a square of size, spacing apart, at angle: where hatch_cross puts its lines"
+  // One line of 460 segments, copied every spacing; hatch_cross inks around its whole steps
+  line = MeshLine(
+    count: 461,
+    start_location: CombineXYZ(y: size * -0.5),
+    offset: CombineXYZ(y: size / 460.0))
+  count = ceil(size / spacing)
+  first = floor(count * -0.5) * spacing
+  return MeshLine(
+      count: count,
+      start_location: CombineXYZ(x: first),
+      offset: CombineXYZ(x: spacing))
+    |> InstanceOnPoints(instance: line)
+    |> RealizeInstances()
+    |> TransformGeometry(rotation: CombineXYZ(z: radians(-angle)))
+}
+
+geometry graph engrave(
+    lines: Geometry,
+    amount: Float,
+    weight: Float = 0.0045 in 0.0..,
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..
+) -> Geometry {
+  "Cuts lines where amount, the ink they hold, is low or off the map; elsewhere amount sets their width"
+  p = Position()
+  off = amount < 0.05 or abs(p.x) > width * 0.5 or abs(p.y) > height * 0.5
+  return lines
+    |> DeleteGeometry(off)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: amount * weight)
+}
+
+geometry graph cross_hatching(spacing: Float = 0.03 in 0.001.., angle: Float = 30.0) -> Geometry {
+  "Engraved lines over the slopes in shade, and a second pass across them where the shade is deepest"
+  s = shade()
+  first = engrave(
+    ruling(angle, spacing),
+    hatch_cross(angle: angle, spacing: spacing, cross_angle: 0.0, shade: s) * Clamp(s * 2.0))
+  across = angle + 90.0
+  second = engrave(
+    ruling(across, spacing),
+    hatch_cross(angle: across, spacing: spacing, cross_angle: 0.0, shade: s * 2.0 - 1.0)
+      * Clamp(s * 4.0 - 2.0))
+  return first + second
+}
+
+geometry graph frame(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    band: Float = 0.1 in 0.0..,
+    waves: Float = 150.0 in 1.0..,
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "The neat line around the map, a guilloché band, and a thick outer line"
+  inner = Quadrilateral(width, height).curve
+  outer = Quadrilateral(width + band * 2.0, height + band * 2.0).curve
+  // Three waves along the middle of the band, a third of a wave apart, braid into a guilloché
+  middle = Quadrilateral(width + band, height + band).curve
+    |> FilletCurve(radius: band * 0.5, mode: "Poly", count: 8)
+  braid = wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.333, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.667, resolution: 2048)
+  return SetCurveRadius(inner + braid, radius: radius) + SetCurveRadius(outer, radius: radius * 2.5)
+}
+
+geometry graph rosette(
+    centre: Vector,
+    size: Float = 0.2 in 0.0..,
+    waves: Float = 16.0 in 1.0..
+) -> Geometry {
+  "A guilloché rosette: four of the curves guilloche traces, one inside the other"
+  r = repeat(4, curves: JoinGeometry()) {
+    t = SplineParameter().factor
+    k = iteration / 3.0
+    // r2 at 0 keeps the loops round; r1 and p change from one curve to the next
+    shape = guilloche(t, r1: 0.95 - k * 0.45, r2: 0.0, p: 0.12 + k * 0.06, waves: waves)
+    ring = CurveCircle(resolution: 900).curve
+      |> SetPosition(position: centre + shape * size)
+    return (curves: curves + ring)
+  }
+  return r.curves
+}
+
+geometry graph cartouche(
+    centre: Vector = (-1.12, -0.95, 0.0),
+    width: Float = 1.2 in 0.1..,
+    height: Float = 0.52 in 0.1..,
+    title: String = "THE LITTLE VALLEY",
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "A framed label in a corner of the map: a rosette and the title"
+  box = Quadrilateral(width, height).curve
+    |> FilletCurve(radius: 0.05, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  inner = Quadrilateral(width - 0.05, height - 0.05).curve
+    |> FilletCurve(radius: 0.03, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  rose = rosette(centre + CombineXYZ(x: width * -0.31), size: height * 0.34)
+  words = StringToCurves(title, size: 0.07, align_x: "Center", align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: 0.04))
+    |> SetMaterial(material: Ink)
+  subtitle = StringToCurves(
+      "engraved relief",
+      size: 0.05,
+      align_x: "Center",
+      align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: -0.07))
+    |> SetMaterial(material: Ink)
+  lines = SetCurveRadius(box + inner, radius: radius) + SetCurveRadius(rose, radius: radius * 0.6)
+  return ink(lines) + words + subtitle
+}
+
+geometry graph clear(strokes: Geometry, under: Bool) -> Geometry {
+  "Strokes and meshes cut away where under is true: where something else is drawn"
+  // A curve whose middle points are deleted would join its ends: as edges of a mesh, it splits.
+  // The mesh has no radius: it keeps it as an attribute of its own
+  parts = SeparateComponents(strokes)
+  curves = parts.curve
+    |> StoreNamedAttribute(name: "width", value: Radius())
+    |> CurveToMesh()
+    |> DeleteGeometry(under)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: NamedAttribute(name: "width", data_type: FLOAT))
+  return curves + DeleteGeometry(parts.mesh, under, domain: FACE)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  lines = contours()
+  label = (-1.12, -0.95, 0.0)
+  // The relief stops a little before the cartouche's box
+  p = Position() - label
+  under = abs(p.x) < 0.63 and abs(p.y) < 0.29
+  strokes = clear(lines + cross_hatching(), under)
+  return ink(strokes + frame()) + clear(hachures(lines), under) + cartouche(label)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module engraved_map_step5
+// @title Engraved map, step 5: a river and a path, along their curves
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use curves2d (wave_curve_2d)
+use deform2d (arrow_head, flow_along_curve, ribbon_outline)
+use hachures2d (guilloche, hatch_cross, lehmann_hachures)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph shade(
+    p: Vector = Position(),
+    light: Vector = (-1.0, 1.0, 1.2),
+    flat: Float = 0.55
+) -> Float {
+  "How much the ground at p turns away from a light from the north-west: 0 on the flat, 1 in deep shade"
+  g = valley_slope(p)
+  facing = normalize(CombineXYZ(-g.x, -g.y, 1.0)) ⋅ normalize(light)
+  return Clamp((flat - facing) * 2.0, 0.0, 1.0)
+}
+
+geometry graph ruling(
+    angle: Float = 30.0,
+    spacing: Float = 0.03 in 0.001..,
+    size: Float = 4.6 in 0.1..
+) -> Geometry {
+  "Parallel lines across a square of size, spacing apart, at angle: where hatch_cross puts its lines"
+  // One line of 460 segments, copied every spacing; hatch_cross inks around its whole steps
+  line = MeshLine(
+    count: 461,
+    start_location: CombineXYZ(y: size * -0.5),
+    offset: CombineXYZ(y: size / 460.0))
+  count = ceil(size / spacing)
+  first = floor(count * -0.5) * spacing
+  return MeshLine(
+      count: count,
+      start_location: CombineXYZ(x: first),
+      offset: CombineXYZ(x: spacing))
+    |> InstanceOnPoints(instance: line)
+    |> RealizeInstances()
+    |> TransformGeometry(rotation: CombineXYZ(z: radians(-angle)))
+}
+
+geometry graph engrave(
+    lines: Geometry,
+    amount: Float,
+    weight: Float = 0.0045 in 0.0..,
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..
+) -> Geometry {
+  "Cuts lines where amount, the ink they hold, is low or off the map; elsewhere amount sets their width"
+  p = Position()
+  off = amount < 0.05 or abs(p.x) > width * 0.5 or abs(p.y) > height * 0.5
+  return lines
+    |> DeleteGeometry(off)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: amount * weight)
+}
+
+geometry graph cross_hatching(spacing: Float = 0.03 in 0.001.., angle: Float = 30.0) -> Geometry {
+  "Engraved lines over the slopes in shade, and a second pass across them where the shade is deepest"
+  s = shade()
+  first = engrave(
+    ruling(angle, spacing),
+    hatch_cross(angle: angle, spacing: spacing, cross_angle: 0.0, shade: s) * Clamp(s * 2.0))
+  across = angle + 90.0
+  second = engrave(
+    ruling(across, spacing),
+    hatch_cross(angle: across, spacing: spacing, cross_angle: 0.0, shade: s * 2.0 - 1.0)
+      * Clamp(s * 4.0 - 2.0))
+  return first + second
+}
+
+geometry graph frame(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    band: Float = 0.1 in 0.0..,
+    waves: Float = 150.0 in 1.0..,
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "The neat line around the map, a guilloché band, and a thick outer line"
+  inner = Quadrilateral(width, height).curve
+  outer = Quadrilateral(width + band * 2.0, height + band * 2.0).curve
+  // Three waves along the middle of the band, a third of a wave apart, braid into a guilloché
+  middle = Quadrilateral(width + band, height + band).curve
+    |> FilletCurve(radius: band * 0.5, mode: "Poly", count: 8)
+  braid = wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.333, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.667, resolution: 2048)
+  return SetCurveRadius(inner + braid, radius: radius) + SetCurveRadius(outer, radius: radius * 2.5)
+}
+
+geometry graph rosette(
+    centre: Vector,
+    size: Float = 0.2 in 0.0..,
+    waves: Float = 16.0 in 1.0..
+) -> Geometry {
+  "A guilloché rosette: four of the curves guilloche traces, one inside the other"
+  r = repeat(4, curves: JoinGeometry()) {
+    t = SplineParameter().factor
+    k = iteration / 3.0
+    // r2 at 0 keeps the loops round; r1 and p change from one curve to the next
+    shape = guilloche(t, r1: 0.95 - k * 0.45, r2: 0.0, p: 0.12 + k * 0.06, waves: waves)
+    ring = CurveCircle(resolution: 900).curve
+      |> SetPosition(position: centre + shape * size)
+    return (curves: curves + ring)
+  }
+  return r.curves
+}
+
+geometry graph cartouche(
+    centre: Vector = (-1.12, -0.95, 0.0),
+    width: Float = 1.2 in 0.1..,
+    height: Float = 0.52 in 0.1..,
+    title: String = "THE LITTLE VALLEY",
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "A framed label in a corner of the map: a rosette and the title"
+  box = Quadrilateral(width, height).curve
+    |> FilletCurve(radius: 0.05, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  inner = Quadrilateral(width - 0.05, height - 0.05).curve
+    |> FilletCurve(radius: 0.03, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  rose = rosette(centre + CombineXYZ(x: width * -0.31), size: height * 0.34)
+  words = StringToCurves(title, size: 0.07, align_x: "Center", align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: 0.04))
+    |> SetMaterial(material: Ink)
+  subtitle = StringToCurves(
+      "engraved relief",
+      size: 0.05,
+      align_x: "Center",
+      align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: -0.07))
+    |> SetMaterial(material: Ink)
+  lines = SetCurveRadius(box + inner, radius: radius) + SetCurveRadius(rose, radius: radius * 0.6)
+  return ink(lines) + words + subtitle
+}
+
+geometry graph clear(strokes: Geometry, under: Bool) -> Geometry {
+  "Strokes and meshes cut away where under is true: where something else is drawn"
+  // A curve whose middle points are deleted would join its ends: as edges of a mesh, it splits.
+  // The mesh has no radius: it keeps it as an attribute of its own
+  parts = SeparateComponents(strokes)
+  curves = parts.curve
+    |> StoreNamedAttribute(name: "width", value: Radius())
+    |> CurveToMesh()
+    |> DeleteGeometry(under)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: NamedAttribute(name: "width", data_type: FLOAT))
+  return curves + DeleteGeometry(parts.mesh, under, domain: FACE)
+}
+
+geometry graph river(width: Float = 0.045 in 0.0.., spring: Float = 0.6 in 0.0..1.0) -> Geometry {
+  "The river on the valley floor: a ribbon that widens from its spring, in the west, as it flows east"
+  p = Position()
+  spine = CurveLine((-1.8, 0.0, 0.0), (1.8, 0.0, 0.0))
+    |> ResampleCurve(count: 200)
+    |> SetPosition(position: CombineXYZ(p.x, river_course(p.x)))
+  return ribbon_outline(spine, width: width, taper_start: spring, resolution: 400)
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph path_line() -> Geometry {
+  "The course of a path: from the river, south, up to the summit"
+  return BezierSegment(
+    64,
+    (-0.05, 0.12, 0.0),
+    (0.0, -0.55, 0.0),
+    (0.3, -0.95, 0.0),
+    (0.82, -0.76, 0.0))
+}
+
+geometry graph path(spine: Geometry, gap: Float = 0.035 in 0.001..) -> Geometry {
+  "A dashed path along spine: a row of dashes, drawn straight, then bent along it"
+  dash = ResampleCurve(CurveLine((0.0, 0.0, 0.0), CombineXYZ(x: gap * 0.6)), count: 4)
+  dashes = MeshLine(count: 50, offset: CombineXYZ(x: gap))
+    |> InstanceOnPoints(instance: dash)
+    |> RealizeInstances()
+  return flow_along_curve(dashes, spine, resolution: 1024)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  lines = contours()
+  label = (-1.12, -0.95, 0.0)
+  way = path_line()
+  // The relief stops a little before the cartouche's box, at the banks, and on each side of the path
+  p = Position()
+  box = abs(p.x - label.x) < 0.63 and abs(p.y - label.y) < 0.29
+  banks = abs(p.y - river_course(p.x)) < 0.05
+  gap = GeometryProximity(CurveToMesh(way), sample_position: p, target_element: EDGES).distance
+  near = gap < 0.045
+  under = box or banks or near
+  strokes = clear(lines + cross_hatching(), under)
+  // arrow_head with fill: false is an outline, a curve: ink makes it a stroke like the path
+  route = path(way) + arrow_head(way, size: 0.07, angle: 28.0, fill: false)
+  meshes = clear(hachures(lines), under) + river()
+  return ink(strokes + frame() + SetCurveRadius(route, radius: 0.004)) + meshes + cartouche(label)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module engraved_map_step6
+// @title Engraved map, step 6: living ink
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example engraved_map
+
+use curves2d (wave_curve_2d)
+use deform2d (arrow_head, flow_along_curve, ribbon_outline)
+use hachures2d (guilloche, hatch_cross, lehmann_hachures)
+use ink2d (ink_bleed, ink_wobble, living_ink, taper_ends)
+use sdf2d (sdf_segment_2d)
+
+geometry graph summit(p: Vector, centre: Vector, height: Float, width: Float) -> Float {
+  "A round hill: height at its centre, falling off over about width"
+  d = distance(p, centre) / width
+  return height * exp(-d * d)
+}
+
+geometry graph river_course(x: Float) -> Float {
+  "Where the river runs: its y at x, a slow bend from west to east"
+  return 0.3 * sin(x * 1.3 + 0.6) - 0.12 * x
+}
+
+geometry graph valley_height(p: Vector = Position()) -> Float {
+  "Height of the ground at p: a gorge between two shoulders, two summits, a side stream, some noise"
+  // d: how far north of the river; the gorge is steep, the shoulders above it gentle
+  d = p.y - river_course(p.x)
+  gorge = 0.6 * (1.0 - exp(-d * d * 8.0)) + 0.2 * max(abs(d) - 0.4, 0.0)
+  north = summit(p, (-0.75, 0.85, 0.0), 0.85, 0.45)
+  south = summit(p, (1.0, -0.8, 0.0), 0.65, 0.4)
+  stream = sdf_segment_2d(p, a: (1.0, 1.4, 0.0), b: (0.35, 0.15, 0.0), thickness: 0.0)
+  side = 0.3 * exp(-stream * stream * 30.0)
+  // Rough ground, but not on the floor of the gorge: the river keeps it smooth
+  noise = NoiseTexture(vector: p, scale: 1.4, detail: 3.0).factor - 0.5
+  rough = noise * 0.3 * Clamp(abs(d) * 4.0)
+  return gorge + north + south - side + rough
+}
+
+geometry graph valley_slope(p: Vector = Position()) -> Vector {
+  "The gradient of valley_height: it points uphill, and its length is the slope"
+  e = 0.005
+  h = valley_height(p)
+  dx = valley_height(p + CombineXYZ(x: e)) - h
+  dy = valley_height(p + CombineXYZ(y: e)) - h
+  return CombineXYZ(dx / e, dy / e, 0.0)
+}
+
+geometry graph contours(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    interval: Float = 0.1 in 0.01..,
+    levels: Int = 16 in 1..64,
+    radius: Float = 0.004 in 0.0..
+) -> Geometry {
+  "One curve per level of valley_height, every interval; every fifth one twice as thick"
+  ground = Grid(width, height, 361, 261).mesh
+  r = repeat(levels, lines: JoinGeometry()) {
+    level = interval * (iteration + 1)
+    // The faces above the level; their edge, but not the edge of the map, is the contour
+    p = Position()
+    inside = abs(p.x) < width * 0.5 - 0.001 and abs(p.y) < height * 0.5 - 0.001
+    above = ground
+      |> DeleteGeometry(valley_height() < level, domain: FACE)
+      |> MeshToCurve(EdgeNeighbors().face_count == 1 and inside)
+    // Each point moves onto the level, along the slope: one step of Newton's method
+    g = valley_slope()
+    onto = p - g * ((valley_height() - level) / max(g ⋅ g, 0.0001))
+    thick = mod(iteration + 1, 5) == 0
+    line = above
+      |> SetPosition(position: onto)
+      |> SetCurveRadius(radius: Switch(thick, radius, radius * 2.0))
+    return (lines: lines + line)
+  }
+  return r.lines
+}
+
+geometry graph ink(strokes: Geometry, color: Color = (0.06, 0.045, 0.035)) -> Geometry {
+  "Curves to Grease Pencil strokes, all of one ink"
+  return strokes
+    |> CurvesToGreasePencil(instances_as_layers: false)
+    |> SetGreasePencilColor(color: color)
+}
+
+shader(material: true) graph Ink() -> (surface: Shader) {
+  "The ink of the meshes: unlit, like a print, and of the colour of the strokes"
+  return (surface: Emission(color: (0.06, 0.045, 0.035), strength: 1.0))
+}
+
+geometry graph hachures(
+    lines: Geometry,
+    interval: Float = 0.1 in 0.01..,
+    spacing: Float = 0.028 in 0.001..,
+    weight: Float = 0.016 in 0.0..,
+    steepest: Float = 2.0 in 0.01..,
+    flat: Float = 0.45 in 0.0..
+) -> Geometry {
+  "Lehmann's hachures: from each contour down to the next, along the slope; the steeper, the thicker"
+  stroke = lehmann_hachures(gradient_dir: (1.0, 0.0, 0.0), slope: 1.0, length: 1.0, width: weight)
+  g = valley_slope()
+  steep = length(g)
+  // Down to the next contour, interval lower: interval / steep away; a gap is left before it
+  reach = min(interval / steep, 0.12) * 0.8
+  tip = Position() - g / steep * reach
+  return lines
+    |> ResampleCurve(mode: "Length", length: spacing)
+    |> InstanceOnPoints(
+      selection: steep > flat and abs(tip.x) < 1.8 and abs(tip.y) < 1.3,
+      instance: stroke,
+      rotation: CombineXYZ(z: atan2(-g.y, -g.x)),
+      scale: CombineXYZ(reach, min(steep / steepest, 1.0), 1.0))
+    |> RealizeInstances()
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph shade(
+    p: Vector = Position(),
+    light: Vector = (-1.0, 1.0, 1.2),
+    flat: Float = 0.55
+) -> Float {
+  "How much the ground at p turns away from a light from the north-west: 0 on the flat, 1 in deep shade"
+  g = valley_slope(p)
+  facing = normalize(CombineXYZ(-g.x, -g.y, 1.0)) ⋅ normalize(light)
+  return Clamp((flat - facing) * 2.0, 0.0, 1.0)
+}
+
+geometry graph ruling(
+    angle: Float = 30.0,
+    spacing: Float = 0.03 in 0.001..,
+    size: Float = 4.6 in 0.1..
+) -> Geometry {
+  "Parallel lines across a square of size, spacing apart, at angle: where hatch_cross puts its lines"
+  // One line of 460 segments, copied every spacing; hatch_cross inks around its whole steps
+  line = MeshLine(
+    count: 461,
+    start_location: CombineXYZ(y: size * -0.5),
+    offset: CombineXYZ(y: size / 460.0))
+  count = ceil(size / spacing)
+  first = floor(count * -0.5) * spacing
+  return MeshLine(
+      count: count,
+      start_location: CombineXYZ(x: first),
+      offset: CombineXYZ(x: spacing))
+    |> InstanceOnPoints(instance: line)
+    |> RealizeInstances()
+    |> TransformGeometry(rotation: CombineXYZ(z: radians(-angle)))
+}
+
+geometry graph engrave(
+    lines: Geometry,
+    amount: Float,
+    weight: Float = 0.0045 in 0.0..,
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..
+) -> Geometry {
+  "Cuts lines where amount, the ink they hold, is low or off the map; elsewhere amount sets their width"
+  p = Position()
+  off = amount < 0.05 or abs(p.x) > width * 0.5 or abs(p.y) > height * 0.5
+  return lines
+    |> DeleteGeometry(off)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: amount * weight)
+}
+
+geometry graph cross_hatching(spacing: Float = 0.03 in 0.001.., angle: Float = 30.0) -> Geometry {
+  "Engraved lines over the slopes in shade, and a second pass across them where the shade is deepest"
+  s = shade()
+  first = engrave(
+    ruling(angle, spacing),
+    hatch_cross(angle: angle, spacing: spacing, cross_angle: 0.0, shade: s) * Clamp(s * 2.0))
+  across = angle + 90.0
+  second = engrave(
+    ruling(across, spacing),
+    hatch_cross(angle: across, spacing: spacing, cross_angle: 0.0, shade: s * 2.0 - 1.0)
+      * Clamp(s * 4.0 - 2.0))
+  return first + second
+}
+
+geometry graph frame(
+    width: Float = 3.6 in 0.1..,
+    height: Float = 2.6 in 0.1..,
+    band: Float = 0.1 in 0.0..,
+    waves: Float = 150.0 in 1.0..,
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "The neat line around the map, a guilloché band, and a thick outer line"
+  inner = Quadrilateral(width, height).curve
+  outer = Quadrilateral(width + band * 2.0, height + band * 2.0).curve
+  // Three waves along the middle of the band, a third of a wave apart, braid into a guilloché
+  middle = Quadrilateral(width + band, height + band).curve
+    |> FilletCurve(radius: band * 0.5, mode: "Poly", count: 8)
+  braid = wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.333, resolution: 2048)
+    + wave_curve_2d(middle, amplitude: band * 0.3, periods: waves, phase: 0.667, resolution: 2048)
+  return SetCurveRadius(inner + braid, radius: radius) + SetCurveRadius(outer, radius: radius * 2.5)
+}
+
+geometry graph rosette(
+    centre: Vector,
+    size: Float = 0.2 in 0.0..,
+    waves: Float = 16.0 in 1.0..
+) -> Geometry {
+  "A guilloché rosette: four of the curves guilloche traces, one inside the other"
+  r = repeat(4, curves: JoinGeometry()) {
+    t = SplineParameter().factor
+    k = iteration / 3.0
+    // r2 at 0 keeps the loops round; r1 and p change from one curve to the next
+    shape = guilloche(t, r1: 0.95 - k * 0.45, r2: 0.0, p: 0.12 + k * 0.06, waves: waves)
+    ring = CurveCircle(resolution: 900).curve
+      |> SetPosition(position: centre + shape * size)
+    return (curves: curves + ring)
+  }
+  return r.curves
+}
+
+geometry graph cartouche(
+    centre: Vector = (-1.12, -0.95, 0.0),
+    width: Float = 1.2 in 0.1..,
+    height: Float = 0.52 in 0.1..,
+    title: String = "THE LITTLE VALLEY",
+    radius: Float = 0.003 in 0.0..
+) -> Geometry {
+  "A framed label in a corner of the map: a rosette and the title"
+  box = Quadrilateral(width, height).curve
+    |> FilletCurve(radius: 0.05, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  inner = Quadrilateral(width - 0.05, height - 0.05).curve
+    |> FilletCurve(radius: 0.03, mode: "Poly", count: 6)
+    |> TransformGeometry(translation: centre)
+  rose = rosette(centre + CombineXYZ(x: width * -0.31), size: height * 0.34)
+  words = StringToCurves(title, size: 0.07, align_x: "Center", align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: 0.04))
+    |> SetMaterial(material: Ink)
+  subtitle = StringToCurves(
+      "engraved relief",
+      size: 0.05,
+      align_x: "Center",
+      align_y: "Middle").curve_instances
+    |> RealizeInstances()
+    |> FillCurve()
+    |> TransformGeometry(translation: centre + CombineXYZ(x: width * 0.15, y: -0.07))
+    |> SetMaterial(material: Ink)
+  lines = SetCurveRadius(box + inner, radius: radius) + SetCurveRadius(rose, radius: radius * 0.6)
+  return ink(lines) + words + subtitle
+}
+
+geometry graph clear(strokes: Geometry, under: Bool) -> Geometry {
+  "Strokes and meshes cut away where under is true: where something else is drawn"
+  // A curve whose middle points are deleted would join its ends: as edges of a mesh, it splits.
+  // The mesh has no radius: it keeps it as an attribute of its own
+  parts = SeparateComponents(strokes)
+  curves = parts.curve
+    |> StoreNamedAttribute(name: "width", value: Radius())
+    |> CurveToMesh()
+    |> DeleteGeometry(under)
+    |> MeshToCurve()
+    |> SetCurveRadius(radius: NamedAttribute(name: "width", data_type: FLOAT))
+  return curves + DeleteGeometry(parts.mesh, under, domain: FACE)
+}
+
+geometry graph river(width: Float = 0.045 in 0.0.., spring: Float = 0.6 in 0.0..1.0) -> Geometry {
+  "The river on the valley floor: a ribbon that widens from its spring, in the west, as it flows east"
+  p = Position()
+  spine = CurveLine((-1.8, 0.0, 0.0), (1.8, 0.0, 0.0))
+    |> ResampleCurve(count: 200)
+    |> SetPosition(position: CombineXYZ(p.x, river_course(p.x)))
+  return ribbon_outline(spine, width: width, taper_start: spring, resolution: 400)
+    |> SetMaterial(material: Ink)
+}
+
+geometry graph path_line() -> Geometry {
+  "The course of a path: from the river, south, up to the summit"
+  return BezierSegment(
+    64,
+    (-0.05, 0.12, 0.0),
+    (0.0, -0.55, 0.0),
+    (0.3, -0.95, 0.0),
+    (0.82, -0.76, 0.0))
+}
+
+geometry graph path(spine: Geometry, gap: Float = 0.035 in 0.001..) -> Geometry {
+  "A dashed path along spine: a row of dashes, drawn straight, then bent along it"
+  dash = ResampleCurve(CurveLine((0.0, 0.0, 0.0), CombineXYZ(x: gap * 0.6)), count: 4)
+  dashes = MeshLine(count: 50, offset: CombineXYZ(x: gap))
+    |> InstanceOnPoints(instance: dash)
+    |> RealizeInstances()
+  return flow_along_curve(dashes, spine, resolution: 1024)
+}
+
+geometry graph engraved_map() -> Geometry {
+  "An engraved relief map of a small valley"
+  lines = contours()
+  label = (-1.12, -0.95, 0.0)
+  way = path_line()
+  // The relief stops a little before the cartouche's box, at the banks, and on each side of the path
+  p = Position()
+  box = abs(p.x - label.x) < 0.63 and abs(p.y - label.y) < 0.29
+  banks = abs(p.y - river_course(p.x)) < 0.05
+  gap = GeometryProximity(CurveToMesh(way), sample_position: p, target_element: EDGES).distance
+  near = gap < 0.045
+  under = box or banks or near
+  // A hand, not a machine: the short lines of the shade taper at both ends, as a burin cuts them;
+  // every line of the relief swells, thins and wanders a little as it goes
+  shading = clear(cross_hatching(), under)
+    |> taper_ends(smoothness: 0.3)
+  relief = clear(lines, under) + shading
+    |> living_ink(amplitude: 0.03, frequency: 5.0, radius_variation: 0.8)
+  // arrow_head with fill: false is an outline, a curve: ink makes it a stroke like the path
+  route = path(way) + arrow_head(way, size: 0.07, angle: 28.0, fill: false)
+  // The ruled lines waver a little, and the ink spreads into the paper
+  drawn = frame() + SetCurveRadius(route, radius: 0.004)
+    |> ink_wobble(amplitude: 0.012, frequency: 3.0)
+    |> ink_bleed(radius: 0.004, roughness: 40.0)
+  meshes = clear(hachures(lines), under) + river()
+  return ink(relief + drawn) + meshes + cartouche(label)
+}
+</script></bn-file>
+    </div>
+    <p>
+      To render it as on this page: a camera straight above the map, <em>Orthographic</em>, <em>Orthographic Scale</em> 4.3; EEVEE; <em>View Transform</em> set to <em>Standard</em>, so the ink and the paper keep their colours. Under the map, a plane with a paper colour, unlit.
+    </p>
+    <p class="muted">
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/engraved_map"><code>examples/tutorials/engraved_map/</code></a>.
+    </p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A title sequence — Motion Design 2D tutorial — Ludopant</title>
+<meta name="description" content="An After Effects style title sequence in Blender&#x27;s Geometry Nodes, with the Motion Design 2D pack: letters revealed and animated about their centre, a tagline typed on, sparks off the letters, a comet with its echoes and its trail, in .bn.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/tutorials/title-sequence.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="A title sequence — Motion Design 2D tutorial — Ludopant">
+<meta property="og:description" content="An After Effects style title sequence in Blender&#x27;s Geometry Nodes, with the Motion Design 2D pack: letters revealed and animated about their centre, a tagline typed on, sparks off the letters, a comet with its echoes and its trail, in .bn.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/tutorials/title-sequence.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/title-sequence-step7.webp">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-view.js"></script>
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-file.js"></script>
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs tuto">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › <a href="../motion-design/">Motion Design 2D</a> › Tutorial: A title sequence</p>
+<h1>A title sequence</h1>
+    <p class="lead">
+      Four seconds of broadcast title: the letters of a name fall into place in a random order and throw sparks, a line draws out under them, a tagline is typed on, a comet sweeps past with its echoes and its trail, and everything leaves again.
+      The kind of thing you would make in After Effects with text animators, Particular and Echo, made here in Geometry Nodes, in one <code>.bn</code> file that grows a few lines at each step.
+    </p>
+    <figure>
+      <img src="img/title-sequence-step7.webp" width="640" height="427" alt="On a dark violet card, the words NEON NIGHTS fall into place letter by letter, turning and shrinking, sparks rising off them; a thin cyan line draws out under them and LIVE FROM GEOMETRY NODES is typed on; a white comet with a pink trail and cyan echoes sweeps past; then the words leave and the card is empty again">
+      <figcaption>Where we are going: the whole sequence, which loops. Seven steps, each one a few lines more.</figcaption>
+    </figure>
+
+    <h2 id="learn">You will learn</h2>
+    <ul>
+      <li><strong>The craft.</strong> How a motion designer builds a title: a range selector that brings the letters in one after the other, animators that move, turn, scale and fade each one about its own centre, a typewriter, particles born on the letters, and a moving element given weight by its echoes and its trail; then the timing that ties them together, in and out.</li>
+      <li><strong>The language.</strong> Time in a graph: <code>SceneTime().frame</code> turned into a progress from 0 to 1 by a <code>Clamp</code>, one per part; small graphs that each take a progress; the same field (a letter's opacity) read by the material and by the particles; simulation zones you never write, because the modules hold them.</li>
+    </ul>
+    <p>
+      This page goes faster on the basics than <a href="https://marcgardent.github.io/base-node-language/tutorials/lunar-ground.html">Lunar ground</a>, which explains a graph, a pipe (<code>|&gt;</code>), a material and the way a step file is read. Read it first if those are new to you.
+    </p>
+
+    <h2 id="before">Before you start</h2>
+    <p>
+      You need three things:
+    </p>
+    <ul>
+      <li>Blender 5.</li>
+      <li>The <a href="https://marcgardent.github.io/base-node-language/#blender">Base Node add-on</a>, version 0.13.1 or later.</li>
+      <li>The <a href="../motion-design/"><strong>Motion Design 2D</strong></a> pack, sold by the author of Base Node apart from the open source project. It carries the three modules this tutorial uses. The steps on this page are free to read, copy and change; the modules they call are not.</li>
+    </ul>
+    <table>
+      <tr><th>Module</th><th>After</th><th>What it gives</th></tr>
+      <tr><td><code>text_animate</code></td><td>After Effects' text animators and range selectors</td><td>A text as one instance per letter (<code>text_characters</code>), a selector that reveals it by letter, word or line, forward, backward or at random (<code>text_reveal</code>), <code>animate_characters</code> about each letter's centre, <code>typewriter</code>, <code>text_on_path</code>.</td></tr>
+      <tr><td><code>particles2d</code></td><td>Fusion's particles, After Effects' Particular</td><td>Emitters (a point, a line, a circle, any shape or the outline of a text), <code>particles_2d</code> with speed, spread, gravity, drag and turbulence, sprites and dots that fade and grow over their life.</td></tr>
+      <tr><td><code>echoes</code></td><td>After Effects' Echo, Fusion's Trails</td><td><code>echoes</code>: copies of a moving element as it was a few frames before, fading and tinted; <code>motion_trail</code>: a curve through where it went, thinning to its tail.</td></tr>
+    </table>
+    <p>
+      Every block below is a complete <code>.bn</code> file, its code beside the nodes it builds. It opens on the graph the step adds or changes; the others are in the menu at the top of the block. Two ways to try a step:
+    </p>
+    <ul>
+      <li><strong>Drag it.</strong> Drag the file icon of its block, or its title, onto empty space in Blender's 3D Viewport, and keep <em>Instantiate the Example</em>: a new object carries <code>title_sequence</code> at the 3D cursor. A click on the file icon downloads the file instead.</li>
+      <li><strong>Paste it.</strong> Press the copy button of its block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>, on any mesh object: the graph writes its own title and ignores the mesh it is given.</li>
+    </ul>
+    <p>
+      Look at it from above (<kbd>Numpad 7</kbd>), in <em>Material Preview</em>, and play it from the first frame (<kbd>Shift</kbd>+<kbd>Left</kbd>, then <kbd>Space</kbd>): from step 5 on, the sparks and the comet are simulations, and a simulation only knows a frame it has played its way to.
+      The animations are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/title_sequence/render.py"><code>render.py</code></a>, which adds a dark gradient card behind the title, an orthographic camera straight above it, and a bloom in the compositor. They are rendered with EEVEE, the 96 frames of the sequence one after the other.
+    </p>
+
+    <h2 id="idea">A letter is an instance</h2>
+    <p>
+      Everything in this tutorial rests on one choice of <code>text_animate</code>: a text is not one mesh but one instance per letter, each knowing its index, its word, its line and its centre.
+      An instance can be moved, turned and scaled on its own, cheaply, before any letter is filled. So the work of a step is always the same: compute, for each letter, a number from 0 to 1 that says how far along it is, then let an animator turn that number into a move.
+      Only at the end does <code>text_mesh</code> fill the letters into a mesh for the render.
+    </p>
+
+    <h2 id="step-1"><span class="n">1.</span> A title, one instance per letter</h2>
+    <p>
+      <code>text_characters</code> writes the title with Blender's <em>String to Curves</em>, a curve instance for each letter, from the origin on its baseline. <code>centred</code> moves it so that its middle is at the origin, and <code>text_mesh</code> fills it.
+    </p>
+    <p class="file">step1_title.bn: <code>title_sequence</code>, <code>centred</code>, <code>Title</code></p>
+    <bn-view graph="title_sequence" height="480"><script type="text/bn">
+// @module title_sequence_step1
+// @title A title sequence, step 1: a title, one instance per letter
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use text_animate (text_characters, text_mesh)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light"
+  return (surface: Emission(color: (1.0, 0.86, 0.62), strength: 2.5))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title_sequence() -> Geometry {
+  "A title, one curve instance per letter, centred and filled"
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  return chars
+    |> text_mesh()
+    |> SetMaterial(material: Title)
+}
+</script></bn-view>
+    <ul>
+      <li><code>use text_animate (…)</code> brings in the groups this file calls, by name.</li>
+      <li><code>use_radius: false</code> matters: the letters are curves, of radius 1 by default, and a <code>BoundingBox</code> that counted the radius would be a metre too wide on every side.</li>
+      <li><code>Title</code> is an <code>Emission</code>, not a lit surface: on a title card, letters give light rather than take it, and the bloom of the compositor finds them by their brightness.</li>
+    </ul>
+    <figure>
+      <img src="img/title-sequence-step1.png" width="960" height="640" loading="lazy" alt="NEON NIGHTS in warm white capitals, glowing softly, in the middle of a dark violet card">
+      <figcaption>Step 1. The title at rest. Nothing moves yet.</figcaption>
+    </figure>
+
+    <h2 id="step-2"><span class="n">2.</span> Revealed letter by letter</h2>
+    <p>
+      Time comes in. <code>SceneTime().frame</code> is the frame being played; <code>Clamp((frame - 6) / 36)</code> makes it a <code>progress</code> that stays at 0 until frame 6, runs to 1 by frame 42 and stays there. Every animated part of this tutorial is driven this way, by a progress of its own.
+    </p>
+    <p class="file">step2_reveal.bn: <code>title_sequence</code>, <code>Title</code></p>
+    <bn-view graph="title_sequence" height="480"><script type="text/bn">
+// @module title_sequence_step2
+// @title A title sequence, step 2: revealed letter by letter
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title_sequence() -> Geometry {
+  "A title revealed letter by letter, left to right, each fading in"
+  progress = Clamp(value: (SceneTime().frame - 6.0) / 36.0)
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(chars, progress: progress, softness: 3.0, by: Character, order: Forward)
+  return chars
+    |> animate_characters(amount: 1.0 - shown, offset: (0.0, 0.0, 0.0), opacity: 0.0)
+    |> text_mesh()
+    |> SetMaterial(material: Title)
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>The selector.</strong> <code>text_reveal</code> is After Effects' range selector: a number on each letter, 0 while it is not shown yet, 1 once it is. As <code>progress</code> goes from 0 to 1, it goes over the letters one after the other, <code>by: Character</code>, <code>order: Forward</code>.</li>
+      <li><strong>The softness.</strong> <code>softness: 3.0</code> makes each letter take the time of three letters to come in, so that three are always on their way: a soft wave across the word instead of letters that blink on.</li>
+      <li><strong>The animator.</strong> <code>animate_characters</code> applies its changes by <code>amount</code>: 1 gives a letter all of them, 0 none. A letter not shown yet must have all of them, so <code>amount: 1.0 - shown</code>. Here the only change is <code>opacity: 0.0</code>, and no offset.</li>
+      <li><strong>The material.</strong> The animator stores <code>opacity</code> on each letter, and <code>text_mesh</code> passes it to the points of the mesh. <code>Title</code> now reads it with an <code>Attribute</code> node and mixes the light with a <code>TransparentBSDF</code>.</li>
+    </ol>
+    <figure>
+      <img src="img/title-sequence-step2.webp" width="640" height="427" loading="lazy" alt="NEON NIGHTS fades in from left to right, a few letters at a time">
+      <figcaption>Step 2. A wave of light from left to right, three letters wide.</figcaption>
+    </figure>
+
+    <h2 id="step-3"><span class="n">3.</span> Letters that fall into place</h2>
+    <p>
+      The same selector and the same animator, with more in it: each letter now comes from 90 cm above, turned by 40°, three times its size and transparent, and lands at rest. And the letters come in a random order.
+    </p>
+    <p class="file">step3_animators.bn: <code>title_sequence</code></p>
+    <bn-view graph="title_sequence" height="480"><script type="text/bn">
+// @module title_sequence_step3
+// @title A title sequence, step 3: letters that fall into place, in a random order
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title_sequence() -> Geometry {
+  "A title whose letters fall into place in a random order: from above, turned, three times their size and transparent"
+  progress = Clamp(value: (SceneTime().frame - 6.0) / 30.0)
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(
+    chars,
+    progress: progress,
+    softness: 4.0,
+    by: Character,
+    order: Random,
+    seed: 3)
+  return chars
+    |> animate_characters(
+      amount: 1.0 - shown,
+      offset: (0.0, 0.9, 0.0),
+      rotation: -0.7,
+      scale: 3.0,
+      opacity: 0.0)
+    |> text_mesh()
+    |> SetMaterial(material: Title)
+}
+</script></bn-view>
+    <ul>
+      <li><strong>About its centre.</strong> A letter turns and scales about its own middle, the <code>pivot</code> that <code>text_characters</code> stored, not about the origin of the title: that is what makes a letter spin in place instead of swinging around the word.</li>
+      <li><strong><code>order: Random</code></strong> shuffles the letters by a <code>seed</code>. Change the seed for another order; the order is the same at every playback, on every machine.</li>
+      <li><strong>Why the letters land, not leave.</strong> The animator describes where a letter comes <em>from</em>: at <code>amount</code> 0 it is at rest. That is After Effects' way, and it means the title is always readable at the end, whatever you put in the animator.</li>
+      <li>Try <code>by: Word</code>: the two words come in one after the other, each letter of a word with its word.</li>
+    </ul>
+    <figure>
+      <img src="img/title-sequence-step3.webp" width="640" height="427" loading="lazy" alt="Large, turned, transparent letters drop into place one by one in a random order until NEON NIGHTS is complete">
+      <figcaption>Step 3. Random order, softness 4: the letters overlap in time, as if dealt onto the card.</figcaption>
+    </figure>
+
+    <h2 id="step-4"><span class="n">4.</span> A tagline, typed on</h2>
+    <p>
+      A second line, small, widely spaced, in cyan, typed on under the title once it has landed, with a cursor that blinks after the last letter. The file now splits its work into small graphs, each with its own progress: <code>title</code> and <code>tagline</code>.
+    </p>
+    <p class="file">step4_typed.bn: <code>tagline</code>, <code>title_sequence</code>, <code>title</code></p>
+    <bn-view graph="tagline" height="480"><script type="text/bn">
+// @module title_sequence_step4
+// @title A title sequence, step 4: a tagline typed on, with its cursor
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal, typewriter)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+shader(material: true) graph Tagline() -> (surface: Shader) {
+  "Cyan letters that give their own light"
+  return (surface: Emission(color: (0.25, 0.8, 1.0), strength: 3.0))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title(progress: Float(subtype: FACTOR)) -> Geometry {
+  "The title, its letters falling into place in a random order as progress goes from 0 to 1"
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(
+    chars,
+    progress: progress,
+    softness: 4.0,
+    by: Character,
+    order: Random,
+    seed: 3)
+  return chars
+    |> animate_characters(
+      amount: 1.0 - shown,
+      offset: (0.0, 0.9, 0.0),
+      rotation: -0.7,
+      scale: 3.0,
+      opacity: 0.0)
+    |> text_mesh()
+    |> SetMaterial(material: Title)
+}
+
+geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometry {
+  "A line under the title, typed on as progress goes from 0 to 1, a cursor after its last letter, shown while it types and when blink is true"
+  chars = text_characters(text: "LIVE FROM GEOMETRY NODES", size: 0.3, character_spacing: 1.6)
+    |> centred()
+  typed = typewriter(chars, progress: progress)
+  line = BoundingBox(RealizeInstances(chars), use_radius: false)
+  end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
+  some = DomainSize(typed, component: INSTANCES).instance_count > 0
+  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  shown = progress > 0.0 and (progress < 1.0 or blink)
+  cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
+    |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
+  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+    |> SetMaterial(material: Tagline)
+    |> TransformGeometry(translation: (0.0, -1.05, 0.0))
+}
+
+geometry graph title_sequence() -> Geometry {
+  "The title falls into place, then its tagline is typed on under it"
+  f = SceneTime().frame
+  return title(progress: Clamp(value: (f - 6.0) / 30.0))
+    + tagline(progress: Clamp(value: (f - 34.0) / 30.0), blink: mod(f, 12.0) < 7.0)
+}
+</script></bn-view>
+    <ul>
+      <li><strong><code>typewriter</code></strong> keeps the first letters only, as many as <code>progress</code> says, and removes the others: no fade, a letter is there or not, as typed.</li>
+      <li><strong>The cursor</strong> stands after the box of the letters typed so far, or at the start of the line before the first one (<code>some</code>). It is shown while the line types, then blinks twice a second: <code>mod(frame, 12) &lt; 7</code>.</li>
+      <li><strong>Overlapping times.</strong> The title runs from frame 6 to 36 and the tagline from 34 to 64: the line starts before the title has quite finished. Parts that wait for each other look mechanical; a little overlap makes a sequence.</li>
+    </ul>
+    <figure>
+      <img src="img/title-sequence-step4.webp" width="640" height="427" loading="lazy" alt="NEON NIGHTS falls into place, then LIVE FROM GEOMETRY NODES is typed under it in small cyan capitals, a cursor blinking at its end">
+      <figcaption>Step 4. The tagline is typed letter by letter, the cursor ahead of it.</figcaption>
+    </figure>
+
+    <h2 id="step-5"><span class="n">5.</span> Sparks off the letters</h2>
+    <p>
+      Particles, born on the outline of the letters as they land. <code>title</code> now returns the letters still as instances, so that two things can read them: <code>text_mesh</code> for the render, and <code>sparks</code> for the particles.
+    </p>
+    <p class="file">step5_sparks.bn: <code>sparks</code>, <code>title_sequence</code>, <code>title</code>, <code>Spark</code></p>
+    <bn-view graph="sparks" height="480"><script type="text/bn">
+// @module title_sequence_step5
+// @title A title sequence, step 5: sparks off the letters
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use particles2d (particle_sprites_2d, particles_2d, shape_emitter)
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal, typewriter)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+shader(material: true) graph Tagline() -> (surface: Shader) {
+  "Cyan letters that give their own light"
+  return (surface: Emission(color: (0.25, 0.8, 1.0), strength: 3.0))
+}
+
+shader(material: true) graph Spark() -> (surface: Shader) {
+  "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
+  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
+  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
+  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
+  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title(progress: Float(subtype: FACTOR)) -> Geometry {
+  "The letters of the title, still one instance each, falling into place in a random order as progress goes from 0 to 1"
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(
+    chars,
+    progress: progress,
+    softness: 4.0,
+    by: Character,
+    order: Random,
+    seed: 3)
+  return animate_characters(
+    chars,
+    amount: 1.0 - shown,
+    offset: (0.0, 0.9, 0.0),
+    rotation: -0.7,
+    scale: 3.0,
+    opacity: 0.0)
+}
+
+geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometry {
+  "A line under the title, typed on as progress goes from 0 to 1, a cursor after its last letter, shown while it types and when blink is true"
+  chars = text_characters(text: "LIVE FROM GEOMETRY NODES", size: 0.3, character_spacing: 1.6)
+    |> centred()
+  typed = typewriter(chars, progress: progress)
+  line = BoundingBox(RealizeInstances(chars), use_radius: false)
+  end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
+  some = DomainSize(typed, component: INSTANCES).instance_count > 0
+  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  shown = progress > 0.0 and (progress < 1.0 or blink)
+  cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
+    |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
+  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+    |> SetMaterial(material: Tagline)
+    |> TransformGeometry(translation: (0.0, -1.05, 0.0))
+}
+
+geometry graph sparks(letters: Geometry) -> Geometry {
+  "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
+  landed = DeleteGeometry(
+    letters,
+    selection: NamedAttribute(name: "opacity").attribute < 0.5,
+    domain: INSTANCE)
+  return shape_emitter(landed)
+    |> particles_2d(
+      rate: 300.0,
+      seed: 7,
+      speed: 1.3,
+      speed_random: 0.7,
+      spread: 1.6,
+      life: 1.0,
+      life_random: 0.6,
+      gravity: (0.0, 0.6, 0.0),
+      drag: 1.6,
+      turbulence: 3.0,
+      turbulence_size: 0.5)
+    |> particle_sprites_2d(size: 0.03, size_end: 0.3, fade_in: 0.2, fade_out: 0.6, stretch: 2.0)
+    |> SetMaterial(material: Spark)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.02))
+}
+
+geometry graph title_sequence() -> Geometry {
+  "The title falls into place throwing sparks off its letters, then its tagline is typed on under it"
+  f = SceneTime().frame
+  letters = title(progress: Clamp(value: (f - 6.0) / 30.0))
+  return (text_mesh(letters) |> SetMaterial(material: Title))
+    + sparks(letters)
+    + tagline(progress: Clamp(value: (f - 34.0) / 30.0), blink: mod(f, 12.0) < 7.0)
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>The emitter.</strong> <code>landed</code> keeps the letters more than half shown, read from the <code>opacity</code> the animator stored; <code>shape_emitter</code> makes their outline a curve to be born on. So a letter starts to spark when it lands, not before, and the sparks follow the reveal with no time of their own.</li>
+      <li><strong>The simulation.</strong> <code>particles_2d</code> gives each spark a speed (<code>speed</code>, up to 70 % less at random), toward <code>direction</code>, up by default, in a fan <code>spread</code> wide, 90° here. Every frame, <code>gravity</code> pulls it (up here: a light spark rises like an ember), <code>drag</code> slows it, <code>turbulence</code> stirs it with a noise that flows. It dies after <code>life</code>.</li>
+      <li><strong>The sprites.</strong> <code>particle_sprites_2d</code> puts a small disc on each spark, stretched along its speed (<code>stretch</code>) so that the fast ones streak, shrinking to <code>size_end</code> of its size and fading over the last 60 % of its life. It stores <code>opacity</code> and <code>life_factor</code> on each one.</li>
+      <li><strong>The colour.</strong> <code>Spark</code> reads them from the instancer: gold at its birth, magenta at its death. A spark that changes colour as it dies reads as hot.</li>
+    </ol>
+    <p>
+      The simulation zone is inside <code>particles_2d</code>: it starts at the first frame of the scene, which is why you play the sequence from there.
+    </p>
+    <figure>
+      <img src="img/title-sequence-step5.webp" width="640" height="427" loading="lazy" alt="As each letter of NEON NIGHTS lands, gold sparks rise from its outline, drift, turn pink and die">
+      <figcaption>Step 5. 300 sparks a second off the letters that have landed, rising, stirred, gold to magenta.</figcaption>
+    </figure>
+
+    <h2 id="step-6"><span class="n">6.</span> A comet, its echoes and its trail</h2>
+    <p>
+      A moving element to cross the frame: a bright disc that sweeps in from the left under the title and out at the top right. Alone, a small disc moving fast is hard to follow; its past makes it read as motion.
+    </p>
+    <p class="file">step6_comet.bn: <code>comet</code>, <code>title_sequence</code>, <code>Comet</code>, <code>Trail</code></p>
+    <bn-view graph="comet" height="480"><script type="text/bn">
+// @module title_sequence_step6
+// @title A title sequence, step 6: a comet, its echoes and its trail
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use echoes (echoes, motion_trail)
+use particles2d (particle_sprites_2d, particles_2d, shape_emitter)
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal, typewriter)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+shader(material: true) graph Tagline() -> (surface: Shader) {
+  "Cyan letters that give their own light"
+  return (surface: Emission(color: (0.25, 0.8, 1.0), strength: 3.0))
+}
+
+shader(material: true) graph Spark() -> (surface: Shader) {
+  "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
+  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
+  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
+  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
+  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+}
+
+shader(material: true) graph Comet() -> (surface: Shader) {
+  "The head and its echoes: white now, toward the tint stored on the oldest, as opaque as their opacity"
+  tint = Attribute(attribute_name: "tint").color
+  shown = Attribute(attribute_name: "opacity").factor
+  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: tint, strength: 4.0)))
+}
+
+shader(material: true) graph Trail() -> (surface: Shader) {
+  "A magenta trail, fading to its tail"
+  tail = Attribute(attribute_name: "trail_factor").factor
+  return (
+    surface: MixShader(
+      1.0 - tail,
+      TransparentBSDF(),
+      Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title(progress: Float(subtype: FACTOR)) -> Geometry {
+  "The letters of the title, still one instance each, falling into place in a random order as progress goes from 0 to 1"
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(
+    chars,
+    progress: progress,
+    softness: 4.0,
+    by: Character,
+    order: Random,
+    seed: 3)
+  return animate_characters(
+    chars,
+    amount: 1.0 - shown,
+    offset: (0.0, 0.9, 0.0),
+    rotation: -0.7,
+    scale: 3.0,
+    opacity: 0.0)
+}
+
+geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometry {
+  "A line under the title, typed on as progress goes from 0 to 1, a cursor after its last letter, shown while it types and when blink is true"
+  chars = text_characters(text: "LIVE FROM GEOMETRY NODES", size: 0.3, character_spacing: 1.6)
+    |> centred()
+  typed = typewriter(chars, progress: progress)
+  line = BoundingBox(RealizeInstances(chars), use_radius: false)
+  end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
+  some = DomainSize(typed, component: INSTANCES).instance_count > 0
+  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  shown = progress > 0.0 and (progress < 1.0 or blink)
+  cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
+    |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
+  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+    |> SetMaterial(material: Tagline)
+    |> TransformGeometry(translation: (0.0, -1.05, 0.0))
+}
+
+geometry graph sparks(letters: Geometry) -> Geometry {
+  "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
+  landed = DeleteGeometry(
+    letters,
+    selection: NamedAttribute(name: "opacity").attribute < 0.5,
+    domain: INSTANCE)
+  return shape_emitter(landed)
+    |> particles_2d(
+      rate: 300.0,
+      seed: 7,
+      speed: 1.3,
+      speed_random: 0.7,
+      spread: 1.6,
+      life: 1.0,
+      life_random: 0.6,
+      gravity: (0.0, 0.6, 0.0),
+      drag: 1.6,
+      turbulence: 3.0,
+      turbulence_size: 0.5)
+    |> particle_sprites_2d(size: 0.03, size_end: 0.3, fade_in: 0.2, fade_out: 0.6, stretch: 2.0)
+    |> SetMaterial(material: Spark)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.02))
+}
+
+geometry graph comet(progress: Float(subtype: FACTOR)) -> Geometry {
+  "A bright disc that sweeps in from the left, under the title, and out at the top right as progress goes from 0 to 1, easing in and out; its echoes over the frames before, and a trail that thins to its tail"
+  path = BezierSegment(64, (-7.5, -2.4, 0.0), (-1.5, -3.9, 0.0), (4.5, -2.6, 0.0), (6.8, 4.8, 0.0))
+  eased = progress * progress * (3.0 - 2.0 * progress)
+  at = SampleCurve(path, factor: eased).position
+  head = MeshCircle(vertices: 24, radius: 0.13, fill_type: NGON)
+    |> TransformGeometry(translation: at)
+  echoed = head
+    |> echoes(count: 6, every: 2, decay: 0.7, tint: (0.2, 0.75, 1.0, 1.0))
+    |> SetMaterial(material: Comet)
+  trail = Points(position: at)
+    |> motion_trail(frames: 14, radius: 0.09)
+    |> CurveToMesh(profile_curve: CurveCircle(resolution: 6, radius: 1.0), scale: Radius())
+    |> SetMaterial(material: Trail)
+  return echoed + trail
+    |> TransformGeometry(translation: (0.0, 0.0, 0.04))
+}
+
+geometry graph title_sequence() -> Geometry {
+  "The title falls into place throwing sparks off its letters, its tagline is typed on under it, and a comet sweeps past"
+  f = SceneTime().frame
+  letters = title(progress: Clamp(value: (f - 6.0) / 30.0))
+  return (text_mesh(letters) |> SetMaterial(material: Title))
+    + sparks(letters)
+    + tagline(progress: Clamp(value: (f - 34.0) / 30.0), blink: mod(f, 12.0) < 7.0)
+    + comet(progress: Clamp(value: (f - 36.0) / 36.0))
+}
+</script></bn-view>
+    <ul>
+      <li><strong>The path.</strong> A <code>BezierSegment</code>, from out of the frame to out of the frame. <code>SampleCurve</code> gives the point at a factor of its length, and <code>progress * progress * (3 - 2 * progress)</code> eases it: the comet leaves slowly, rushes, and slows down.</li>
+      <li><strong><code>echoes</code></strong> keeps the disc as it was over the last frames and shows six copies, every two frames: each one 70 % as opaque as the one before, and tinted from white toward cyan. The echoes of a mesh come out as a mesh, the opacity and tint on its points: <code>Comet</code> reads them there, not from the instancer as the sparks do.</li>
+      <li><strong><code>motion_trail</code></strong> draws a curve through where the comet's centre went over the last 14 frames, its radius thinning from 9 cm to nothing at the tail; <code>CurveToMesh</code> gives it a body and <code>Trail</code> fades it by <code>trail_factor</code>.</li>
+      <li>Both hold their own simulation zone. Neither knows anything about the path: they would echo and trail anything that moves, a letter or a spark.</li>
+    </ul>
+    <figure>
+      <img src="img/title-sequence-step6.webp" width="640" height="427" loading="lazy" alt="Under the sparking title and its tagline, a white comet sweeps in from the left trailing a pink line and cyan dots, curves up past the end of the title and leaves at the top right">
+      <figcaption>Step 6. The trail is continuous, the echoes are beads along it: two readings of the same past.</figcaption>
+    </figure>
+
+    <h2 id="step-7"><span class="n">7.</span> The whole sequence, in and out</h2>
+    <p>
+      The last step is timing. A line draws out under the title, the sequence holds, then everything leaves in turn and the card is empty again at frame 96, where it started: the sequence loops.
+    </p>
+    <p class="file">step7_final.bn: <code>title_sequence</code>, <code>title</code>, <code>rule</code>, <code>ease</code></p>
+    <bn-view graph="title_sequence" height="480"><script type="text/bn">
+// @module title_sequence_step7
+// @title A title sequence, step 7: the whole sequence, in and out
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use echoes (echoes, motion_trail)
+use particles2d (particle_sprites_2d, particles_2d, shape_emitter)
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal, typewriter)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+shader(material: true) graph Tagline() -> (surface: Shader) {
+  "Cyan letters that give their own light"
+  return (surface: Emission(color: (0.25, 0.8, 1.0), strength: 3.0))
+}
+
+shader(material: true) graph Spark() -> (surface: Shader) {
+  "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
+  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
+  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
+  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
+  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+}
+
+shader(material: true) graph Comet() -> (surface: Shader) {
+  "The head and its echoes: white now, toward the tint stored on the oldest, as opaque as their opacity"
+  tint = Attribute(attribute_name: "tint").color
+  shown = Attribute(attribute_name: "opacity").factor
+  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: tint, strength: 4.0)))
+}
+
+shader(material: true) graph Trail() -> (surface: Shader) {
+  "A magenta trail, fading to its tail"
+  tail = Attribute(attribute_name: "trail_factor").factor
+  return (
+    surface: MixShader(
+      1.0 - tail,
+      TransparentBSDF(),
+      Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph ease(t: Float(subtype: FACTOR)) -> Float {
+  "t from 0 to 1, slow at both ends (smoothstep)"
+  return t * t * (3.0 - 2.0 * t)
+}
+
+geometry graph title(progress: Float(subtype: FACTOR), out: Float(subtype: FACTOR)) -> Geometry {
+  "The letters of the title, still one instance each, falling into place in a random order as progress goes from 0 to 1, then leaving word by word, growing and fading, as out goes from 0 to 1"
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(
+    chars,
+    progress: progress,
+    softness: 4.0,
+    by: Character,
+    order: Random,
+    seed: 3)
+  gone = text_reveal(chars, progress: out, softness: 1.0, by: Word, order: Forward)
+  return chars
+    |> animate_characters(
+      amount: 1.0 - shown,
+      offset: (0.0, 0.9, 0.0),
+      rotation: -0.7,
+      scale: 3.0,
+      opacity: 0.0)
+    |> animate_characters(amount: gone, offset: (0.0, 0.3, 0.0), scale: 1.8, opacity: 0.0)
+}
+
+geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometry {
+  "A line under the title, typed on as progress goes from 0 to 1, a cursor after its last letter, shown while it types and when blink is true"
+  chars = text_characters(text: "LIVE FROM GEOMETRY NODES", size: 0.3, character_spacing: 1.6)
+    |> centred()
+  typed = typewriter(chars, progress: progress)
+  line = BoundingBox(RealizeInstances(chars), use_radius: false)
+  end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
+  some = DomainSize(typed, component: INSTANCES).instance_count > 0
+  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  shown = progress > 0.0 and (progress < 1.0 or blink)
+  cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
+    |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
+  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+    |> SetMaterial(material: Tagline)
+    |> TransformGeometry(translation: (0.0, -1.05, 0.0))
+}
+
+geometry graph sparks(letters: Geometry) -> Geometry {
+  "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
+  landed = DeleteGeometry(
+    letters,
+    selection: NamedAttribute(name: "opacity").attribute < 0.5,
+    domain: INSTANCE)
+  return shape_emitter(landed)
+    |> particles_2d(
+      rate: 300.0,
+      seed: 7,
+      speed: 1.3,
+      speed_random: 0.7,
+      spread: 1.6,
+      life: 1.0,
+      life_random: 0.6,
+      gravity: (0.0, 0.6, 0.0),
+      drag: 1.6,
+      turbulence: 3.0,
+      turbulence_size: 0.5)
+    |> particle_sprites_2d(size: 0.03, size_end: 0.3, fade_in: 0.2, fade_out: 0.6, stretch: 2.0)
+    |> SetMaterial(material: Spark)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.02))
+}
+
+geometry graph comet(progress: Float(subtype: FACTOR)) -> Geometry {
+  "A bright disc that sweeps in from the left, under the title, and out at the top right as progress goes from 0 to 1, easing in and out; its echoes over the frames before, and a trail that thins to its tail"
+  path = BezierSegment(64, (-7.5, -2.4, 0.0), (-1.5, -3.9, 0.0), (4.5, -2.6, 0.0), (6.8, 4.8, 0.0))
+  at = SampleCurve(path, factor: ease(progress)).position
+  head = MeshCircle(vertices: 24, radius: 0.13, fill_type: NGON)
+    |> TransformGeometry(translation: at)
+  echoed = head
+    |> echoes(count: 6, every: 2, decay: 0.7, tint: (0.2, 0.75, 1.0, 1.0))
+    |> SetMaterial(material: Comet)
+  trail = Points(position: at)
+    |> motion_trail(frames: 14, radius: 0.09)
+    |> CurveToMesh(profile_curve: CurveCircle(resolution: 6, radius: 1.0), scale: Radius())
+    |> SetMaterial(material: Trail)
+  return echoed + trail
+    |> TransformGeometry(translation: (0.0, 0.0, 0.04))
+}
+
+geometry graph rule(width: Float(subtype: DISTANCE)) -> Geometry {
+  "A thin line between the title and its tagline, width wide, about the middle"
+  return Grid(size_x: width, size_y: 0.022, vertices_x: 2, vertices_y: 2)
+    |> TransformGeometry(translation: (0.0, -0.66, 0.0))
+    |> SetMaterial(material: Tagline)
+}
+
+geometry graph title_sequence() -> Geometry {
+  "Four seconds: the title falls into place throwing sparks off its letters, a line draws out under it, its tagline is typed on, a comet sweeps past; then the title leaves word by word, the tagline is typed off and the line draws back in, to an empty card"
+  f = SceneTime().frame
+  // Every part, in from 0 to 1 and out from 0 to 1, by the frame
+  letters = title(progress: Clamp(value: (f - 6.0) / 30.0), out: Clamp(value: (f - 66.0) / 12.0))
+  typed = Clamp(value: (f - 34.0) / 30.0) - Clamp(value: (f - 64.0) / 10.0)
+  drawn = ease(Clamp(value: (f - 26.0) / 14.0)) - ease(Clamp(value: (f - 72.0) / 8.0))
+  return (text_mesh(letters) |> SetMaterial(material: Title))
+    + sparks(letters)
+    + rule(width: 7.6 * drawn)
+    + tagline(progress: typed, blink: mod(f, 12.0) < 7.0)
+    + comet(progress: Clamp(value: (f - 34.0) / 32.0))
+}
+</script></bn-view>
+    <ul>
+      <li><strong>Two animators in a row.</strong> <code>title</code> takes a second progress, <code>out</code>, and a second <code>animate_characters</code> after the first: by <code>Word</code>, <code>Forward</code>, each word grows to 1.8 times its size and fades. The opacities multiply, so a letter can be on its way in and out at once.</li>
+      <li><strong>Typed off.</strong> The tagline's progress is a progress in minus a progress out: it climbs to 1 and comes back to 0, and the typewriter erases the line from its end, the cursor ahead.</li>
+      <li><strong>The line.</strong> <code>rule</code> is a thin <code>Grid</code> whose width is a progress too, eased in and out by <code>ease</code>, which the comet now uses as well.</li>
+      <li><strong>The timeline.</strong> All the times are in <code>title_sequence</code>, one line each: to slow the sequence down or move a part, you change a number there, not inside the parts.</li>
+    </ul>
+    <figure>
+      <img src="img/title-sequence-step7.webp" width="640" height="427" loading="lazy" alt="The full sequence: the title lands and sparks, a cyan line draws out, the tagline is typed on, the comet sweeps past, then NEON and NIGHTS grow and fade one after the other, the tagline is erased and the line draws back in">
+      <figcaption>Step 7. Four seconds, from an empty card back to an empty card.</figcaption>
+    </figure>
+
+    <h2 id="tune">The knobs</h2>
+    <p>
+      Every module group has its inputs, on its node in the Geometry Node editor. A few to start with:
+    </p>
+    <table>
+      <tr><th>Where</th><th>Input</th><th>What it does</th></tr>
+      <tr><td><code>text_reveal</code></td><td><code>by</code>, <code>order</code>, <code>seed</code></td><td>Letter, word or line; forward, backward or at random, shuffled by the seed.</td></tr>
+      <tr><td><code>text_reveal</code></td><td><code>softness</code></td><td>How many letters are on their way at once; 0 for letters that switch on.</td></tr>
+      <tr><td><code>animate_characters</code></td><td><code>offset</code>, <code>rotation</code>, <code>scale</code>, <code>opacity</code></td><td>Where a letter comes from, how turned, how big, how transparent, about its centre.</td></tr>
+      <tr><td><code>particles_2d</code></td><td><code>rate</code>, <code>speed</code>, <code>spread</code>, <code>life</code></td><td>How many sparks a second, how fast, how wide a fan, how long they live.</td></tr>
+      <tr><td><code>particles_2d</code></td><td><code>gravity</code>, <code>drag</code>, <code>turbulence</code></td><td>The pull (a vector: up, down or sideways), the slowing down, the stirring.</td></tr>
+      <tr><td><code>particle_sprites_2d</code></td><td><code>size</code>, <code>size_end</code>, <code>stretch</code></td><td>The size at birth, the size at death as a factor of it, the streak along the speed.</td></tr>
+      <tr><td><code>echoes</code></td><td><code>count</code>, <code>every</code>, <code>decay</code>, <code>tint</code></td><td>How many echoes, how many frames apart, how fast they fade, toward what colour.</td></tr>
+      <tr><td><code>motion_trail</code></td><td><code>frames</code>, <code>radius</code></td><td>How long the trail is, in frames, and how thick at its head.</td></tr>
+    </table>
+    <p class="try"><strong>Try:</strong> on step 7, set the title's <code>order</code> to <code>Backward</code> and <code>by</code> to <code>Word</code>. Set the sparks' <code>gravity</code> to <code>(0.0, -2.0, 0.0)</code>: they fall like molten metal. Set <code>every</code> of <code>echoes</code> to 1 and <code>count</code> to 12: the beads become a smear.</p>
+    <p>
+      To use your own title, change the two texts: <code>centred</code> keeps them in the middle, whatever their length. For a longer title, give <code>text_characters</code> a <code>width</code>: it wraps by words into lines, and <code>by: Line</code> brings them in one line at a time.
+    </p>
+
+    <h2 id="files">Take it to Blender</h2>
+    <p>
+      The whole sequence, in one file. Drag the card onto empty space in Blender's 3D Viewport and keep <em>Instantiate the Example</em>: a new object carries <code>title_sequence</code>. Then play it from the first frame. A click on the card downloads the file.
+    </p>
+    <bn-file><script type="text/bn">
+// @module title_sequence_step7
+// @title A title sequence, step 7: the whole sequence, in and out
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use echoes (echoes, motion_trail)
+use particles2d (particle_sprites_2d, particles_2d, shape_emitter)
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal, typewriter)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+shader(material: true) graph Tagline() -> (surface: Shader) {
+  "Cyan letters that give their own light"
+  return (surface: Emission(color: (0.25, 0.8, 1.0), strength: 3.0))
+}
+
+shader(material: true) graph Spark() -> (surface: Shader) {
+  "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
+  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
+  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
+  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
+  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+}
+
+shader(material: true) graph Comet() -> (surface: Shader) {
+  "The head and its echoes: white now, toward the tint stored on the oldest, as opaque as their opacity"
+  tint = Attribute(attribute_name: "tint").color
+  shown = Attribute(attribute_name: "opacity").factor
+  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: tint, strength: 4.0)))
+}
+
+shader(material: true) graph Trail() -> (surface: Shader) {
+  "A magenta trail, fading to its tail"
+  tail = Attribute(attribute_name: "trail_factor").factor
+  return (
+    surface: MixShader(
+      1.0 - tail,
+      TransparentBSDF(),
+      Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph ease(t: Float(subtype: FACTOR)) -> Float {
+  "t from 0 to 1, slow at both ends (smoothstep)"
+  return t * t * (3.0 - 2.0 * t)
+}
+
+geometry graph title(progress: Float(subtype: FACTOR), out: Float(subtype: FACTOR)) -> Geometry {
+  "The letters of the title, still one instance each, falling into place in a random order as progress goes from 0 to 1, then leaving word by word, growing and fading, as out goes from 0 to 1"
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(
+    chars,
+    progress: progress,
+    softness: 4.0,
+    by: Character,
+    order: Random,
+    seed: 3)
+  gone = text_reveal(chars, progress: out, softness: 1.0, by: Word, order: Forward)
+  return chars
+    |> animate_characters(
+      amount: 1.0 - shown,
+      offset: (0.0, 0.9, 0.0),
+      rotation: -0.7,
+      scale: 3.0,
+      opacity: 0.0)
+    |> animate_characters(amount: gone, offset: (0.0, 0.3, 0.0), scale: 1.8, opacity: 0.0)
+}
+
+geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometry {
+  "A line under the title, typed on as progress goes from 0 to 1, a cursor after its last letter, shown while it types and when blink is true"
+  chars = text_characters(text: "LIVE FROM GEOMETRY NODES", size: 0.3, character_spacing: 1.6)
+    |> centred()
+  typed = typewriter(chars, progress: progress)
+  line = BoundingBox(RealizeInstances(chars), use_radius: false)
+  end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
+  some = DomainSize(typed, component: INSTANCES).instance_count > 0
+  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  shown = progress > 0.0 and (progress < 1.0 or blink)
+  cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
+    |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
+  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+    |> SetMaterial(material: Tagline)
+    |> TransformGeometry(translation: (0.0, -1.05, 0.0))
+}
+
+geometry graph sparks(letters: Geometry) -> Geometry {
+  "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
+  landed = DeleteGeometry(
+    letters,
+    selection: NamedAttribute(name: "opacity").attribute < 0.5,
+    domain: INSTANCE)
+  return shape_emitter(landed)
+    |> particles_2d(
+      rate: 300.0,
+      seed: 7,
+      speed: 1.3,
+      speed_random: 0.7,
+      spread: 1.6,
+      life: 1.0,
+      life_random: 0.6,
+      gravity: (0.0, 0.6, 0.0),
+      drag: 1.6,
+      turbulence: 3.0,
+      turbulence_size: 0.5)
+    |> particle_sprites_2d(size: 0.03, size_end: 0.3, fade_in: 0.2, fade_out: 0.6, stretch: 2.0)
+    |> SetMaterial(material: Spark)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.02))
+}
+
+geometry graph comet(progress: Float(subtype: FACTOR)) -> Geometry {
+  "A bright disc that sweeps in from the left, under the title, and out at the top right as progress goes from 0 to 1, easing in and out; its echoes over the frames before, and a trail that thins to its tail"
+  path = BezierSegment(64, (-7.5, -2.4, 0.0), (-1.5, -3.9, 0.0), (4.5, -2.6, 0.0), (6.8, 4.8, 0.0))
+  at = SampleCurve(path, factor: ease(progress)).position
+  head = MeshCircle(vertices: 24, radius: 0.13, fill_type: NGON)
+    |> TransformGeometry(translation: at)
+  echoed = head
+    |> echoes(count: 6, every: 2, decay: 0.7, tint: (0.2, 0.75, 1.0, 1.0))
+    |> SetMaterial(material: Comet)
+  trail = Points(position: at)
+    |> motion_trail(frames: 14, radius: 0.09)
+    |> CurveToMesh(profile_curve: CurveCircle(resolution: 6, radius: 1.0), scale: Radius())
+    |> SetMaterial(material: Trail)
+  return echoed + trail
+    |> TransformGeometry(translation: (0.0, 0.0, 0.04))
+}
+
+geometry graph rule(width: Float(subtype: DISTANCE)) -> Geometry {
+  "A thin line between the title and its tagline, width wide, about the middle"
+  return Grid(size_x: width, size_y: 0.022, vertices_x: 2, vertices_y: 2)
+    |> TransformGeometry(translation: (0.0, -0.66, 0.0))
+    |> SetMaterial(material: Tagline)
+}
+
+geometry graph title_sequence() -> Geometry {
+  "Four seconds: the title falls into place throwing sparks off its letters, a line draws out under it, its tagline is typed on, a comet sweeps past; then the title leaves word by word, the tagline is typed off and the line draws back in, to an empty card"
+  f = SceneTime().frame
+  // Every part, in from 0 to 1 and out from 0 to 1, by the frame
+  letters = title(progress: Clamp(value: (f - 6.0) / 30.0), out: Clamp(value: (f - 66.0) / 12.0))
+  typed = Clamp(value: (f - 34.0) / 30.0) - Clamp(value: (f - 64.0) / 10.0)
+  drawn = ease(Clamp(value: (f - 26.0) / 14.0)) - ease(Clamp(value: (f - 72.0) / 8.0))
+  return (text_mesh(letters) |> SetMaterial(material: Title))
+    + sparks(letters)
+    + rule(width: 7.6 * drawn)
+    + tagline(progress: typed, blink: mod(f, 12.0) < 7.0)
+    + comet(progress: Clamp(value: (f - 34.0) / 32.0))
+}
+</script></bn-file>
+    <p>The steps before it, to start again from any of them:</p>
+    <div class="cards">
+      <bn-file><script type="text/bn">
+// @module title_sequence_step1
+// @title A title sequence, step 1: a title, one instance per letter
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use text_animate (text_characters, text_mesh)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light"
+  return (surface: Emission(color: (1.0, 0.86, 0.62), strength: 2.5))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title_sequence() -> Geometry {
+  "A title, one curve instance per letter, centred and filled"
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  return chars
+    |> text_mesh()
+    |> SetMaterial(material: Title)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module title_sequence_step2
+// @title A title sequence, step 2: revealed letter by letter
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title_sequence() -> Geometry {
+  "A title revealed letter by letter, left to right, each fading in"
+  progress = Clamp(value: (SceneTime().frame - 6.0) / 36.0)
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(chars, progress: progress, softness: 3.0, by: Character, order: Forward)
+  return chars
+    |> animate_characters(amount: 1.0 - shown, offset: (0.0, 0.0, 0.0), opacity: 0.0)
+    |> text_mesh()
+    |> SetMaterial(material: Title)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module title_sequence_step3
+// @title A title sequence, step 3: letters that fall into place, in a random order
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title_sequence() -> Geometry {
+  "A title whose letters fall into place in a random order: from above, turned, three times their size and transparent"
+  progress = Clamp(value: (SceneTime().frame - 6.0) / 30.0)
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(
+    chars,
+    progress: progress,
+    softness: 4.0,
+    by: Character,
+    order: Random,
+    seed: 3)
+  return chars
+    |> animate_characters(
+      amount: 1.0 - shown,
+      offset: (0.0, 0.9, 0.0),
+      rotation: -0.7,
+      scale: 3.0,
+      opacity: 0.0)
+    |> text_mesh()
+    |> SetMaterial(material: Title)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module title_sequence_step4
+// @title A title sequence, step 4: a tagline typed on, with its cursor
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal, typewriter)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+shader(material: true) graph Tagline() -> (surface: Shader) {
+  "Cyan letters that give their own light"
+  return (surface: Emission(color: (0.25, 0.8, 1.0), strength: 3.0))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title(progress: Float(subtype: FACTOR)) -> Geometry {
+  "The title, its letters falling into place in a random order as progress goes from 0 to 1"
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(
+    chars,
+    progress: progress,
+    softness: 4.0,
+    by: Character,
+    order: Random,
+    seed: 3)
+  return chars
+    |> animate_characters(
+      amount: 1.0 - shown,
+      offset: (0.0, 0.9, 0.0),
+      rotation: -0.7,
+      scale: 3.0,
+      opacity: 0.0)
+    |> text_mesh()
+    |> SetMaterial(material: Title)
+}
+
+geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometry {
+  "A line under the title, typed on as progress goes from 0 to 1, a cursor after its last letter, shown while it types and when blink is true"
+  chars = text_characters(text: "LIVE FROM GEOMETRY NODES", size: 0.3, character_spacing: 1.6)
+    |> centred()
+  typed = typewriter(chars, progress: progress)
+  line = BoundingBox(RealizeInstances(chars), use_radius: false)
+  end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
+  some = DomainSize(typed, component: INSTANCES).instance_count > 0
+  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  shown = progress > 0.0 and (progress < 1.0 or blink)
+  cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
+    |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
+  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+    |> SetMaterial(material: Tagline)
+    |> TransformGeometry(translation: (0.0, -1.05, 0.0))
+}
+
+geometry graph title_sequence() -> Geometry {
+  "The title falls into place, then its tagline is typed on under it"
+  f = SceneTime().frame
+  return title(progress: Clamp(value: (f - 6.0) / 30.0))
+    + tagline(progress: Clamp(value: (f - 34.0) / 30.0), blink: mod(f, 12.0) < 7.0)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module title_sequence_step5
+// @title A title sequence, step 5: sparks off the letters
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use particles2d (particle_sprites_2d, particles_2d, shape_emitter)
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal, typewriter)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+shader(material: true) graph Tagline() -> (surface: Shader) {
+  "Cyan letters that give their own light"
+  return (surface: Emission(color: (0.25, 0.8, 1.0), strength: 3.0))
+}
+
+shader(material: true) graph Spark() -> (surface: Shader) {
+  "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
+  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
+  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
+  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
+  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title(progress: Float(subtype: FACTOR)) -> Geometry {
+  "The letters of the title, still one instance each, falling into place in a random order as progress goes from 0 to 1"
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(
+    chars,
+    progress: progress,
+    softness: 4.0,
+    by: Character,
+    order: Random,
+    seed: 3)
+  return animate_characters(
+    chars,
+    amount: 1.0 - shown,
+    offset: (0.0, 0.9, 0.0),
+    rotation: -0.7,
+    scale: 3.0,
+    opacity: 0.0)
+}
+
+geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometry {
+  "A line under the title, typed on as progress goes from 0 to 1, a cursor after its last letter, shown while it types and when blink is true"
+  chars = text_characters(text: "LIVE FROM GEOMETRY NODES", size: 0.3, character_spacing: 1.6)
+    |> centred()
+  typed = typewriter(chars, progress: progress)
+  line = BoundingBox(RealizeInstances(chars), use_radius: false)
+  end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
+  some = DomainSize(typed, component: INSTANCES).instance_count > 0
+  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  shown = progress > 0.0 and (progress < 1.0 or blink)
+  cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
+    |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
+  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+    |> SetMaterial(material: Tagline)
+    |> TransformGeometry(translation: (0.0, -1.05, 0.0))
+}
+
+geometry graph sparks(letters: Geometry) -> Geometry {
+  "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
+  landed = DeleteGeometry(
+    letters,
+    selection: NamedAttribute(name: "opacity").attribute < 0.5,
+    domain: INSTANCE)
+  return shape_emitter(landed)
+    |> particles_2d(
+      rate: 300.0,
+      seed: 7,
+      speed: 1.3,
+      speed_random: 0.7,
+      spread: 1.6,
+      life: 1.0,
+      life_random: 0.6,
+      gravity: (0.0, 0.6, 0.0),
+      drag: 1.6,
+      turbulence: 3.0,
+      turbulence_size: 0.5)
+    |> particle_sprites_2d(size: 0.03, size_end: 0.3, fade_in: 0.2, fade_out: 0.6, stretch: 2.0)
+    |> SetMaterial(material: Spark)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.02))
+}
+
+geometry graph title_sequence() -> Geometry {
+  "The title falls into place throwing sparks off its letters, then its tagline is typed on under it"
+  f = SceneTime().frame
+  letters = title(progress: Clamp(value: (f - 6.0) / 30.0))
+  return (text_mesh(letters) |> SetMaterial(material: Title))
+    + sparks(letters)
+    + tagline(progress: Clamp(value: (f - 34.0) / 30.0), blink: mod(f, 12.0) < 7.0)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module title_sequence_step6
+// @title A title sequence, step 6: a comet, its echoes and its trail
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example title_sequence
+
+use echoes (echoes, motion_trail)
+use particles2d (particle_sprites_2d, particles_2d, shape_emitter)
+use text_animate (animate_characters, text_characters, text_mesh, text_reveal, typewriter)
+
+shader(material: true) graph Title() -> (surface: Shader) {
+  "Warm white letters that give their own light, as opaque as their opacity"
+  shown = Attribute(attribute_name: "opacity").factor
+  return (
+    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+}
+
+shader(material: true) graph Tagline() -> (surface: Shader) {
+  "Cyan letters that give their own light"
+  return (surface: Emission(color: (0.25, 0.8, 1.0), strength: 3.0))
+}
+
+shader(material: true) graph Spark() -> (surface: Shader) {
+  "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
+  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
+  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
+  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
+  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+}
+
+shader(material: true) graph Comet() -> (surface: Shader) {
+  "The head and its echoes: white now, toward the tint stored on the oldest, as opaque as their opacity"
+  tint = Attribute(attribute_name: "tint").color
+  shown = Attribute(attribute_name: "opacity").factor
+  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: tint, strength: 4.0)))
+}
+
+shader(material: true) graph Trail() -> (surface: Shader) {
+  "A magenta trail, fading to its tail"
+  tail = Attribute(attribute_name: "trail_factor").factor
+  return (
+    surface: MixShader(
+      1.0 - tail,
+      TransparentBSDF(),
+      Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
+}
+
+geometry graph centred(geometry: Geometry) -> Geometry {
+  "The geometry moved so that the middle of its bounding box is at the origin"
+  box = BoundingBox(RealizeInstances(geometry), use_radius: false)
+  return TransformGeometry(geometry, translation: (box.min + box.max) * -0.5)
+}
+
+geometry graph title(progress: Float(subtype: FACTOR)) -> Geometry {
+  "The letters of the title, still one instance each, falling into place in a random order as progress goes from 0 to 1"
+  chars = text_characters(text: "NEON NIGHTS", size: 1.0, character_spacing: 1.15)
+    |> centred()
+  shown = text_reveal(
+    chars,
+    progress: progress,
+    softness: 4.0,
+    by: Character,
+    order: Random,
+    seed: 3)
+  return animate_characters(
+    chars,
+    amount: 1.0 - shown,
+    offset: (0.0, 0.9, 0.0),
+    rotation: -0.7,
+    scale: 3.0,
+    opacity: 0.0)
+}
+
+geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometry {
+  "A line under the title, typed on as progress goes from 0 to 1, a cursor after its last letter, shown while it types and when blink is true"
+  chars = text_characters(text: "LIVE FROM GEOMETRY NODES", size: 0.3, character_spacing: 1.6)
+    |> centred()
+  typed = typewriter(chars, progress: progress)
+  line = BoundingBox(RealizeInstances(chars), use_radius: false)
+  end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
+  some = DomainSize(typed, component: INSTANCES).instance_count > 0
+  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  shown = progress > 0.0 and (progress < 1.0 or blink)
+  cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
+    |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
+  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+    |> SetMaterial(material: Tagline)
+    |> TransformGeometry(translation: (0.0, -1.05, 0.0))
+}
+
+geometry graph sparks(letters: Geometry) -> Geometry {
+  "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
+  landed = DeleteGeometry(
+    letters,
+    selection: NamedAttribute(name: "opacity").attribute < 0.5,
+    domain: INSTANCE)
+  return shape_emitter(landed)
+    |> particles_2d(
+      rate: 300.0,
+      seed: 7,
+      speed: 1.3,
+      speed_random: 0.7,
+      spread: 1.6,
+      life: 1.0,
+      life_random: 0.6,
+      gravity: (0.0, 0.6, 0.0),
+      drag: 1.6,
+      turbulence: 3.0,
+      turbulence_size: 0.5)
+    |> particle_sprites_2d(size: 0.03, size_end: 0.3, fade_in: 0.2, fade_out: 0.6, stretch: 2.0)
+    |> SetMaterial(material: Spark)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.02))
+}
+
+geometry graph comet(progress: Float(subtype: FACTOR)) -> Geometry {
+  "A bright disc that sweeps in from the left, under the title, and out at the top right as progress goes from 0 to 1, easing in and out; its echoes over the frames before, and a trail that thins to its tail"
+  path = BezierSegment(64, (-7.5, -2.4, 0.0), (-1.5, -3.9, 0.0), (4.5, -2.6, 0.0), (6.8, 4.8, 0.0))
+  eased = progress * progress * (3.0 - 2.0 * progress)
+  at = SampleCurve(path, factor: eased).position
+  head = MeshCircle(vertices: 24, radius: 0.13, fill_type: NGON)
+    |> TransformGeometry(translation: at)
+  echoed = head
+    |> echoes(count: 6, every: 2, decay: 0.7, tint: (0.2, 0.75, 1.0, 1.0))
+    |> SetMaterial(material: Comet)
+  trail = Points(position: at)
+    |> motion_trail(frames: 14, radius: 0.09)
+    |> CurveToMesh(profile_curve: CurveCircle(resolution: 6, radius: 1.0), scale: Radius())
+    |> SetMaterial(material: Trail)
+  return echoed + trail
+    |> TransformGeometry(translation: (0.0, 0.0, 0.04))
+}
+
+geometry graph title_sequence() -> Geometry {
+  "The title falls into place throwing sparks off its letters, its tagline is typed on under it, and a comet sweeps past"
+  f = SceneTime().frame
+  letters = title(progress: Clamp(value: (f - 6.0) / 30.0))
+  return (text_mesh(letters) |> SetMaterial(material: Title))
+    + sparks(letters)
+    + tagline(progress: Clamp(value: (f - 34.0) / 30.0), blink: mod(f, 12.0) < 7.0)
+    + comet(progress: Clamp(value: (f - 36.0) / 36.0))
+}
+</script></bn-file>
+    </div>
+    <p class="muted">
+      The files, with the script that renders this page's animations, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/title_sequence"><code>examples/tutorials/title_sequence/</code></a>.
+    </p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

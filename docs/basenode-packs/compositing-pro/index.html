@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compositing Pro — BaseNode Packs — Ludopant</title>
+<meta name="description" content="Compositing Pro, a pack of 5 Base Node modules for Blender 5.2+: keying, glows, grain, render passes and 360° for the Blender compositor.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/compositing-pro/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Compositing Pro — BaseNode Packs — Ludopant">
+<meta property="og:description" content="Compositing Pro, a pack of 5 Base Node modules for Blender 5.2+: keying, glows, grain, render passes and 360° for the Blender compositor.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/compositing-pro/">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/final-shot-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › Compositing Pro</p>
+<p class="store">Coming soon on Superhive</p>
+<h1>Compositing Pro</h1>
+<p class="lead">Keying, glows, grain, render passes and 360° for the Blender compositor.</p>
+<p class="cover"><img src="../tutorials/img/final-shot-hero.png" alt="Compositing Pro: Keying, glows, grain, render passes and 360° for the Blender compositor"></p>
+<dl class="facts">
+<dt>For</dt><dd>Compositors who know Nuke</dd>
+<dt>Modelled on</dt><dd>Nuke</dd>
+<dt>Modules</dt><dd>5</dd>
+<dt>Blender</dt><dd>5.2 and later, tested at each release</dd>
+<dt>Store</dt><dd>Coming soon on Superhive</dd>
+</dl>
+<p>IBK keying and despill, glow and light wrap, film grain and regrain per stock, the beauty rebuilt from Cycles passes with relight and depth fog, and 360° projections: latlong, camera view, cubemap and fisheye.</p>
+
+<h2>The modules</h2>
+<p>A module is a <code>.bn</code> file of node groups. Once the pack is installed, a graph calls it with <code>use</code>, and Blender builds its groups.</p>
+<table>
+<tr><th>Module</th><th>What it gives</th></tr>
+<tr><td><code>grain</code></td><td>Compositor film grain after Nuke's Grain and Regrain: grain of its own size, irregularity and intensity per channel from noise textures on the pixels, seeded and animated, less of it in the blacks by a luma response, the Kodak stocks of Nuke's presets (5248, 5279, FX214, GT5274, 5217, 5218), regrain by the high pass of a grain plate, a simple degrain by bilateral blur</td></tr>
+<tr><td><code>keying</code></td><td>Compositor keying tools after Nuke: IBK gizmo screen subtraction and IBK colour clean plate by push-pull, despill by average, red or blue limit or both with its spill map and luminance restore, matte clean, soft erode, choke, edge matte, core and edge merge, edge extend</td></tr>
+<tr><td><code>light</code></td><td>Compositor light effects after Nuke: Glow of blurs of doubling size over a tolerance, LightWrap of the background on the foreground's edges by plus or screen, glow of exponential falloff, anamorphic streak of the highlights, glow around a matte's edges</td></tr>
+<tr><td><code>passes</code></td><td>Compositor tools on Cycles render passes: beauty rebuilt from its light passes, position, box, normal and depth mattes, depth fog, relight</td></tr>
+<tr><td><code>vr360</code></td><td>Compositor 360° projections after Nuke's SphericalTransform and Cara VR: a camera view of a latlong and back, latlong rotation by yaw, pitch and roll, 3 × 2 cubemap and back, equidistant fisheye and back, little planet, each as its STMap and its image</td></tr>
+</table>
+
+<h2>Free in Base Node, and what the pack adds</h2>
+<p>Free and open source, on <a href="https://marcgardent.github.io/base-node-language/">the Base Node site</a>: the language, the Blender add-on, the formatter and parsers, and the free modules of the standard library. The pack's modules build on the free modules <code>grade</code>, <code>merge</code>, <code>stmap</code>. The pack adds the modules above, their showcase files and this tutorial.</p>
+<table>
+<tr><th>Capability</th><th>Blender's own nodes</th><th>With the pack</th></tr>
+<tr><td>IBK keying, despill</td><td>Partial</td><td>Covered<br><span class="mods"><code>keying</code></span></td></tr>
+<tr><td>Glow, light wrap</td><td>Partial — Glare node, Bloom asset since 5.3</td><td>Covered<br><span class="mods"><code>light</code></span></td></tr>
+<tr><td>360°: latlong, cubemap, fisheye</td><td>No</td><td>Covered<br><span class="mods"><code>vr360</code></span></td></tr>
+<tr><td>Grain and regrain</td><td>Partial — Film Grain</td><td>Covered<br><span class="mods"><code>grain</code></span></td></tr>
+<tr><td>Beauty rebuilt from render passes, relight</td><td>Partial</td><td>Covered<br><span class="mods"><code>passes</code></span></td></tr>
+</table>
+
+<h2>Tutorial</h2>
+<a class="tuto-card" href="../tutorials/final-shot.html">
+  <img src="../tutorials/img/final-shot-hero.png" alt="" loading="lazy">
+  <span class="body"><strong>The final shot</strong><span>Finish a Cycles render in Blender's compositor, Nuke style: the beauty rebuilt from its passes, a light added, depth haze, glow, light wrap, film grain and a grade, one step at a time in .bn.</span><span class="count">7 steps</span></span>
+</a>
+
+<h2>Compared</h2>
+<ul>
+<li><a href="../vs/nuke.html">Base Node VS Nuke</a></li>
+</ul>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

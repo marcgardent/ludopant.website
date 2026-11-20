@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Materials — BaseNode Packs — Ludopant</title>
+<meta name="description" content="Smart Materials, a pack of 3 Base Node modules for Blender 5.2+: a texture painter&#x27;s smart materials, live in Geometry Nodes and shaders.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/smart-materials/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Smart Materials — BaseNode Packs — Ludopant">
+<meta property="og:description" content="Smart Materials, a pack of 3 Base Node modules for Blender 5.2+: a texture painter&#x27;s smart materials, live in Geometry Nodes and shaders.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/smart-materials/">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/smart-crate-step5.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › Smart Materials</p>
+<p class="store">Coming soon on Superhive</p>
+<h1>Smart Materials</h1>
+<p class="lead">A texture painter's smart materials, live in Geometry Nodes and shaders.</p>
+<p class="cover"><img src="../tutorials/img/smart-crate-step5.png" alt="Smart Materials: A texture painter&#x27;s smart materials, live in Geometry Nodes and shaders"></p>
+<dl class="facts">
+<dt>For</dt><dd>Texture artists who know Substance Painter</dd>
+<dt>Modelled on</dt><dd>Substance 3D Painter</dd>
+<dt>Modules</dt><dd>3</dd>
+<dt>Blender</dt><dd>5.2 and later, tested at each release</dd>
+<dt>Store</dt><dd>Coming soon on Superhive</dd>
+</dl>
+<p>Mesh maps computed live and stored as attributes (curvature, ambient occlusion, thickness, position, islands, sky), the generators that turn them into masks (edge wear, metal edge wear, dirt, dust, grunge, dripping rust) and the wear only a mesh can carry (chipped edges, dents, rivets, stitches, streaks and drips).</p>
+
+<h2>The modules</h2>
+<p>A module is a <code>.bn</code> file of node groups. Once the pack is installed, a graph calls it with <code>use</code>, and Blender builds its groups.</p>
+<table>
+<tr><th>Module</th><th>What it gives</th></tr>
+<tr><td><code>generators</code></td><td>The generators of a texture painter's smart materials, as shader groups that turn the mesh maps into masks: levels (Histogram Scan), grunge, curvature, occlusion, edge wear, metal edge wear, dirt, dust, dripping rust, position, 3D distance, light</td></tr>
+<tr><td><code>mesh_effects</code></td><td>Wear a texture painter can only paint, made in the mesh by Geometry Nodes: chips knocked off the edges, dents, rivets and stitches along the seams, rust and dirt streaked down the walls from their tops and the rivets as a stain, paint or oil run down them in the material under them, wearing what it wears, dust settled in the corners; each stores where it acted, and a shader group reads it</td></tr>
+<tr><td><code>mesh_maps</code></td><td>Mesh maps computed live by Geometry Nodes and stored as attributes, as a texture painter bakes them: curvature, ambient occlusion, thickness, position, islands, and the sky a point sees above it; and the shader group that reads them</td></tr>
+</table>
+
+<h2>Free in Base Node, and what the pack adds</h2>
+<p>Free and open source, on <a href="https://marcgardent.github.io/base-node-language/">the Base Node site</a>: the language, the Blender add-on, the formatter and parsers, and the free modules of the standard library. The pack adds the modules above, their showcase files and this tutorial.</p>
+<table>
+<tr><th>Capability</th><th>Blender's own nodes</th><th>With the pack</th></tr>
+<tr><td>Live mesh maps (curvature, AO, thickness)</td><td>No</td><td>Covered<br><span class="mods"><code>mesh_maps</code></span></td></tr>
+<tr><td>Wear in the mesh (chips, rivets, streaks)</td><td>No</td><td>Covered<br><span class="mods"><code>mesh_effects</code></span></td></tr>
+<tr><td>Smart-material generators (edge wear, dirt, grunge)</td><td>No</td><td>Covered<br><span class="mods"><code>generators</code></span></td></tr>
+</table>
+
+<h2>Tutorial</h2>
+<a class="tuto-card" href="../tutorials/smart-crate.html">
+  <img src="../tutorials/img/smart-crate-step5.png" alt="" loading="lazy">
+  <span class="body"><strong>Smart crate</strong><span>Weather a steel crate in Blender by assembling Base Node's smart materials: mesh maps, generators and mesh effects, one line or one layer at a time, in .bn.</span><span class="count">5 steps</span></span>
+</a>
+
+<h2>Compared</h2>
+<ul>
+<li><a href="../vs/substance-designer.html">Base Node VS Substance 3D Designer</a></li>
+</ul>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

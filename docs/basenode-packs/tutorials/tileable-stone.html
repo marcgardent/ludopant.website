@@ -1,0 +1,1119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tileable stone — Texture Lab tutorial — Ludopant</title>
+<meta name="description" content="Make a tileable stone floor the Substance Designer way, in Blender&#x27;s compositor: atoms that tile, a seeded tile sampler, warp and slope blur, edges and levels, normal, curvature and occlusion maps, then the maps on a floor, one step at a time in .bn.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/tutorials/tileable-stone.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Tileable stone — Texture Lab tutorial — Ludopant">
+<meta property="og:description" content="Make a tileable stone floor the Substance Designer way, in Blender&#x27;s compositor: atoms that tile, a seeded tile sampler, warp and slope blur, edges and levels, normal, curvature and occlusion maps, then the maps on a floor, one step at a time in .bn.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/tutorials/tileable-stone.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/tileable-stone-step7.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-view.js"></script>
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-file.js"></script>
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs tuto">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › <a href="../texture-lab/">Texture Lab</a> › Tutorial: Tileable stone</p>
+<h1>Tileable stone</h1>
+    <p class="lead">
+      A cobbled floor, made the way a Substance Designer artist makes one: no photo, no sculpt, a graph of generators and filters that ends in the maps a material needs. Here the graph is Blender's compositor.
+      The texture tiles: lay it nine times on a floor and nobody finds where one copy ends.
+    </p>
+    <figure>
+      <img src="img/tileable-stone-step7.png" width="1000" height="750" alt="A courtyard floor of grey cobblestones under a low sun from the right: worn, cracked stones with pebbles in the dark gaps, long shadows, two terracotta pots against a plaster wall and a wooden bench at the back">
+      <figcaption>Where we are going: one texture of 1024 pixels, repeated three by three on a floor of 6 m, displaced by Cycles. Seven steps, each one a few lines more.</figcaption>
+    </figure>
+
+    <h2 id="learn">You will learn</h2>
+    <ul>
+      <li><strong>The craft.</strong> The order of a procedural material: atoms, a pattern laid by a tile sampler, erosion by warp and slope blur, a height shaped with edges and levels, then the maps derived from it (normal, curvature, occlusion), the colour and roughness last, and why every step must wrap at the borders.</li>
+      <li><strong>The .bn.</strong> A compositor graph with several outputs, one per map, written to files in one render; a shader group that reads them back.</li>
+    </ul>
+
+    <h2 id="prerequisites">Prerequisites</h2>
+    <p>
+      This page assumes you have read <a href="https://marcgardent.github.io/base-node-language/tutorials/lunar-ground.html">Lunar ground</a>, or know the basics of a <code>.bn</code> file: a graph, its nodes as calls, named outputs, the pipe <code>|&gt;</code>.
+      Knowing what a height map and a normal map are helps; no Substance Designer is needed.
+    </p>
+
+    <h2 id="before">Before you start</h2>
+    <p>
+      You need Blender 5, the <a href="https://marcgardent.github.io/base-node-language/#blender">Base Node add-on</a>, version 0.13.1 or later, and the <a href="../texture-lab/">Texture Lab</a> pack, sold by the author of Base Node apart from the open source project: it carries the two modules this tutorial uses.
+      The steps are free to read and to copy; the modules they call are not, and without the pack a step does not build.
+    </p>
+    <table>
+      <tr><th>Module</th><th>Comes with</th><th>What it gives</th></tr>
+      <tr><td><code>texture_atoms</code></td><td>Texture Lab</td><td>Generators that tile: Perlin noise and ridges read on a torus, Voronoi cells on a grid that wraps, stripes, checkers, shapes, and a tile sampler that lays a shape over a grid with a seeded random offset, size, rotation and grey per tile.</td></tr>
+      <tr><td><code>texture_filters</code></td><td>Texture Lab</td><td>Filters that wrap at the borders: blurs, warp, directional warp, slope blur, edge detection, histogram scan and range, levels, height to normal (OpenGL or DirectX), curvature, ambient occlusion from heights.</td></tr>
+    </table>
+    <p>
+      Every block below is a complete <code>.bn</code> file, its code beside the nodes it builds. Two ways to try a step:
+    </p>
+    <ul>
+      <li><strong>Drag it.</strong> Drag the file icon of its block, or its title, onto Blender and keep <em>Import into the .blend</em>: <code>tileable_stone</code> becomes the scene's compositor, if the scene has none yet. A click on the file icon downloads the file instead.</li>
+      <li><strong>Paste it.</strong> Press the copy button of its block, open the Compositor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>.</li>
+    </ul>
+    <p>
+      The scene needs nothing in it: the graph draws its texture on a canvas of its own, 1024 pixels square. Render with <kbd>F12</kbd>: you see the first output of the step. To see another, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+click its node in the Compositor and look at the <em>Viewer Node</em> image.
+      The pictures are made from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/tileable_stone/render.py"><code>render.py</code></a>: each output written to an EXR, then shown two by two, so that a seam would show where the copies meet.
+    </p>
+
+    <h2 id="idea">A graph that ends in maps</h2>
+    <p>
+      A material for a game or a film is a set of images that share one surface: a height, a normal map, a colour (the <em>albedo</em>), a roughness, an occlusion. Painting them by hand, they never quite agree. Computing them from one height, they always do: the normal is the slope of that height, the occlusion is where it is low among high, the dirt goes where the occlusion is dark.
+    </p>
+    <p>
+      So most of the work is the height. It is built like a sculpture in reverse: lay simple shapes, break their regularity, wear them, cut them, then level the result. Every filter reads a pixel's neighbours, and a pixel on the right border has its neighbours on the left border: the filters of <code>texture_filters</code> wrap, so that what tiles at the start still tiles at the end.
+    </p>
+
+    <h2 id="step-1"><span class="n">1.</span> Atoms that tile</h2>
+    <p>
+      Two generators to start, the atoms of everything that follows: a fractal noise and Voronoi cells.
+    </p>
+    <p class="file">step1_atoms.bn: <code>tileable_stone</code></p>
+    <bn-view graph="tileable_stone" height="480"><script type="text/bn">
+// @module tileable_stone_step1
+// @title Tileable stone, step 1: atoms that tile
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+
+compositor graph tileable_stone(image: Color) -> (noise: Float, cells: Float) {
+  "Two atoms of the stone on a square texture of 1024 pixels: a fractal noise and Voronoi cells, both periodic"
+  t = texture_canvas(image, size: 1024)
+  noise = tileable_noise(t, scale: 5.0, detail: 6.0, roughness: 0.55, seed: 1.0)
+  cells = tileable_cells(t, scale: 9, seed: 2.0)
+  return (noise: noise, cells: cells.edge * 3.0)
+}
+</script></bn-view>
+    <ul>
+      <li><strong>The canvas.</strong> <code>texture_canvas</code> gives a square image of 1024 pixels, whatever the scene renders. Every generator draws on it in tile coordinates, 0 to 1 across.</li>
+      <li><strong>Why they tile.</strong> A plain Noise Texture does not: its right column has nothing to do with its left one. <code>tileable_noise</code> reads Blender's 4D Noise Texture on a torus, where u = 1 is the same point as u = 0. <code>tileable_cells</code> lays one point in each cell of a grid, 9 by 9 here, and a cell past the right border is the first one on the left. <code>scale</code> is the number of features across, a whole number for the cells; it must stay the same for the texture to keep tiling.</li>
+      <li><strong>Several outputs.</strong> The graph returns <code>(noise: …, cells: …)</code>: two maps, two sockets of its output, as Substance's graph outputs.</li>
+    </ul>
+    <figure>
+      <img src="img/tileable-stone-step1.png" width="1000" height="750" loading="lazy" alt="Two square panels, each a texture repeated two by two: on the left a soft grey cloud noise, on the right white Voronoi cells with dark borders; no seam shows where the copies meet">
+      <figcaption>Step 1. The noise (left) and the distance to the cells' edges (right), each repeated two by two: no line where the copies meet.</figcaption>
+    </figure>
+
+    <h2 id="step-2"><span class="n">2.</span> Stones laid by a tile sampler</h2>
+    <p>
+      A cobbled floor is a grid that tries not to look like one. <code>tile_sampler</code> lays a shape in each cell of a grid and gives each a random offset, size, rotation and grey, from a seed.
+    </p>
+    <p class="file">step2_stones.bn: <code>tileable_stone</code></p>
+    <bn-view graph="tileable_stone" height="480"><script type="text/bn">
+// @module tileable_stone_step2
+// @title Tileable stone, step 2: stones laid by a tile sampler
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+
+compositor graph tileable_stone(image: Color) -> (height: Float, id: Float) {
+  "Stones laid on a grid of five by five, rounded squares domed, moved, turned and sized at random; pebbles in the gaps"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles: the pebbles, lower, only show in the gaps
+  low = pebbles.height * 0.45
+  on_stone = stones.height >= low
+  return (
+    height: max(stones.height, low),
+    id: Mix(factor: on_stone, a: pebbles.id * 0.5, b: stones.id))
+}
+</script></bn-view>
+    <ul>
+      <li><strong>The stones.</strong> Rounded squares (<code>shape: Square</code>, <code>roundness</code>), domed (<code>profile: Dome</code>), on five by five. <code>size: 1.1</code> lets them overlap a little: where two meet, the higher shows, so they press against each other as stones do.</li>
+      <li><strong>The pebbles.</strong> A second sampler, eleven by eleven, of small discs scattered far from their cells (<code>offset_random: 0.9</code>). Scaled down to 0.45, they only show in the gaps.</li>
+      <li><strong><code>id</code></strong> is a random grey per stone: in step 6 it gives each stone its tone.</li>
+      <li><strong>The seed.</strong> Change it and you get another floor; keep it and you get the same one, to the bit.</li>
+    </ul>
+    <figure>
+      <img src="img/tileable-stone-step2.png" width="1000" height="750" loading="lazy" alt="Left, a height map of domed rounded squares in rows, small round pebbles between them; right, the same stones as flat greys, one grey per stone">
+      <figcaption>Step 2. The height (left) and the grey per stone (right). Still too regular: straight sides, a visible grid.</figcaption>
+    </figure>
+
+    <h2 id="step-3"><span class="n">3.</span> Warp and slope blur</h2>
+    <p>
+      Two filters that every Substance graph uses, here to take the stones out of their grid and to wear them.
+    </p>
+    <p class="file">step3_erosion.bn: <code>tileable_stone</code></p>
+    <bn-view graph="tileable_stone" height="480"><script type="text/bn">
+// @module tileable_stone_step3
+// @title Tileable stone, step 3: warp and slope blur
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+use texture_filters
+
+compositor graph tileable_stone(image: Color) -> (warped: Float, eroded: Float) {
+  "The stones of step 2 bent out of their grid by a warp, then worn by a slope blur along a noise"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles, as in step 2
+  low = pebbles.height * 0.45
+  laid = max(stones.height, low)
+  // Warp: each pixel read away along the slope of a broad noise, so that the straight sides bend
+  wobble = tileable_noise(t, scale: 4.0, detail: 1.0, seed: 5.0)
+  warped = warp(laid, warp: wobble, intensity: 0.008)
+    |> SeparateColor().red
+  // Slope blur: the height smeared down the slopes of a finer noise, as water and frost wear it
+  grit = tileable_noise(t, scale: 10.0, detail: 2.0, seed: 6.0)
+  eroded = slope_blur(warped, slope: grit, intensity: 0.006)
+    |> SeparateColor().red
+  return (warped: warped, eroded: eroded)
+}
+</script></bn-view>
+    <ul>
+      <li><strong>Warp.</strong> Each pixel is read a little away from where it is, along the slope of a broad noise (<code>wobble</code>). The straight sides bend, each stone differently. <code>intensity</code> is in tiles for a slope of one height per tile: small numbers are already large. It gives the same bend at any size of the texture.</li>
+      <li><strong>Slope blur.</strong> The height is smeared down the slopes of a finer noise (<code>grit</code>): its borders crumble as if water and frost had worked on them. <code>intensity</code> is how far, in tiles.</li>
+      <li><strong>The order.</strong> Warp first, on clean shapes; erosion after, on the bent ones. Swapped, the warp would stretch the crumbs.</li>
+    </ul>
+    <figure>
+      <img src="img/tileable-stone-step3.png" width="1000" height="750" loading="lazy" alt="Left, the stones with bent sides; right, the same stones with soft, crumbled borders">
+      <figcaption>Step 3. Warped (left), then eroded by the slope blur (right).</figcaption>
+    </figure>
+
+    <h2 id="step-4"><span class="n">4.</span> Edges, cracks and levels</h2>
+    <p>
+      Now the height is shaped: chips on the edges, cracks across the stones, a grain on top, then levels to set where the gaps and the tops are.
+    </p>
+    <p class="file">step4_shape.bn: <code>tileable_stone</code></p>
+    <bn-view graph="tileable_stone" height="480"><script type="text/bn">
+// @module tileable_stone_step4
+// @title Tileable stone, step 4: edges, cracks and levels
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+use texture_filters
+
+compositor graph tileable_stone(image: Color) -> (edges: Float, cracks: Float, height: Float) {
+  "The eroded stones of step 3 chipped on their edges, cracked along Voronoi cells, grained, and levelled to flat tops"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles, as in step 2
+  low = pebbles.height * 0.45
+  laid = max(stones.height, low)
+  // Warp: each pixel read away along the slope of a broad noise, so that the straight sides bend
+  wobble = tileable_noise(t, scale: 4.0, detail: 1.0, seed: 5.0)
+  warped = warp(laid, warp: wobble, intensity: 0.008)
+    |> SeparateColor().red
+  // Slope blur: the height smeared down the slopes of a finer noise, as water and frost wear it
+  grit = tileable_noise(t, scale: 10.0, detail: 2.0, seed: 6.0)
+  eroded = slope_blur(warped, slope: grit, intensity: 0.006)
+    |> SeparateColor().red
+  // Chips: the borders of the stones, found by edge detection, knocked off where the grit is high
+  edges = edge_detect(warped, strength: 0.025)
+  chips = edges * histogram_scan(grit, position: 0.54, contrast: 0.6)
+  // Cracks: the edges of Voronoi cells, scanned to thin lines, cut into the stones only
+  cells = tileable_cells(t, scale: 3, seed: 2.0)
+  cracks = 1.0 - histogram_scan(cells.edge, position: 0.03, contrast: 0.97)
+  on_stone = histogram_scan(eroded, position: 0.33, contrast: 0.8)
+  grain = tileable_noise(t, scale: 48.0, detail: 4.0, roughness: 0.6, seed: 7.0)
+  carved = eroded - chips * 0.08 - cracks * on_stone * 0.06 + (grain - 0.5) * 0.03
+  // Levels: the gaps down to 0, the tops up to flat, the mid-tones raised by the gamma
+  height = levels(carved, in_low: 0.08, in_high: 1.0, gamma: 1.6)
+  return (edges: edges, cracks: cracks * on_stone, height: height)
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>Chips.</strong> <code>edge_detect</code> is 1 on the borders of the warped stones. Times a <code>histogram_scan</code> of the grit, only part of the borders: there the height drops a little, as if knocked off.</li>
+      <li><strong>Cracks.</strong> The cells of step 1, at 3 across: <code>histogram_scan</code> keeps only what is very near their edges, a thin line. <code>on_stone</code>, another scan, keeps the cracks on the stones and out of the gaps.</li>
+      <li><strong>Levels.</strong> <code>in_low: 0.08</code> takes the bottom of the gaps to 0; <code>gamma: 1.6</code> raises the mid-tones, so that the domes flatten into worn tops.</li>
+    </ol>
+    <p>
+      A <code>histogram_scan</code> is a threshold with a soft ramp: <code>position</code> is where it cuts, <code>contrast</code> how sharply. It turns any grey map into a mask.
+    </p>
+    <figure>
+      <img src="img/tileable-stone-step4.png" width="1000" height="750" loading="lazy" alt="Top left, white outlines of the stones; bottom left, thin white crack lines; right, large, the final height map of flat-topped stones with fine cracks and dark gaps">
+      <figcaption>Step 4. The edges (top left), the cracks (bottom left), and the height they shape (right). The rest of the material comes from this map.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> set <code>gamma</code> of <code>levels</code> to 0.8: the stones round off like river pebbles. Set it to 3.0: they become flat slabs.</p>
+
+    <h2 id="step-5"><span class="n">5.</span> Normal maps, OpenGL and DirectX</h2>
+    <p>
+      A normal map stores the slope of the surface in colour: x to the right in red, y in green, up out of the surface in blue. <code>height_to_normal</code> computes it from the height, wrapping.
+    </p>
+    <p class="file">step5_normal.bn: <code>tileable_stone</code></p>
+    <bn-view graph="tileable_stone" height="480"><script type="text/bn">
+// @module tileable_stone_step5
+// @title Tileable stone, step 5: normal maps, OpenGL and DirectX
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+use texture_filters
+
+compositor graph tileable_stone(image: Color) -> (opengl: Color, directx: Color) {
+  "The normal maps of the height of step 4, a height of 1 standing 0.02 tiles high: OpenGL, as Blender reads them, and DirectX"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles, as in step 2
+  low = pebbles.height * 0.45
+  laid = max(stones.height, low)
+  // Warp: each pixel read away along the slope of a broad noise, so that the straight sides bend
+  wobble = tileable_noise(t, scale: 4.0, detail: 1.0, seed: 5.0)
+  warped = warp(laid, warp: wobble, intensity: 0.008)
+    |> SeparateColor().red
+  // Slope blur: the height smeared down the slopes of a finer noise, as water and frost wear it
+  grit = tileable_noise(t, scale: 10.0, detail: 2.0, seed: 6.0)
+  eroded = slope_blur(warped, slope: grit, intensity: 0.006)
+    |> SeparateColor().red
+  // Chips: the borders of the stones, found by edge detection, knocked off where the grit is high
+  edges = edge_detect(warped, strength: 0.025)
+  chips = edges * histogram_scan(grit, position: 0.54, contrast: 0.6)
+  // Cracks: the edges of Voronoi cells, scanned to thin lines, cut into the stones only
+  cells = tileable_cells(t, scale: 3, seed: 2.0)
+  cracks = 1.0 - histogram_scan(cells.edge, position: 0.03, contrast: 0.97)
+  on_stone = histogram_scan(eroded, position: 0.33, contrast: 0.8)
+  grain = tileable_noise(t, scale: 48.0, detail: 4.0, roughness: 0.6, seed: 7.0)
+  carved = eroded - chips * 0.08 - cracks * on_stone * 0.06 + (grain - 0.5) * 0.03
+  // Levels: the gaps down to 0, the tops up to flat, the mid-tones raised by the gamma
+  height = levels(carved, in_low: 0.08, in_high: 1.0, gamma: 1.6)
+  // The slope of the height turned into a tangent-space normal: x in red, y in green
+  return (
+    opengl: height_to_normal(height, depth: 0.02),
+    directx: height_to_normal(height, depth: 0.02, directx: true))
+}
+</script></bn-view>
+    <ul>
+      <li><strong><code>depth</code></strong> is how high a height of 1 stands, in tiles: 0.02 of a tile of 2 m is 4 cm, a cobble's relief. The larger, the stronger the normals.</li>
+      <li><strong>OpenGL or DirectX.</strong> The two conventions differ by the sign of green: up the image in OpenGL, down in DirectX. Blender, Unity and Godot read OpenGL; Unreal and many game engines read DirectX. A map of the wrong one lights the stones from below. <code>directx: true</code> flips it.</li>
+    </ul>
+    <figure>
+      <img src="img/tileable-stone-step5.png" width="1000" height="750" loading="lazy" alt="Two lilac normal maps of the stones: on the left the OpenGL one, its stones light on their top sides, on the right the DirectX one, light on their bottom sides">
+      <figcaption>Step 5. OpenGL (left) and DirectX (right): look at the top edge of a stone, green in one, pink in the other.</figcaption>
+    </figure>
+
+    <h2 id="step-6"><span class="n">6.</span> Curvature, occlusion, colour</h2>
+    <p>
+      The height says where the material is high; two more maps say what that means for the light and the dirt, and from those come the colour and the roughness.
+    </p>
+    <p class="file">step6_maps.bn: <code>tileable_stone</code></p>
+    <bn-view graph="tileable_stone" height="480"><script type="text/bn">
+// @module tileable_stone_step6
+// @title Tileable stone, step 6: curvature, occlusion, colour
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+use texture_filters
+
+compositor graph tileable_stone(
+    image: Color
+) -> (albedo: Color, roughness: Float, curvature: Float, occlusion: Float) {
+  "The maps a material needs besides the height: curvature and ambient occlusion from it, and from those a colour and a roughness"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles, as in step 2
+  low = pebbles.height * 0.45
+  laid = max(stones.height, low)
+  // Warp: each pixel read away along the slope of a broad noise, so that the straight sides bend
+  wobble = tileable_noise(t, scale: 4.0, detail: 1.0, seed: 5.0)
+  warped = warp(laid, warp: wobble, intensity: 0.008)
+    |> SeparateColor().red
+  // The random grey of each stone, warped with it: a tone per stone
+  id = warp(
+      Mix(factor: stones.height >= low, a: pebbles.id * 0.5, b: stones.id),
+      warp: wobble,
+      intensity: 0.008)
+    |> SeparateColor().red
+  // Slope blur: the height smeared down the slopes of a finer noise, as water and frost wear it
+  grit = tileable_noise(t, scale: 10.0, detail: 2.0, seed: 6.0)
+  eroded = slope_blur(warped, slope: grit, intensity: 0.006)
+    |> SeparateColor().red
+  // Chips: the borders of the stones, found by edge detection, knocked off where the grit is high
+  edges = edge_detect(warped, strength: 0.025)
+  chips = edges * histogram_scan(grit, position: 0.54, contrast: 0.6)
+  // Cracks: the edges of Voronoi cells, scanned to thin lines, cut into the stones only
+  cells = tileable_cells(t, scale: 3, seed: 2.0)
+  cracks = 1.0 - histogram_scan(cells.edge, position: 0.03, contrast: 0.97)
+  on_stone = histogram_scan(eroded, position: 0.33, contrast: 0.8)
+  grain = tileable_noise(t, scale: 48.0, detail: 4.0, roughness: 0.6, seed: 7.0)
+  carved = eroded - chips * 0.08 - cracks * on_stone * 0.06 + (grain - 0.5) * 0.03
+  // Levels: the gaps down to 0, the tops up to flat, the mid-tones raised by the gamma
+  height = levels(carved, in_low: 0.08, in_high: 1.0, gamma: 1.6)
+  // Curvature: bright on the edges, dark in the hollows, from the height a little blurred so that
+  // the grain does not drown the shapes; occlusion: dark where the heights around stand above
+  curvature = height_curvature(height_blur(height, size: 6.0), depth: 0.02, strength: 0.008)
+  occlusion = height_occlusion(height, radius: 64.0, strength: 4.0)
+  // Colour: two tones of stone mixed by the grey of each, stained by a broad noise and speckled;
+  // dirt in the gaps; the edges worn lighter where they stand out
+  tone = Mix(factor: id, a: (0.08, 0.075, 0.07, 1.0), b: (0.3, 0.25, 0.19, 1.0), data_type: RGBA)
+  stain = tileable_noise(t, scale: 5.0, detail: 6.0, roughness: 0.55, seed: 1.0)
+  speckle = tileable_noise(t, scale: 32.0, detail: 6.0, roughness: 0.65, seed: 8.0)
+  stone = tone * (0.5 + levels(stain, in_low: 0.3, in_high: 0.7) * 0.7) * (0.6 + speckle * 0.8)
+  gap = 1.0 - histogram_scan(height, position: 0.2, contrast: 0.75)
+  dirty = Mix(factor: gap, a: stone, b: (0.06, 0.05, 0.04, 1.0), data_type: RGBA)
+  worn = max(curvature - 0.5, 0.0) * 2.0
+  albedo = Mix(factor: worn * 0.6, a: dirty, b: dirty * 1.6, data_type: RGBA)
+  // Roughness: rough stone, rougher dirt, polished a little where feet wear the edges
+  roughness = 0.62 + gap * 0.3 - worn * 0.25 + speckle * 0.1
+  return (albedo: albedo, roughness: roughness, curvature: curvature, occlusion: occlusion)
+}
+</script></bn-view>
+    <ul>
+      <li><strong>Curvature.</strong> <code>height_curvature</code>: 0.5 where it is flat, brighter on edges and bumps, darker in hollows. It is taken on the height blurred over 6 pixels, so that it follows the shapes and not the grain.</li>
+      <li><strong>Occlusion.</strong> <code>height_occlusion</code> darkens a pixel by how much the heights around it, up to 64 pixels away, stand above it: the gaps and the feet of the stones.</li>
+      <li><strong>Colour.</strong> A tone per stone from <code>id</code>, stained by the noise of step 1 (through <code>levels</code>, to stretch its contrast), speckled; dark dirt in the gaps; edges worn lighter where the curvature is high, as a sole polishes them.</li>
+      <li><strong>Roughness.</strong> Rough stone, rougher dirt, a little smoother on the worn edges.</li>
+    </ul>
+    <figure>
+      <img src="img/tileable-stone-step6.png" width="1000" height="750" loading="lazy" alt="Four panels: top left the albedo, grey and beige stones on dark dirt; top right the roughness, white in the gaps; bottom left the curvature, mid grey with light edges; bottom right the occlusion, white with dark gaps">
+      <figcaption>Step 6. The albedo and the roughness (top), the curvature and the occlusion they are made from (bottom).</figcaption>
+    </figure>
+
+    <h2 id="step-7"><span class="n">7.</span> The maps on a floor</h2>
+    <p>
+      The last step gives the five maps a material needs, and a shader group, <code>stone_surface</code>, that reads them back.
+    </p>
+    <p class="file">step7_floor.bn: <code>tileable_stone</code>, <code>stone_surface</code></p>
+    <bn-view graph="tileable_stone" height="480"><script type="text/bn">
+// @module tileable_stone_step7
+// @title Tileable stone, step 7: the maps on a floor
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor, blender-shader
+// @offer groups
+
+use texture_atoms
+use texture_filters
+
+compositor graph tileable_stone(
+    image: Color
+) -> (albedo: Color, height: Float, normal: Color, roughness: Float, occlusion: Float) {
+  "The five maps of a stone floor that tiles, on a texture of 1024 pixels: to render once and write to files"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles, as in step 2
+  low = pebbles.height * 0.45
+  laid = max(stones.height, low)
+  // Warp: each pixel read away along the slope of a broad noise, so that the straight sides bend
+  wobble = tileable_noise(t, scale: 4.0, detail: 1.0, seed: 5.0)
+  warped = warp(laid, warp: wobble, intensity: 0.008)
+    |> SeparateColor().red
+  // The random grey of each stone, warped with it: a tone per stone
+  id = warp(
+      Mix(factor: stones.height >= low, a: pebbles.id * 0.5, b: stones.id),
+      warp: wobble,
+      intensity: 0.008)
+    |> SeparateColor().red
+  // Slope blur: the height smeared down the slopes of a finer noise, as water and frost wear it
+  grit = tileable_noise(t, scale: 10.0, detail: 2.0, seed: 6.0)
+  eroded = slope_blur(warped, slope: grit, intensity: 0.006)
+    |> SeparateColor().red
+  // Chips: the borders of the stones, found by edge detection, knocked off where the grit is high
+  edges = edge_detect(warped, strength: 0.025)
+  chips = edges * histogram_scan(grit, position: 0.54, contrast: 0.6)
+  // Cracks: the edges of Voronoi cells, scanned to thin lines, cut into the stones only
+  cells = tileable_cells(t, scale: 3, seed: 2.0)
+  cracks = 1.0 - histogram_scan(cells.edge, position: 0.03, contrast: 0.97)
+  on_stone = histogram_scan(eroded, position: 0.33, contrast: 0.8)
+  grain = tileable_noise(t, scale: 48.0, detail: 4.0, roughness: 0.6, seed: 7.0)
+  carved = eroded - chips * 0.08 - cracks * on_stone * 0.06 + (grain - 0.5) * 0.03
+  // Levels: the gaps down to 0, the tops up to flat, the mid-tones raised by the gamma
+  height = levels(carved, in_low: 0.08, in_high: 1.0, gamma: 1.6)
+  // Curvature: bright on the edges, dark in the hollows, from the height a little blurred so that
+  // the grain does not drown the shapes; occlusion: dark where the heights around stand above
+  curvature = height_curvature(height_blur(height, size: 6.0), depth: 0.02, strength: 0.008)
+  occlusion = height_occlusion(height, radius: 64.0, strength: 4.0)
+  // Colour: two tones of stone mixed by the grey of each, stained by a broad noise and speckled;
+  // dirt in the gaps; the edges worn lighter where they stand out
+  tone = Mix(factor: id, a: (0.08, 0.075, 0.07, 1.0), b: (0.3, 0.25, 0.19, 1.0), data_type: RGBA)
+  stain = tileable_noise(t, scale: 5.0, detail: 6.0, roughness: 0.55, seed: 1.0)
+  speckle = tileable_noise(t, scale: 32.0, detail: 6.0, roughness: 0.65, seed: 8.0)
+  stone = tone * (0.5 + levels(stain, in_low: 0.3, in_high: 0.7) * 0.7) * (0.6 + speckle * 0.8)
+  gap = 1.0 - histogram_scan(height, position: 0.2, contrast: 0.75)
+  dirty = Mix(factor: gap, a: stone, b: (0.06, 0.05, 0.04, 1.0), data_type: RGBA)
+  worn = max(curvature - 0.5, 0.0) * 2.0
+  albedo = Mix(factor: worn * 0.6, a: dirty, b: dirty * 1.6, data_type: RGBA)
+  // Roughness: rough stone, rougher dirt, polished a little where feet wear the edges
+  roughness = 0.62 + gap * 0.3 - worn * 0.25 + speckle * 0.1
+  return (
+    albedo: albedo,
+    height: height,
+    normal: height_to_normal(height, depth: 0.02),
+    roughness: roughness,
+    occlusion: occlusion)
+}
+
+shader graph stone_surface(
+    albedo: Color = (0.2, 0.18, 0.15, 1.0),
+    height: Float = 0.5,
+    normal: Color = (0.5, 0.5, 1.0, 1.0),
+    roughness: Float = 0.7 in 0.0..1.0,
+    occlusion: Float = 1.0 in 0.0..1.0,
+    "occlusion amount" as ao_amount: Float = 0.6 in 0.0..1.0,
+    depth: Float(subtype: DISTANCE) = 0.04 in 0.0..
+) -> (bsdf: Shader, displacement: Vector) {
+  "The maps read back by Image Texture nodes, made into a surface: the albedo darkened by the occlusion, the normal map (OpenGL) for the detail, the height for the displacement, depth metres high"
+  return (
+    bsdf: PrincipledBSDF(
+      base_color: Mix(factor: ao_amount, a: albedo, b: albedo * occlusion, data_type: RGBA),
+      roughness: roughness,
+      normal: NormalMap(color: normal)),
+    displacement: Displacement(height: height, midlevel: 0.0, scale: depth))
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>Write the maps.</strong> In the Compositor, add a <em>File Output</em> node, give it one input per output of <code>tileable_stone</code> (<code>albedo</code>, <code>height</code>, <code>normal</code>, <code>roughness</code>, <code>occlusion</code>), link them, pick OpenEXR, 32 bits, and render once: Blender writes the five files. <code>render.py</code> does exactly that.</li>
+      <li><strong>Read them back.</strong> In the material of a plane, one <em>Image Texture</em> per map, all on the same coordinates scaled so that a tile is 2 m. The albedo is a colour (<em>Linear Rec.709</em> for an EXR); the other four are data: <em>Non-Color</em>.</li>
+      <li><strong>Plug them in.</strong> Into <code>stone_surface</code>: its <code>bsdf</code> to the <em>Surface</em> of the Material Output, its <code>displacement</code> to <em>Displacement</em>. In the material's settings, set <em>Displacement</em> to <em>Displacement and Bump</em>, and give the plane enough vertices: here a grid of 900 by 900 for 6 m.</li>
+    </ol>
+    <p>
+      The displacement moves the vertices by the height, <code>depth</code> metres high: the stones stand out against the light and throw shadows. The normal map adds what the vertices are too far apart to carry: the grain, the cracks. The occlusion darkens the albedo by <code>ao_amount</code>, for the dirt light does not reach even where Cycles finds it lit.
+    </p>
+    <figure>
+      <img src="img/tileable-stone-step7-tiles.png" width="1000" height="750" loading="lazy" alt="The stone floor seen from straight above, lit from the right: nine copies of the texture, white marks on the gravel around it at 2 m and 4 m where the copies meet; no seam shows">
+      <figcaption>Step 7, from above. The white marks show where the nine copies meet: the stones cross those lines as they cross any other.</figcaption>
+    </figure>
+    <p>
+      The hero picture of this page is the same floor, from a standing eye, in a courtyard at the end of the afternoon.
+    </p>
+
+    <h2 id="tune">The knobs</h2>
+    <p>
+      Each filter has a few inputs; these change the floor most:
+    </p>
+    <table>
+      <tr><th>Where</th><th>Input</th><th>What it does</th></tr>
+      <tr><td><code>tile_sampler</code> of the stones</td><td><code>columns</code>, <code>rows</code>, <code>size</code></td><td>How many stones across, and how tightly they pack.</td></tr>
+      <tr><td><code>tile_sampler</code></td><td><code>offset_random</code>, <code>rotation_random</code>, <code>seed</code></td><td>How far they stray from the grid, how much they turn, which floor you get.</td></tr>
+      <tr><td><code>warp</code></td><td><code>intensity</code></td><td>How much the sides bend; and the <code>scale</code> of <code>wobble</code>, how wide the bends.</td></tr>
+      <tr><td><code>slope_blur</code></td><td><code>intensity</code></td><td>How worn the borders are.</td></tr>
+      <tr><td><code>levels</code></td><td><code>in_low</code>, <code>gamma</code></td><td>How wide the gaps, how flat the tops.</td></tr>
+      <tr><td><code>height_to_normal</code></td><td><code>depth</code>, <code>directx</code></td><td>How strong the normals, and for which engine.</td></tr>
+      <tr><td><code>stone_surface</code></td><td><code>depth</code>, <code>ao_amount</code></td><td>How high the displacement, how much the occlusion darkens the colour.</td></tr>
+    </table>
+    <p class="try"><strong>Try:</strong> on step 7, set <code>columns</code> and <code>rows</code> of the stones to 3, and <code>size</code> of the pebbles to 1.0: large flagstones in a bed of gravel. Every map follows, because every map comes from the height.</p>
+    <p>
+      Changing <code>texture_canvas</code>'s <code>size</code> to 2048 doubles the detail, and the render time; the sizes given in pixels (<code>height_blur</code>, <code>height_occlusion</code>) then cover half as much of the texture, so double them too.
+    </p>
+
+    <h2 id="files">Take it to Blender</h2>
+    <p>
+      The finished graph, in one file. Drag the card onto Blender and keep <em>Import into the .blend</em>: <code>tileable_stone</code> becomes the scene's compositor, if it has none yet, and <code>stone_surface</code> comes as a shader group. A click on the card downloads the file.
+    </p>
+    <bn-file><script type="text/bn">
+// @module tileable_stone_step7
+// @title Tileable stone, step 7: the maps on a floor
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor, blender-shader
+// @offer groups
+
+use texture_atoms
+use texture_filters
+
+compositor graph tileable_stone(
+    image: Color
+) -> (albedo: Color, height: Float, normal: Color, roughness: Float, occlusion: Float) {
+  "The five maps of a stone floor that tiles, on a texture of 1024 pixels: to render once and write to files"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles, as in step 2
+  low = pebbles.height * 0.45
+  laid = max(stones.height, low)
+  // Warp: each pixel read away along the slope of a broad noise, so that the straight sides bend
+  wobble = tileable_noise(t, scale: 4.0, detail: 1.0, seed: 5.0)
+  warped = warp(laid, warp: wobble, intensity: 0.008)
+    |> SeparateColor().red
+  // The random grey of each stone, warped with it: a tone per stone
+  id = warp(
+      Mix(factor: stones.height >= low, a: pebbles.id * 0.5, b: stones.id),
+      warp: wobble,
+      intensity: 0.008)
+    |> SeparateColor().red
+  // Slope blur: the height smeared down the slopes of a finer noise, as water and frost wear it
+  grit = tileable_noise(t, scale: 10.0, detail: 2.0, seed: 6.0)
+  eroded = slope_blur(warped, slope: grit, intensity: 0.006)
+    |> SeparateColor().red
+  // Chips: the borders of the stones, found by edge detection, knocked off where the grit is high
+  edges = edge_detect(warped, strength: 0.025)
+  chips = edges * histogram_scan(grit, position: 0.54, contrast: 0.6)
+  // Cracks: the edges of Voronoi cells, scanned to thin lines, cut into the stones only
+  cells = tileable_cells(t, scale: 3, seed: 2.0)
+  cracks = 1.0 - histogram_scan(cells.edge, position: 0.03, contrast: 0.97)
+  on_stone = histogram_scan(eroded, position: 0.33, contrast: 0.8)
+  grain = tileable_noise(t, scale: 48.0, detail: 4.0, roughness: 0.6, seed: 7.0)
+  carved = eroded - chips * 0.08 - cracks * on_stone * 0.06 + (grain - 0.5) * 0.03
+  // Levels: the gaps down to 0, the tops up to flat, the mid-tones raised by the gamma
+  height = levels(carved, in_low: 0.08, in_high: 1.0, gamma: 1.6)
+  // Curvature: bright on the edges, dark in the hollows, from the height a little blurred so that
+  // the grain does not drown the shapes; occlusion: dark where the heights around stand above
+  curvature = height_curvature(height_blur(height, size: 6.0), depth: 0.02, strength: 0.008)
+  occlusion = height_occlusion(height, radius: 64.0, strength: 4.0)
+  // Colour: two tones of stone mixed by the grey of each, stained by a broad noise and speckled;
+  // dirt in the gaps; the edges worn lighter where they stand out
+  tone = Mix(factor: id, a: (0.08, 0.075, 0.07, 1.0), b: (0.3, 0.25, 0.19, 1.0), data_type: RGBA)
+  stain = tileable_noise(t, scale: 5.0, detail: 6.0, roughness: 0.55, seed: 1.0)
+  speckle = tileable_noise(t, scale: 32.0, detail: 6.0, roughness: 0.65, seed: 8.0)
+  stone = tone * (0.5 + levels(stain, in_low: 0.3, in_high: 0.7) * 0.7) * (0.6 + speckle * 0.8)
+  gap = 1.0 - histogram_scan(height, position: 0.2, contrast: 0.75)
+  dirty = Mix(factor: gap, a: stone, b: (0.06, 0.05, 0.04, 1.0), data_type: RGBA)
+  worn = max(curvature - 0.5, 0.0) * 2.0
+  albedo = Mix(factor: worn * 0.6, a: dirty, b: dirty * 1.6, data_type: RGBA)
+  // Roughness: rough stone, rougher dirt, polished a little where feet wear the edges
+  roughness = 0.62 + gap * 0.3 - worn * 0.25 + speckle * 0.1
+  return (
+    albedo: albedo,
+    height: height,
+    normal: height_to_normal(height, depth: 0.02),
+    roughness: roughness,
+    occlusion: occlusion)
+}
+
+shader graph stone_surface(
+    albedo: Color = (0.2, 0.18, 0.15, 1.0),
+    height: Float = 0.5,
+    normal: Color = (0.5, 0.5, 1.0, 1.0),
+    roughness: Float = 0.7 in 0.0..1.0,
+    occlusion: Float = 1.0 in 0.0..1.0,
+    "occlusion amount" as ao_amount: Float = 0.6 in 0.0..1.0,
+    depth: Float(subtype: DISTANCE) = 0.04 in 0.0..
+) -> (bsdf: Shader, displacement: Vector) {
+  "The maps read back by Image Texture nodes, made into a surface: the albedo darkened by the occlusion, the normal map (OpenGL) for the detail, the height for the displacement, depth metres high"
+  return (
+    bsdf: PrincipledBSDF(
+      base_color: Mix(factor: ao_amount, a: albedo, b: albedo * occlusion, data_type: RGBA),
+      roughness: roughness,
+      normal: NormalMap(color: normal)),
+    displacement: Displacement(height: height, midlevel: 0.0, scale: depth))
+}
+</script></bn-file>
+    <p>The steps before it, to start again from any of them:</p>
+    <div class="cards">
+      <bn-file><script type="text/bn">
+// @module tileable_stone_step1
+// @title Tileable stone, step 1: atoms that tile
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+
+compositor graph tileable_stone(image: Color) -> (noise: Float, cells: Float) {
+  "Two atoms of the stone on a square texture of 1024 pixels: a fractal noise and Voronoi cells, both periodic"
+  t = texture_canvas(image, size: 1024)
+  noise = tileable_noise(t, scale: 5.0, detail: 6.0, roughness: 0.55, seed: 1.0)
+  cells = tileable_cells(t, scale: 9, seed: 2.0)
+  return (noise: noise, cells: cells.edge * 3.0)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module tileable_stone_step2
+// @title Tileable stone, step 2: stones laid by a tile sampler
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+
+compositor graph tileable_stone(image: Color) -> (height: Float, id: Float) {
+  "Stones laid on a grid of five by five, rounded squares domed, moved, turned and sized at random; pebbles in the gaps"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles: the pebbles, lower, only show in the gaps
+  low = pebbles.height * 0.45
+  on_stone = stones.height >= low
+  return (
+    height: max(stones.height, low),
+    id: Mix(factor: on_stone, a: pebbles.id * 0.5, b: stones.id))
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module tileable_stone_step3
+// @title Tileable stone, step 3: warp and slope blur
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+use texture_filters
+
+compositor graph tileable_stone(image: Color) -> (warped: Float, eroded: Float) {
+  "The stones of step 2 bent out of their grid by a warp, then worn by a slope blur along a noise"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles, as in step 2
+  low = pebbles.height * 0.45
+  laid = max(stones.height, low)
+  // Warp: each pixel read away along the slope of a broad noise, so that the straight sides bend
+  wobble = tileable_noise(t, scale: 4.0, detail: 1.0, seed: 5.0)
+  warped = warp(laid, warp: wobble, intensity: 0.008)
+    |> SeparateColor().red
+  // Slope blur: the height smeared down the slopes of a finer noise, as water and frost wear it
+  grit = tileable_noise(t, scale: 10.0, detail: 2.0, seed: 6.0)
+  eroded = slope_blur(warped, slope: grit, intensity: 0.006)
+    |> SeparateColor().red
+  return (warped: warped, eroded: eroded)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module tileable_stone_step4
+// @title Tileable stone, step 4: edges, cracks and levels
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+use texture_filters
+
+compositor graph tileable_stone(image: Color) -> (edges: Float, cracks: Float, height: Float) {
+  "The eroded stones of step 3 chipped on their edges, cracked along Voronoi cells, grained, and levelled to flat tops"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles, as in step 2
+  low = pebbles.height * 0.45
+  laid = max(stones.height, low)
+  // Warp: each pixel read away along the slope of a broad noise, so that the straight sides bend
+  wobble = tileable_noise(t, scale: 4.0, detail: 1.0, seed: 5.0)
+  warped = warp(laid, warp: wobble, intensity: 0.008)
+    |> SeparateColor().red
+  // Slope blur: the height smeared down the slopes of a finer noise, as water and frost wear it
+  grit = tileable_noise(t, scale: 10.0, detail: 2.0, seed: 6.0)
+  eroded = slope_blur(warped, slope: grit, intensity: 0.006)
+    |> SeparateColor().red
+  // Chips: the borders of the stones, found by edge detection, knocked off where the grit is high
+  edges = edge_detect(warped, strength: 0.025)
+  chips = edges * histogram_scan(grit, position: 0.54, contrast: 0.6)
+  // Cracks: the edges of Voronoi cells, scanned to thin lines, cut into the stones only
+  cells = tileable_cells(t, scale: 3, seed: 2.0)
+  cracks = 1.0 - histogram_scan(cells.edge, position: 0.03, contrast: 0.97)
+  on_stone = histogram_scan(eroded, position: 0.33, contrast: 0.8)
+  grain = tileable_noise(t, scale: 48.0, detail: 4.0, roughness: 0.6, seed: 7.0)
+  carved = eroded - chips * 0.08 - cracks * on_stone * 0.06 + (grain - 0.5) * 0.03
+  // Levels: the gaps down to 0, the tops up to flat, the mid-tones raised by the gamma
+  height = levels(carved, in_low: 0.08, in_high: 1.0, gamma: 1.6)
+  return (edges: edges, cracks: cracks * on_stone, height: height)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module tileable_stone_step5
+// @title Tileable stone, step 5: normal maps, OpenGL and DirectX
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+use texture_filters
+
+compositor graph tileable_stone(image: Color) -> (opengl: Color, directx: Color) {
+  "The normal maps of the height of step 4, a height of 1 standing 0.02 tiles high: OpenGL, as Blender reads them, and DirectX"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles, as in step 2
+  low = pebbles.height * 0.45
+  laid = max(stones.height, low)
+  // Warp: each pixel read away along the slope of a broad noise, so that the straight sides bend
+  wobble = tileable_noise(t, scale: 4.0, detail: 1.0, seed: 5.0)
+  warped = warp(laid, warp: wobble, intensity: 0.008)
+    |> SeparateColor().red
+  // Slope blur: the height smeared down the slopes of a finer noise, as water and frost wear it
+  grit = tileable_noise(t, scale: 10.0, detail: 2.0, seed: 6.0)
+  eroded = slope_blur(warped, slope: grit, intensity: 0.006)
+    |> SeparateColor().red
+  // Chips: the borders of the stones, found by edge detection, knocked off where the grit is high
+  edges = edge_detect(warped, strength: 0.025)
+  chips = edges * histogram_scan(grit, position: 0.54, contrast: 0.6)
+  // Cracks: the edges of Voronoi cells, scanned to thin lines, cut into the stones only
+  cells = tileable_cells(t, scale: 3, seed: 2.0)
+  cracks = 1.0 - histogram_scan(cells.edge, position: 0.03, contrast: 0.97)
+  on_stone = histogram_scan(eroded, position: 0.33, contrast: 0.8)
+  grain = tileable_noise(t, scale: 48.0, detail: 4.0, roughness: 0.6, seed: 7.0)
+  carved = eroded - chips * 0.08 - cracks * on_stone * 0.06 + (grain - 0.5) * 0.03
+  // Levels: the gaps down to 0, the tops up to flat, the mid-tones raised by the gamma
+  height = levels(carved, in_low: 0.08, in_high: 1.0, gamma: 1.6)
+  // The slope of the height turned into a tangent-space normal: x in red, y in green
+  return (
+    opengl: height_to_normal(height, depth: 0.02),
+    directx: height_to_normal(height, depth: 0.02, directx: true))
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module tileable_stone_step6
+// @title Tileable stone, step 6: curvature, occlusion, colour
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender-compositor
+// @offer groups
+
+use texture_atoms
+use texture_filters
+
+compositor graph tileable_stone(
+    image: Color
+) -> (albedo: Color, roughness: Float, curvature: Float, occlusion: Float) {
+  "The maps a material needs besides the height: curvature and ambient occlusion from it, and from those a colour and a roughness"
+  t = texture_canvas(image, size: 1024)
+  stones = tile_sampler(
+    t,
+    columns: 5,
+    rows: 5,
+    shape: Square,
+    roundness: 0.5,
+    profile: Dome,
+    size: 1.1,
+    size_random: 0.2,
+    offset_random: 0.25,
+    rotation_random: 0.1,
+    luminance_random: 0.3,
+    seed: 3.0)
+  pebbles = tile_sampler(
+    t,
+    columns: 11,
+    rows: 11,
+    profile: Dome,
+    size: 0.7,
+    size_random: 0.5,
+    offset_random: 0.9,
+    luminance_random: 0.5,
+    seed: 4.0)
+  // The stones over the pebbles, as in step 2
+  low = pebbles.height * 0.45
+  laid = max(stones.height, low)
+  // Warp: each pixel read away along the slope of a broad noise, so that the straight sides bend
+  wobble = tileable_noise(t, scale: 4.0, detail: 1.0, seed: 5.0)
+  warped = warp(laid, warp: wobble, intensity: 0.008)
+    |> SeparateColor().red
+  // The random grey of each stone, warped with it: a tone per stone
+  id = warp(
+      Mix(factor: stones.height >= low, a: pebbles.id * 0.5, b: stones.id),
+      warp: wobble,
+      intensity: 0.008)
+    |> SeparateColor().red
+  // Slope blur: the height smeared down the slopes of a finer noise, as water and frost wear it
+  grit = tileable_noise(t, scale: 10.0, detail: 2.0, seed: 6.0)
+  eroded = slope_blur(warped, slope: grit, intensity: 0.006)
+    |> SeparateColor().red
+  // Chips: the borders of the stones, found by edge detection, knocked off where the grit is high
+  edges = edge_detect(warped, strength: 0.025)
+  chips = edges * histogram_scan(grit, position: 0.54, contrast: 0.6)
+  // Cracks: the edges of Voronoi cells, scanned to thin lines, cut into the stones only
+  cells = tileable_cells(t, scale: 3, seed: 2.0)
+  cracks = 1.0 - histogram_scan(cells.edge, position: 0.03, contrast: 0.97)
+  on_stone = histogram_scan(eroded, position: 0.33, contrast: 0.8)
+  grain = tileable_noise(t, scale: 48.0, detail: 4.0, roughness: 0.6, seed: 7.0)
+  carved = eroded - chips * 0.08 - cracks * on_stone * 0.06 + (grain - 0.5) * 0.03
+  // Levels: the gaps down to 0, the tops up to flat, the mid-tones raised by the gamma
+  height = levels(carved, in_low: 0.08, in_high: 1.0, gamma: 1.6)
+  // Curvature: bright on the edges, dark in the hollows, from the height a little blurred so that
+  // the grain does not drown the shapes; occlusion: dark where the heights around stand above
+  curvature = height_curvature(height_blur(height, size: 6.0), depth: 0.02, strength: 0.008)
+  occlusion = height_occlusion(height, radius: 64.0, strength: 4.0)
+  // Colour: two tones of stone mixed by the grey of each, stained by a broad noise and speckled;
+  // dirt in the gaps; the edges worn lighter where they stand out
+  tone = Mix(factor: id, a: (0.08, 0.075, 0.07, 1.0), b: (0.3, 0.25, 0.19, 1.0), data_type: RGBA)
+  stain = tileable_noise(t, scale: 5.0, detail: 6.0, roughness: 0.55, seed: 1.0)
+  speckle = tileable_noise(t, scale: 32.0, detail: 6.0, roughness: 0.65, seed: 8.0)
+  stone = tone * (0.5 + levels(stain, in_low: 0.3, in_high: 0.7) * 0.7) * (0.6 + speckle * 0.8)
+  gap = 1.0 - histogram_scan(height, position: 0.2, contrast: 0.75)
+  dirty = Mix(factor: gap, a: stone, b: (0.06, 0.05, 0.04, 1.0), data_type: RGBA)
+  worn = max(curvature - 0.5, 0.0) * 2.0
+  albedo = Mix(factor: worn * 0.6, a: dirty, b: dirty * 1.6, data_type: RGBA)
+  // Roughness: rough stone, rougher dirt, polished a little where feet wear the edges
+  roughness = 0.62 + gap * 0.3 - worn * 0.25 + speckle * 0.1
+  return (albedo: albedo, roughness: roughness, curvature: curvature, occlusion: occlusion)
+}
+</script></bn-file>
+    </div>
+    <p class="muted">
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/tileable_stone"><code>examples/tutorials/tileable_stone/</code></a>.
+    </p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Procedural Toolkit — BaseNode Packs — Ludopant</title>
+<meta name="description" content="Procedural Toolkit, a pack of 3 Base Node modules for Blender 5.2+: terrains, Voronoi fracture and L-system trees in Geometry Nodes.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/procedural/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Procedural Toolkit — BaseNode Packs — Ludopant">
+<meta property="og:description" content="Procedural Toolkit, a pack of 3 Base Node modules for Blender 5.2+: terrains, Voronoi fracture and L-system trees in Geometry Nodes.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/procedural/">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/valley-step8.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › Procedural Toolkit</p>
+<p class="store">Coming soon on Superhive</p>
+<h1>Procedural Toolkit</h1>
+<p class="lead">Terrains, Voronoi fracture and L-system trees in Geometry Nodes.</p>
+<p class="cover"><img src="../tutorials/img/valley-step8.png" alt="Procedural Toolkit: Terrains, Voronoi fracture and L-system trees in Geometry Nodes"></p>
+<dl class="facts">
+<dt>For</dt><dd>Environment artists</dd>
+<dt>Modelled on</dt><dd>Gaea, Houdini Heightfields, Houdini RBD, SpeedTree</dd>
+<dt>Modules</dt><dd>3</dd>
+<dt>Blender</dt><dd>5.2 and later, tested at each release</dd>
+<dt>Store</dt><dd>Coming soon on Superhive</dd>
+</dl>
+<p>Terrains on a grid: layered noise, terraces, thermal and hydraulic erosion that keep the ground and store their water, flow, wetness and sediment maps, and a slope mask. Voronoi fracture of a closed mesh into convex pieces, one island each, the cut faces marked, with gap, shrink and explode. Trees grown as a bracketed L-system rewrites them: branches as curves with their radius, tubes, and leaves at the tips.</p>
+
+<h2>The modules</h2>
+<p>A module is a <code>.bn</code> file of node groups. Once the pack is installed, a graph calls it with <code>use</code>, and Blender builds its groups.</p>
+<table>
+<tr><th>Module</th><th>What it gives</th></tr>
+<tr><td><code>fracture</code></td><td>Voronoi fracture of a closed mesh: points scattered inside it, each cut out as its convex cell by one Manifold Boolean of the half-spaces halfway to the other points, one island a piece with fracture_piece and fracture_inside on the cut faces, a gap between the cells, each piece shrunk about its centre, exploded from a centre</td></tr>
+<tr><td><code>lsystem</code></td><td>Branching grown as a bracketed L-system rewrites its tips (F -&gt; F [&amp;F] [&amp;F] …) in a Repeat zone: side branches tilted by an angle and spun as phyllotaxis turns, a leader, length decay, jitter by seed, tropism; each segment a curve whose radius thins at each level, tubes of that radius, leaves at the last tips with their rotation</td></tr>
+<tr><td><code>terrain</code></td><td>Terrains on a grid of square cells: a heightfield of layered noise (fractal, ridged, warped) from 0 to its height, terraces exact to their levels, thermal erosion past a talus angle and hydraulic erosion through eight pipes per cell (rain, flow, sediment carried and laid down) that keep the ground, its maps stored on the points (water, sediment, wetness, flow, change of height), and a slope mask</td></tr>
+</table>
+
+<h2>Free in Base Node, and what the pack adds</h2>
+<p>Free and open source, on <a href="https://marcgardent.github.io/base-node-language/">the Base Node site</a>: the language, the Blender add-on, the formatter and parsers, and the free modules of the standard library. The pack adds the modules above, their showcase files and this tutorial.</p>
+<table>
+<tr><th>Capability</th><th>Blender's own nodes</th><th>With the pack</th></tr>
+<tr><td>Terrain and hydraulic erosion</td><td>No</td><td>Covered — Thermal and hydraulic erosion, water and sediment maps<br><span class="mods"><code>terrain</code></span></td></tr>
+<tr><td>Vegetation, L-systems</td><td>No</td><td>Covered<br><span class="mods"><code>lsystem</code></span></td></tr>
+<tr><td>Voronoi fracture, debris</td><td>No</td><td>Covered — One Manifold Boolean per cell<br><span class="mods"><code>fracture</code></span></td></tr>
+</table>
+
+<h2>Tutorial</h2>
+<a class="tuto-card" href="../tutorials/valley.html">
+  <img src="../tutorials/img/valley-step8.png" alt="" loading="lazy">
+  <span class="body"><strong>The valley</strong><span>Build an eroded valley in Blender, step by step, with the Procedural Toolkit: layered noise, terraces, thermal and hydraulic erosion, rock fractured at the foot of the cliffs, L-system trees, in .bn.</span><span class="count">8 steps</span></span>
+</a>
+
+<h2>Compared</h2>
+<ul>
+<li><a href="../vs/houdini.html">Base Node VS Houdini</a></li>
+</ul>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

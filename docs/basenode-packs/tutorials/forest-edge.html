@@ -1,0 +1,2633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forest edge — Scatter &amp; Biomes tutorial — Ludopant</title>
+<meta name="description" content="Scatter a forest edge on a hillside in Blender with the Scatter &amp; Biomes pack: Poisson-disk points, slope, altitude and path rules, glades of noise, varied instances, biome layers that keep off one another, level of detail and view-frustum culling, in .bn.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/tutorials/forest-edge.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Forest edge — Scatter &amp; Biomes tutorial — Ludopant">
+<meta property="og:description" content="Scatter a forest edge on a hillside in Blender with the Scatter &amp; Biomes pack: Poisson-disk points, slope, altitude and path rules, glades of noise, varied instances, biome layers that keep off one another, level of detail and view-frustum culling, in .bn.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/tutorials/forest-edge.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/forest-edge-close.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-view.js"></script>
+<script type="module" src="https://marcgardent.github.io/base-node-language/view/bn-file.js"></script>
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs tuto">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › <a href="../scatter/">Scatter &amp; Biomes</a> › Tutorial: Forest edge</p>
+<h1>Forest edge</h1>
+    <p class="lead">
+      A hillside with a path up it: pines and round trees in groves on the gentle slopes, glades between them, bushes at their feet, rocks on the steep bank, grass wherever the others leave room, and nothing on the path.
+      Nothing is placed by hand. Rules decide where each thing grows, and the camera decides what is worth keeping.
+    </p>
+    <figure>
+      <img src="img/forest-edge-close.png" width="1000" height="750" alt="Beside a dirt path on a hillside: tufts of grass, low bushes and grey rocks in the foreground, pines and round trees behind, a bare bank of earth and a grassy crest under a blue sky">
+      <figcaption>Where we are going: the last step, seen from the path. Seven steps, each one a few lines more.</figcaption>
+    </figure>
+
+    <h2 id="learn">You will learn</h2>
+    <ul>
+      <li><strong>The craft.</strong> Scatter as a procedural content generator does it: points by density with Poisson-disk spacing, kept by slope, altitude, distance to a path and a noise, soft at their edges; instances turned and sized at random for a seed; layers that keep off one another; then only what the camera sees, simpler far away.</li>
+      <li><strong>The language.</strong> <code>use</code> to bring in a module, a module's graph called with only the inputs that matter (the others keep their defaults), its tuple of outputs read by name (<code>t.points</code>, <code>t.instances</code>), frames to group a long graph, and an <code>Object</code> input that the modifier fills in.</li>
+    </ul>
+    <p>
+      This page goes faster on the basics than <a href="https://marcgardent.github.io/base-node-language/tutorials/lunar-ground.html">Lunar ground</a>, which starts from a flat square: a noise, <code>SetPosition</code>, a material. Read it first if those are new to you.
+    </p>
+
+    <h2 id="before">Before you start</h2>
+    <p>
+      You need Blender 5, the <a href="https://marcgardent.github.io/base-node-language/#blender">Base Node add-on</a>, and the <a href="../scatter/">Scatter &amp; Biomes</a> pack, version 0.13.1 or later. The pack is sold by the author of Base Node, apart from the open source project: the steps below are free to read, copy and change; the modules they <code>use</code> are not.
+      The hillside, the path and the trees, bushes, rocks and grass are made with plain nodes, in the step files themselves.
+    </p>
+    <table>
+      <tr><th>Module</th><th>Kind</th><th>What it gives</th></tr>
+      <tr><td><code>scatter</code></td><td>geometry</td><td><code>scatter</code>: points by density and spacing where its rules allow (slope, altitude, attribute, distance to paths, noise), each storing how far inside the rules it is; <code>place_instances</code>: an instance on each, aligned, spun, tilted and sized for a seed; <code>avoid</code>: a layer kept off another.</td></tr>
+      <tr><td><code>biomes</code></td><td>geometry</td><td><code>biome_layer</code>: one layer in one node, from its rules to what the camera sees; <code>lod</code> and <code>frustum_cull</code> for the camera; <code>camera_view</code> to read one; <code>biome</code>: four layers from four collections.</td></tr>
+    </table>
+    <p>
+      Every block below is a complete <code>.bn</code> file, its code beside the nodes it builds. Two ways to try a step:
+    </p>
+    <ul>
+      <li><strong>Drag it.</strong> Drag the file icon of its block, or its title, onto empty space in Blender's 3D Viewport, and keep <em>Instantiate the Example</em>: a new object carries <code>forest_edge</code> at the 3D cursor. A click on the file icon downloads the file instead.</li>
+      <li><strong>Paste it.</strong> Press the copy button of its block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>, on any mesh object: the graph makes its own hillside and ignores the mesh it is given.</li>
+    </ul>
+    <p>
+      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/forest_edge/render.py"><code>render.py</code></a>, with the same camera, sun and sky, except where a caption says otherwise. The hillside is 180 m wide; the camera stands at its foot, 11 m up.
+    </p>
+
+    <h2 id="step-1"><span class="n">1.</span> A hillside and a path</h2>
+    <p>
+      Something to scatter on. A grid 180 m wide, a point every 50 cm, lifted by <code>hill_height</code>; a path that winds up it, as a curve laid on the same heights.
+    </p>
+    <p class="file">step1_hillside.bn: <code>forest_edge</code>, <code>hill_height</code>, <code>hill_path</code>, <code>meadow</code></p>
+    <bn-view graph="forest_edge" height="480"><script type="text/bn">
+// @module forest_edge_step1
+// @title Forest edge, step 1: a hillside and a path
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph forest_edge() -> Geometry {
+  "A hillside 180 m wide and a path up it"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  return SetMaterial(ground, material: Meadow) + strip
+}
+</script></bn-view>
+    <ul>
+      <li><code>hill_height</code> adds three things: a hill whose crest is 40 m away, a bank that rises 5 m in 6 m across it, and hummocks of noise. The bank is there for the rules of step 3: it is too steep for trees.</li>
+      <li><code>hill_path</code> is a curve, not a mesh: the scatter keeps away from curves (step 4). Its points take their height from <code>hill_height(xy)</code>, the same graph as the ground, so it lies on it. <code>CurveToMesh</code> only gives it a body to render.</li>
+      <li>The material shows bare earth where the ground is steeper than about 32°: the bank.</li>
+    </ul>
+    <figure>
+      <img src="img/forest-edge-step1.png" width="1000" height="750" loading="lazy" alt="A bare green hillside under a blue sky, a dirt path winding up it, a band of bare earth across the slope">
+      <figcaption>Step 1. The hillside, the bank across it, the path.</figcaption>
+    </figure>
+
+    <h2 id="step-2"><span class="n">2.</span> Trees by density and spacing</h2>
+    <p>
+      <code>use scatter</code> brings in the module. Its <code>scatter</code> puts points on the faces of a mesh, so many per square metre, and removes those closer than <code>spacing</code> to another: a Poisson disk. A pine on each point, and the hillside is planted.
+    </p>
+    <p class="file">step2_scatter.bn: <code>forest_edge</code>, <code>pine</code></p>
+    <bn-view graph="forest_edge" height="480"><script type="text/bn">
+// @module forest_edge_step2
+// @title Forest edge, step 2: trees by density and spacing
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use scatter
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph forest_edge(seed: Int) -> Geometry {
+  "A hillside 180 m wide, a path up it, and pines scattered all over it"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // 6 trees per 100 square metres, none closer than 3 m to another
+  points = scatter(ground, density: 0.06, spacing: 3.0, seed: seed)
+  trees = InstanceOnPoints(points, instance: pine())
+  return SetMaterial(ground, material: Meadow) + strip + trees
+}
+</script></bn-view>
+    <ul>
+      <li><strong>Why a spacing.</strong> Random points clump: some trees would stand in each other's trunks while gaps open elsewhere. A minimum distance is what real trees keep, each one shading the ground around it.</li>
+      <li><strong>Density and spacing work together.</strong> 0.06 per square metre would be 1,944 trees on 32,400 m²; with no two closer than 3 m, 1,135 are left. A larger spacing lowers the density you get; it never raises it.</li>
+      <li><code>seed</code> is an input of the graph: another seed, another forest, everything else the same.</li>
+    </ul>
+    <figure>
+      <img src="img/forest-edge-step2.png" width="1000" height="750" loading="lazy" alt="The hillside covered in identical pines, evenly spaced, on the path and the bank as well">
+      <figcaption>Step 2. A plantation: 1,135 identical pines, on the path, on the bank, up to the crest.</figcaption>
+    </figure>
+
+    <h2 id="step-3"><span class="n">3.</span> Kept by slope and altitude</h2>
+    <p>
+      Trees do not root on a steep bank, and they stop below the top of a windy hill. Two rules of <code>scatter</code> say so, in the same call: <code>slope_max</code> and <code>altitude_max</code>.
+    </p>
+    <p class="file">step3_rules.bn: <code>forest_edge</code></p>
+    <bn-view graph="forest_edge" height="480"><script type="text/bn">
+// @module forest_edge_step3
+// @title Forest edge, step 3: kept by slope and altitude
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use scatter
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph forest_edge(seed: Int, tree_line: Float(subtype: DISTANCE) = 17.0) -> Geometry {
+  "A hillside 180 m wide, a path up it, and pines on its gentle slopes below the tree line"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // 6 trees per 100 square metres, none closer than 3 m to another, none on the bank
+  // (steeper than 27 degrees) nor above the tree line (17 m); fewer toward both edges
+  points = scatter(
+    ground,
+    density: 0.06,
+    spacing: 3.0,
+    seed: seed,
+    thinning: 1.0,
+    slope_max: 0.47,
+    slope_softness: 0.1,
+    altitude_max: tree_line,
+    altitude_softness: 4.0)
+  trees = InstanceOnPoints(points, instance: pine())
+  return SetMaterial(ground, material: Meadow) + strip + trees
+}
+</script></bn-view>
+    <ul>
+      <li><code>slope_max: 0.47</code>, in radians: 27°. The slope is the angle of the ground's normal from up, so flat ground is 0.</li>
+      <li><code>altitude_max: tree_line</code>: a new input of the graph, 17 m. Change it on the modifier and the forest climbs or retreats.</li>
+      <li><strong>Why soft.</strong> A rule is not a wall. Each one is 1 inside, falls to 0 at its edge over its softness (here 0.1 rad and 4 m), and the rules multiply into a mask stored on each point, <code>scatter_mask</code>. <code>thinning: 1.0</code> keeps a point with the chance of its mask: the trees thin out toward the tree line instead of stopping on a contour line.</li>
+    </ul>
+    <figure>
+      <img src="img/forest-edge-step3.png" width="1000" height="750" loading="lazy" alt="The pines now stop below the grassy crest and leave the bank bare, still standing on the path">
+      <figcaption>Step 3. 579 pines: the crest and the bank are bare, the edge of the forest is ragged. The path is still planted.</figcaption>
+    </figure>
+
+    <h2 id="step-4"><span class="n">4.</span> A clear path, and glades</h2>
+    <p>
+      Two more rules. <code>paths</code> takes the curve of the path and keeps the trees <code>clearance</code> away from it. <code>noise</code> breaks the forest into groves with glades between them: an even forest looks planted.
+    </p>
+    <p class="file">step4_clearings.bn: <code>forest_edge</code></p>
+    <bn-view graph="forest_edge" height="480"><script type="text/bn">
+// @module forest_edge_step4
+// @title Forest edge, step 4: a clear path, and glades
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use scatter
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph forest_edge(seed: Int, tree_line: Float(subtype: DISTANCE) = 17.0) -> Geometry {
+  "A hillside 180 m wide, a path up it, and groves of pines on its gentle slopes below the tree line, off the path"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // 6 trees per 100 square metres, none closer than 3 m to another, none on the bank
+  // (steeper than 27 degrees) nor above the tree line (17 m); fewer toward every edge
+  points = scatter(
+    ground,
+    density: 0.06,
+    spacing: 3.0,
+    seed: seed,
+    thinning: 1.0,
+    slope_max: 0.47,
+    slope_softness: 0.1,
+    altitude_max: tree_line,
+    altitude_softness: 4.0,
+    // Nothing within 3 m of the path, fewer for 4 m more
+    paths: path,
+    clearance: 3.0,
+    falloff: 4.0,
+    // Groves about 25 m wide over 70 % of the ground, glades between them
+    noise: 1.0,
+    noise_size: 25.0,
+    coverage: 0.7)
+  trees = InstanceOnPoints(points, instance: pine())
+  return SetMaterial(ground, material: Meadow) + strip + trees
+}
+</script></bn-view>
+    <ul>
+      <li><code>clearance: 3.0</code>, <code>falloff: 4.0</code>: nothing within 3 m of the path, then fewer trees for 4 m. A path through a wood is lined by the trees it was cut through, not by a hedge.</li>
+      <li><code>paths</code> is any geometry: curves, the edges of a mesh, points. A river, a road, the footprint of a house all work the same.</li>
+      <li><code>noise_size: 25.0</code>, <code>coverage: 0.7</code>: groves about 25 m wide over 70 % of the ground. The noise is fixed for a seed, so the glades stay where they are when you change another rule.</li>
+    </ul>
+    <figure>
+      <img src="img/forest-edge-step4.png" width="1000" height="750" loading="lazy" alt="The path now clear of trees, the pines in groves with grassy glades between them">
+      <figcaption>Step 4. 288 pines in groves, the path clear.</figcaption>
+    </figure>
+
+    <h2 id="step-5"><span class="n">5.</span> No two trees alike</h2>
+    <p>
+      Every tree is still the same pine, the same way round, the same size. <code>place_instances</code> replaces <code>InstanceOnPoints</code>: it picks one of several trees, turns it and sizes it, at random for the seed.
+    </p>
+    <p class="file">step5_variety.bn: <code>forest_edge</code>, <code>broadleaf</code></p>
+    <bn-view graph="forest_edge" height="480"><script type="text/bn">
+// @module forest_edge_step5
+// @title Forest edge, step 5: no two trees alike
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use scatter
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Leaves() -> (surface: Shader) {
+  "Fresh green, from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.06, 0.15, 0.03),
+    b: (0.17, 0.24, 0.05),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph broadleaf() -> Geometry {
+  "A round tree 8 m tall: a lumpy crown on a trunk"
+  lumps = NoiseTexture(vector: Position(), scale: 0.6, detail: 2.0).factor - 0.5
+  crown = IcoSphere(radius: 2.6, subdivisions: 3).mesh
+    |> SetPosition(offset: Normal() * lumps * 2.0)
+    |> TransformGeometry(translation: (0.0, 0.0, 5.4), scale: (1.0, 1.0, 1.1))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Leaves)
+  return crown + trunk(height: 3.6, radius: 0.22)
+}
+
+geometry graph forest_edge(seed: Int, tree_line: Float(subtype: DISTANCE) = 17.0) -> Geometry {
+  "A hillside 180 m wide, a path up it, and groves of pines and round trees on its gentle slopes below the tree line, off the path"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // 6 trees per 100 square metres, none closer than 3 m to another, none on the bank
+  // (steeper than 27 degrees) nor above the tree line (17 m); fewer toward every edge
+  points = scatter(
+    ground,
+    density: 0.06,
+    spacing: 3.0,
+    seed: seed,
+    thinning: 1.0,
+    slope_max: 0.47,
+    slope_softness: 0.1,
+    altitude_max: tree_line,
+    altitude_softness: 4.0,
+    // Nothing within 3 m of the path, fewer for 4 m more
+    paths: path,
+    clearance: 3.0,
+    falloff: 4.0,
+    // Groves about 25 m wide over 70 % of the ground, glades between them
+    noise: 1.0,
+    noise_size: 25.0,
+    coverage: 0.7)
+  // Two pines for a round tree, picked at random; up, whatever the slope; spun, a little
+  // tilted, 0.7 to 1.3 times their size, and down to half of it at the edge of a grove
+  trees = place_instances(
+    points,
+    instance: GeometryToInstance(pine(), pine(), broadleaf()),
+    seed: seed,
+    align: 0.0,
+    tilt: 0.06,
+    scale_min: 0.7,
+    scale_max: 1.3,
+    edge_scale: 0.5,
+    pick_instance: true)
+  return SetMaterial(ground, material: Meadow) + strip + trees
+}
+</script></bn-view>
+    <ul>
+      <li><code>GeometryToInstance(pine(), pine(), broadleaf())</code>: three instances to pick from, so two pines for a round tree. <code>pick_instance: true</code> picks one for each point.</li>
+      <li><code>align: 0.0</code>: trees grow toward the sky whatever the slope. Rocks will take <code>align: 1.0</code>, laid along the ground.</li>
+      <li><code>edge_scale: 0.5</code>: a tree is up to half its size smaller where its mask is low. The edge of a grove is young trees, and the soft rules of steps 3 and 4 are what tell <code>place_instances</code> where that edge is.</li>
+      <li><strong>Why it stays put.</strong> Each point keeps its <code>id</code> from where it was scattered. Raise the tree line: new trees appear above, and none of the others moves or turns; only those that were at the edge grow, being no longer at it.</li>
+    </ul>
+    <figure>
+      <img src="img/forest-edge-step5.png" width="1000" height="750" loading="lazy" alt="Groves of pines and round trees of different sizes, some leaning slightly, smaller toward the glades">
+      <figcaption>Step 5. The same 288 points; pines and round trees, small ones at the edges.</figcaption>
+    </figure>
+
+    <h2 id="step-6"><span class="n">6.</span> Four layers that keep off one another</h2>
+    <p>
+      A forest edge is more than trees. <code>use biomes</code> brings in <code>biome_layer</code>: a <code>scatter</code>, an <code>avoid</code> and a <code>place_instances</code> in one node. Four of them, from the tallest to the smallest, each one kept off the layers before it.
+    </p>
+    <p class="file">step6_layers.bn: <code>forest_edge</code>, <code>bush</code>, <code>rock</code>, <code>tuft</code></p>
+    <bn-view graph="forest_edge" height="480"><script type="text/bn">
+// @module forest_edge_step6
+// @title Forest edge, step 6: four layers that keep off one another
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use biomes
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Leaves() -> (surface: Shader) {
+  "Fresh green, from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.06, 0.15, 0.03),
+    b: (0.17, 0.24, 0.05),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
+}
+
+shader(material: true) graph Shrub() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.05, 0.11, 0.025),
+    b: (0.12, 0.17, 0.04),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.75))
+}
+
+shader(material: true) graph Stone() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.13, 0.12, 0.11),
+    b: (0.24, 0.22, 0.19),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.85))
+}
+
+shader(material: true) graph Blades() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.08, 0.18, 0.03),
+    b: (0.24, 0.26, 0.08),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.6))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph broadleaf() -> Geometry {
+  "A round tree 8 m tall: a lumpy crown on a trunk"
+  lumps = NoiseTexture(vector: Position(), scale: 0.6, detail: 2.0).factor - 0.5
+  crown = IcoSphere(radius: 2.6, subdivisions: 3).mesh
+    |> SetPosition(offset: Normal() * lumps * 2.0)
+    |> TransformGeometry(translation: (0.0, 0.0, 5.4), scale: (1.0, 1.0, 1.1))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Leaves)
+  return crown + trunk(height: 3.6, radius: 0.22)
+}
+
+geometry graph bush() -> Geometry {
+  "A bush 1.3 m tall, lumpy and flattened"
+  lumps = NoiseTexture(vector: Position(), scale: 1.5, detail: 2.0).factor - 0.5
+  return IcoSphere(radius: 0.9, subdivisions: 2).mesh
+    |> SetPosition(offset: Normal() * lumps * 0.8)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.45), scale: (1.0, 1.0, 0.75))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Shrub)
+}
+
+geometry graph rock() -> Geometry {
+  "A rock a metre long, sunk a little into the ground"
+  lumps = NoiseTexture(vector: Position(), scale: 1.2, detail: 3.0).factor - 0.5
+  return IcoSphere(radius: 0.6, subdivisions: 2).mesh
+    |> SetPosition(offset: Normal() * lumps * 0.5)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.08), scale: (1.0, 0.8, 0.55))
+    |> SetMaterial(material: Stone)
+}
+
+geometry graph blade(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
+  "A blade of grass, leant away from the middle of its tuft"
+  return Cone(vertices: 3, radius_bottom: 0.035, depth: height).mesh
+    |> TransformGeometry(rotation: CombineXYZ(x: lean, z: turn))
+}
+
+geometry graph tuft() -> Geometry {
+  "Five blades of grass"
+  blades = blade(turn: 0.0, lean: 0.1, height: 0.7)
+    + blade(turn: 1.3)
+    + blade(turn: 2.5, lean: 0.4, height: 0.5)
+    + blade(turn: 3.8, height: 0.65)
+    + blade(turn: 5.0, lean: 0.45, height: 0.45)
+  return SetMaterial(blades, material: Blades)
+}
+
+geometry graph tag(instances: Geometry, layer: Int) -> Geometry {
+  "Each instance stores the layer it belongs to as biome_layer, to count them"
+  return StoreNamedAttribute(
+    instances,
+    name: "biome_layer",
+    value: layer,
+    data_type: INT,
+    domain: INSTANCE)
+}
+
+geometry graph forest_edge(seed: Int, tree_line: Float(subtype: DISTANCE) = 17.0) -> Geometry {
+  "A hillside 180 m wide, a path up it, and on it four layers: trees, bushes, rocks and grass, each by its own rules, each kept off the layers before it"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // Each layer: its density and spacing, its rules, the layers it keeps off and by how far,
+  // how it is placed. thinning 0: the view comes in the next step
+  "Trees" #teal {
+    t = biome_layer(
+      ground,
+      instance: GeometryToInstance(pine(), pine(), broadleaf()),
+      density: 0.06,
+      spacing: 3.0,
+      seed: seed,
+      slope_max: 0.47,
+      altitude_max: tree_line,
+      paths: path,
+      clearance: 3.0,
+      noise: 1.0,
+      noise_size: 25.0,
+      radius: 0.0,
+      align: 0.0,
+      scale_min: 0.7,
+      scale_max: 1.3,
+      tilt: 0.06,
+      thinning: 0.0)
+  }
+  "Bushes" #orange {
+    // At the foot of the trees but 2 m off their trunks, a little higher up the hill
+    b = biome_layer(
+      ground,
+      instance: bush(),
+      density: 0.08,
+      spacing: 1.5,
+      seed: seed + 1,
+      slope_max: 0.6,
+      altitude_max: tree_line + 3.0,
+      paths: path,
+      clearance: 1.8,
+      noise: 0.6,
+      noise_size: 10.0,
+      avoid: t.points,
+      radius: 2.0,
+      align: 0.3,
+      thinning: 0.0)
+  }
+  "Rocks" #violet {
+    // On the bank too, laid along the ground, off the trees and the bushes
+    r = biome_layer(
+      ground,
+      instance: rock(),
+      density: 0.12,
+      spacing: 1.5,
+      seed: seed + 2,
+      slope_max: 1.3,
+      paths: path,
+      clearance: 1.5,
+      noise: 0.7,
+      noise_size: 8.0,
+      avoid: t.points + b.points,
+      radius: 1.2,
+      align: 1.0,
+      scale_min: 0.5,
+      scale_max: 1.6,
+      tilt: 0.3,
+      thinning: 0.0)
+  }
+  "Grass" #green {
+    // Tufts everywhere the others leave room, but on the bank and the path
+    g = biome_layer(
+      ground,
+      instance: tuft(),
+      density: 3.0,
+      spacing: 0.25,
+      seed: seed + 3,
+      slope_max: 0.6,
+      paths: path,
+      clearance: 1.4,
+      avoid: t.points + b.points + r.points,
+      radius: 0.6,
+      align: 0.7,
+      tilt: 0.2,
+      thinning: 0.0)
+  }
+  return SetMaterial(ground, material: Meadow)
+    + strip
+    + tag(t.instances, layer: 1)
+    + tag(b.instances, layer: 2)
+    + tag(r.instances, layer: 3)
+    + tag(g.instances, layer: 4)
+}
+</script></bn-view>
+    <ul>
+      <li><strong>Each layer its rules.</strong> Rocks take <code>slope_max: 1.3</code>, 75°: they lie on the bank where nothing else holds. Bushes go 3 m above the tree line; grass up to the crest.</li>
+      <li><strong>Why avoid, and in this order.</strong> <code>avoid: t.points</code> with <code>radius: 2.0</code> keeps the bushes 2 m off the trunks; the rocks avoid trees and bushes; the grass avoids all three. Big things first: a rock may move for a tree, never the other way round.</li>
+      <li><code>t.points</code> are every point of the layer, before the camera has its say: the layers avoid each other the same wherever the camera is.</li>
+      <li><code>thinning: 0.0</code>: a layer thins out away from its camera, which is the origin until the next step gives it one. Here, no thinning.</li>
+      <li><code>tag</code> stores the layer on each instance, <code>biome_layer</code>, 1 to 4: the counts below are read from it.</li>
+    </ul>
+    <figure>
+      <img src="img/forest-edge-step6.png" width="1000" height="750" loading="lazy" alt="The hillside populated: groves of trees, bushes and grass between them, grey rocks scattered across the slope and on the bank, the path clear">
+      <figcaption>Step 6. 78,128 instances: 257 trees, 990 bushes, 1,858 rocks, 75,023 tufts of grass.</figcaption>
+    </figure>
+
+    <h2 id="step-7"><span class="n">7.</span> What the camera sees</h2>
+    <p>
+      75,023 tufts of grass, most of them behind the camera or too far to be more than a pixel. The last step gives the layers a camera: an <code>Object</code> input of the graph, read by <code>camera_view</code>. Each layer then keeps only what that camera sees, and makes it simpler far away.
+    </p>
+    <p class="file">step7_view.bn: <code>forest_edge</code>, <code>pine_proxy</code></p>
+    <bn-view graph="forest_edge" height="480"><script type="text/bn">
+// @module forest_edge_step7
+// @title Forest edge, step 7: what the camera sees
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use biomes
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Leaves() -> (surface: Shader) {
+  "Fresh green, from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.06, 0.15, 0.03),
+    b: (0.17, 0.24, 0.05),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
+}
+
+shader(material: true) graph Shrub() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.05, 0.11, 0.025),
+    b: (0.12, 0.17, 0.04),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.75))
+}
+
+shader(material: true) graph Stone() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.13, 0.12, 0.11),
+    b: (0.24, 0.22, 0.19),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.85))
+}
+
+shader(material: true) graph Blades() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.08, 0.18, 0.03),
+    b: (0.24, 0.26, 0.08),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.6))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph broadleaf() -> Geometry {
+  "A round tree 8 m tall: a lumpy crown on a trunk"
+  lumps = NoiseTexture(vector: Position(), scale: 0.6, detail: 2.0).factor - 0.5
+  crown = IcoSphere(radius: 2.6, subdivisions: 3).mesh
+    |> SetPosition(offset: Normal() * lumps * 2.0)
+    |> TransformGeometry(translation: (0.0, 0.0, 5.4), scale: (1.0, 1.0, 1.1))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Leaves)
+  return crown + trunk(height: 3.6, radius: 0.22)
+}
+
+geometry graph pine_proxy() -> Geometry {
+  "The pine from afar: one cone of 6 sides on its trunk"
+  cone = Cone(vertices: 6, radius_bottom: 2.4, depth: 8.2).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.8))
+    |> SetMaterial(material: Needles)
+  return cone + trunk(height: 2.0)
+}
+
+geometry graph broadleaf_proxy() -> Geometry {
+  "The round tree from afar: a crown of 80 faces on its trunk"
+  crown = IcoSphere(radius: 2.6, subdivisions: 2).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 5.4), scale: (1.0, 1.0, 1.1))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Leaves)
+  return crown + trunk(height: 3.6, radius: 0.22)
+}
+
+geometry graph bush() -> Geometry {
+  "A bush 1.3 m tall, lumpy and flattened"
+  lumps = NoiseTexture(vector: Position(), scale: 1.5, detail: 2.0).factor - 0.5
+  return IcoSphere(radius: 0.9, subdivisions: 2).mesh
+    |> SetPosition(offset: Normal() * lumps * 0.8)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.45), scale: (1.0, 1.0, 0.75))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Shrub)
+}
+
+geometry graph rock() -> Geometry {
+  "A rock a metre long, sunk a little into the ground"
+  lumps = NoiseTexture(vector: Position(), scale: 1.2, detail: 3.0).factor - 0.5
+  return IcoSphere(radius: 0.6, subdivisions: 2).mesh
+    |> SetPosition(offset: Normal() * lumps * 0.5)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.08), scale: (1.0, 0.8, 0.55))
+    |> SetMaterial(material: Stone)
+}
+
+geometry graph blade(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
+  "A blade of grass, leant away from the middle of its tuft"
+  return Cone(vertices: 3, radius_bottom: 0.035, depth: height).mesh
+    |> TransformGeometry(rotation: CombineXYZ(x: lean, z: turn))
+}
+
+geometry graph tuft() -> Geometry {
+  "Five blades of grass"
+  blades = blade(turn: 0.0, lean: 0.1, height: 0.7)
+    + blade(turn: 1.3)
+    + blade(turn: 2.5, lean: 0.4, height: 0.5)
+    + blade(turn: 3.8, height: 0.65)
+    + blade(turn: 5.0, lean: 0.45, height: 0.45)
+  return SetMaterial(blades, material: Blades)
+}
+
+geometry graph tag(instances: Geometry, layer: Int) -> Geometry {
+  "Each instance stores the layer it belongs to as biome_layer, to count them"
+  return StoreNamedAttribute(
+    instances,
+    name: "biome_layer",
+    value: layer,
+    data_type: INT,
+    domain: INSTANCE)
+}
+
+geometry graph forest_edge(
+    seed: Int,
+    tree_line: Float(subtype: DISTANCE) = 17.0,
+    camera: Object
+) -> Geometry {
+  "A hillside 180 m wide, a path up it, and on it four layers: trees, bushes, rocks and grass, each by its own rules, each kept off the layers before it; as camera sees them"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // Each layer: its density and spacing, its rules, the layers it keeps off and by how far,
+  // how it is placed, and how far the camera sees it
+  eye = camera_view(camera: camera)
+  "Trees" #teal {
+    t = biome_layer(
+      ground,
+      instance: GeometryToInstance(pine(), pine(), broadleaf()),
+      density: 0.06,
+      spacing: 3.0,
+      seed: seed,
+      slope_max: 0.47,
+      altitude_max: tree_line,
+      paths: path,
+      clearance: 3.0,
+      noise: 1.0,
+      noise_size: 25.0,
+      radius: 0.0,
+      align: 0.0,
+      scale_min: 0.7,
+      scale_max: 1.3,
+      tilt: 0.06,
+      // Past 90 m, the proxies: a cone, a ball
+      lod_distance: 90.0,
+      cull_distance: 10000.0,
+      thinning: 0.0,
+      proxy: GeometryToInstance(pine_proxy(), pine_proxy(), broadleaf_proxy()),
+      use_proxy: true,
+      camera: eye.position,
+      use_camera: eye.found,
+      frustum: true,
+      view: eye.view,
+      projection: eye.projection,
+      viewport_only: false,
+      // A tree whose foot is out of the frame may still reach into it: half a frame more
+      margin: 0.5)
+  }
+  "Bushes" #orange {
+    // At the foot of the trees but 2 m off their trunks, a little higher up the hill
+    b = biome_layer(
+      ground,
+      instance: bush(),
+      density: 0.08,
+      spacing: 1.5,
+      seed: seed + 1,
+      slope_max: 0.6,
+      altitude_max: tree_line + 3.0,
+      paths: path,
+      clearance: 1.8,
+      noise: 0.6,
+      noise_size: 10.0,
+      avoid: t.points,
+      radius: 2.0,
+      align: 0.3,
+      // Fewer past 60 m, none past 140 m
+      lod_distance: 60.0,
+      cull_distance: 140.0,
+      thinning: 0.6,
+      camera: eye.position,
+      use_camera: eye.found,
+      frustum: true,
+      view: eye.view,
+      projection: eye.projection,
+      viewport_only: false)
+  }
+  "Rocks" #violet {
+    // On the bank too, laid along the ground, off the trees and the bushes
+    r = biome_layer(
+      ground,
+      instance: rock(),
+      density: 0.12,
+      spacing: 1.5,
+      seed: seed + 2,
+      slope_max: 1.3,
+      paths: path,
+      clearance: 1.5,
+      noise: 0.7,
+      noise_size: 8.0,
+      avoid: t.points + b.points,
+      radius: 1.2,
+      align: 1.0,
+      scale_min: 0.5,
+      scale_max: 1.6,
+      tilt: 0.3,
+      lod_distance: 60.0,
+      cull_distance: 140.0,
+      thinning: 0.6,
+      camera: eye.position,
+      use_camera: eye.found,
+      frustum: true,
+      view: eye.view,
+      projection: eye.projection,
+      viewport_only: false)
+  }
+  "Grass" #green {
+    // Tufts everywhere the others leave room, but on the bank and the path
+    g = biome_layer(
+      ground,
+      instance: tuft(),
+      density: 3.0,
+      spacing: 0.25,
+      seed: seed + 3,
+      slope_max: 0.6,
+      paths: path,
+      clearance: 1.4,
+      avoid: t.points + b.points + r.points,
+      radius: 0.6,
+      align: 0.7,
+      tilt: 0.2,
+      // A tuft is a few pixels past 25 m: fewer and fewer, none past 80 m
+      lod_distance: 25.0,
+      cull_distance: 80.0,
+      thinning: 0.8,
+      camera: eye.position,
+      use_camera: eye.found,
+      frustum: true,
+      view: eye.view,
+      projection: eye.projection,
+      viewport_only: false)
+  }
+  return SetMaterial(ground, material: Meadow)
+    + strip
+    + tag(t.instances, layer: 1)
+    + tag(b.instances, layer: 2)
+    + tag(r.instances, layer: 3)
+    + tag(g.instances, layer: 4)
+}
+</script></bn-view>
+    <ul>
+      <li><strong>Level of detail.</strong> Past <code>lod_distance</code>, a tree is its <code>proxy</code>: one cone or one ball instead of three cones and a lumpy crown. The proxies are listed in the order of the trees, so a far pine stays a pine.</li>
+      <li><strong>Thinning and culling by distance.</strong> From <code>lod_distance</code> to <code>cull_distance</code> a layer thins out, down to <code>1 - thinning</code> of its points; past it, none. A tuft of grass is a few pixels at 25 m: by 80 m, it is gone.</li>
+      <li><strong>View-frustum culling.</strong> <code>frustum</code> drops every point outside the camera's frame, widened by <code>margin</code>. A point is tested, not the instance on it, so a tree whose foot is just out of frame would vanish while its crown should show: the trees take <code>margin: 0.5</code>, half a frame more on each side.</li>
+      <li><code>camera_view</code> reads the camera picked on the modifier, else the scene's active camera; <code>eye.found</code> says whether it found one. <code>use_camera: eye.found</code>: with no camera at all, a layer shows every point at full detail.</li>
+      <li><code>viewport_only: false</code>. By default a layer culls in the viewport only, and a render keeps every point, for its shadows and reflections. Here the render shows what the camera keeps.</li>
+    </ul>
+    <table>
+      <tr><th>Layer</th><th>Step 6</th><th>Step 7</th><th>Kept</th></tr>
+      <tr><td>Trees</td><td>257</td><td>140</td><td>54 %</td></tr>
+      <tr><td>Bushes</td><td>990</td><td>251</td><td>25 %</td></tr>
+      <tr><td>Rocks</td><td>1,858</td><td>421</td><td>23 %</td></tr>
+      <tr><td>Grass</td><td>75,023</td><td>3,977</td><td>5 %</td></tr>
+      <tr><td><strong>All</strong></td><td><strong>78,128</strong></td><td><strong>4,789</strong></td><td><strong>6 %</strong></td></tr>
+    </table>
+    <div class="pair">
+      <figure>
+        <img src="img/forest-edge-step7.png" width="1000" height="750" loading="lazy" alt="The populated hillside from the same camera: trees, bushes, rocks and grass, the far trees on the crest as simple cones">
+        <figcaption>Step 7, from its camera: nearly the picture of step 6, with 6 % of its instances. On the crest, the proxies; in front, two trees whose feet are more than half a frame below it are gone.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/forest-edge-above.png" width="1000" height="750" loading="lazy" alt="The hillside from high above: the instances fill a wedge that opens away from the camera, bare grass on either side">
+        <figcaption>Step 7 from high above, still culled for the camera of the other pictures: its frustum is the wedge. Grass only near its tip.</figcaption>
+      </figure>
+    </div>
+    <p>
+      A culled point is gone for every render pass, its shadow too: a tree just out of the frame casts no shadow into it. Widen <code>margin</code> when long shadows come in from the side.
+    </p>
+
+    <h2 id="tune">The knobs</h2>
+    <p>
+      Every layer has its inputs, on its node in the Geometry Node editor. A few worth turning:
+    </p>
+    <table>
+      <tr><th>Where</th><th>Input</th><th>What it does</th></tr>
+      <tr><td><code>forest_edge</code></td><td><code>seed</code></td><td>Another forest: every layer, its glades and its sizes change together.</td></tr>
+      <tr><td><code>forest_edge</code></td><td><code>tree_line</code></td><td>How high the trees climb, and the bushes 3 m above them.</td></tr>
+      <tr><td><code>forest_edge</code></td><td><code>camera</code></td><td>The camera the layers are culled for. Move it: what is kept follows.</td></tr>
+      <tr><td><code>biome_layer</code></td><td><code>density</code>, <code>spacing</code></td><td>How many per square metre, and how close they may stand.</td></tr>
+      <tr><td><code>biome_layer</code></td><td><code>slope_max</code>, <code>altitude_min</code>, <code>altitude_max</code></td><td>Where the layer may grow.</td></tr>
+      <tr><td><code>biome_layer</code></td><td><code>clearance</code>, <code>noise</code>, <code>noise_size</code></td><td>How far from the path; how patchy, and in patches how wide.</td></tr>
+      <tr><td><code>biome_layer</code></td><td><code>radius</code></td><td>How far it keeps from the layers in its <code>avoid</code>.</td></tr>
+      <tr><td><code>biome_layer</code></td><td><code>lod_distance</code>, <code>cull_distance</code>, <code>thinning</code>, <code>margin</code></td><td>Where the proxies start, where the layer stops, how much it thins between, how far past the frame it reaches.</td></tr>
+    </table>
+    <p class="try"><strong>Try:</strong> on step 7, set <code>tree_line</code> of <code>forest_edge</code> to 30: the trees climb to the crest and none below moves. Then set <code>radius</code> of the bushes to 0: they crowd against the trunks.</p>
+    <p>
+      To scatter on your own terrain, use your mesh instead of <code>ground</code> and your curves instead of <code>path</code>: the layers stay as they are. Mind the scale: densities are per square metre and distances in metres, so a terrain modelled at another scale needs them scaled too. For four collections instead of meshes made in the file, <code>biome</code> does the four layers of this step in one node.
+    </p>
+
+    <h2 id="files">Take it to Blender</h2>
+    <p>
+      The finished forest edge, in one file. Drag the card onto empty space in Blender's 3D Viewport and keep <em>Instantiate the Example</em>: a new object carries <code>forest_edge</code>. Pick your scene camera in its <code>camera</code> input. A click on the card downloads the file.
+    </p>
+    <bn-file><script type="text/bn">
+// @module forest_edge_step7
+// @title Forest edge, step 7: what the camera sees
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use biomes
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Leaves() -> (surface: Shader) {
+  "Fresh green, from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.06, 0.15, 0.03),
+    b: (0.17, 0.24, 0.05),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
+}
+
+shader(material: true) graph Shrub() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.05, 0.11, 0.025),
+    b: (0.12, 0.17, 0.04),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.75))
+}
+
+shader(material: true) graph Stone() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.13, 0.12, 0.11),
+    b: (0.24, 0.22, 0.19),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.85))
+}
+
+shader(material: true) graph Blades() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.08, 0.18, 0.03),
+    b: (0.24, 0.26, 0.08),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.6))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph broadleaf() -> Geometry {
+  "A round tree 8 m tall: a lumpy crown on a trunk"
+  lumps = NoiseTexture(vector: Position(), scale: 0.6, detail: 2.0).factor - 0.5
+  crown = IcoSphere(radius: 2.6, subdivisions: 3).mesh
+    |> SetPosition(offset: Normal() * lumps * 2.0)
+    |> TransformGeometry(translation: (0.0, 0.0, 5.4), scale: (1.0, 1.0, 1.1))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Leaves)
+  return crown + trunk(height: 3.6, radius: 0.22)
+}
+
+geometry graph pine_proxy() -> Geometry {
+  "The pine from afar: one cone of 6 sides on its trunk"
+  cone = Cone(vertices: 6, radius_bottom: 2.4, depth: 8.2).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.8))
+    |> SetMaterial(material: Needles)
+  return cone + trunk(height: 2.0)
+}
+
+geometry graph broadleaf_proxy() -> Geometry {
+  "The round tree from afar: a crown of 80 faces on its trunk"
+  crown = IcoSphere(radius: 2.6, subdivisions: 2).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 5.4), scale: (1.0, 1.0, 1.1))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Leaves)
+  return crown + trunk(height: 3.6, radius: 0.22)
+}
+
+geometry graph bush() -> Geometry {
+  "A bush 1.3 m tall, lumpy and flattened"
+  lumps = NoiseTexture(vector: Position(), scale: 1.5, detail: 2.0).factor - 0.5
+  return IcoSphere(radius: 0.9, subdivisions: 2).mesh
+    |> SetPosition(offset: Normal() * lumps * 0.8)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.45), scale: (1.0, 1.0, 0.75))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Shrub)
+}
+
+geometry graph rock() -> Geometry {
+  "A rock a metre long, sunk a little into the ground"
+  lumps = NoiseTexture(vector: Position(), scale: 1.2, detail: 3.0).factor - 0.5
+  return IcoSphere(radius: 0.6, subdivisions: 2).mesh
+    |> SetPosition(offset: Normal() * lumps * 0.5)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.08), scale: (1.0, 0.8, 0.55))
+    |> SetMaterial(material: Stone)
+}
+
+geometry graph blade(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
+  "A blade of grass, leant away from the middle of its tuft"
+  return Cone(vertices: 3, radius_bottom: 0.035, depth: height).mesh
+    |> TransformGeometry(rotation: CombineXYZ(x: lean, z: turn))
+}
+
+geometry graph tuft() -> Geometry {
+  "Five blades of grass"
+  blades = blade(turn: 0.0, lean: 0.1, height: 0.7)
+    + blade(turn: 1.3)
+    + blade(turn: 2.5, lean: 0.4, height: 0.5)
+    + blade(turn: 3.8, height: 0.65)
+    + blade(turn: 5.0, lean: 0.45, height: 0.45)
+  return SetMaterial(blades, material: Blades)
+}
+
+geometry graph tag(instances: Geometry, layer: Int) -> Geometry {
+  "Each instance stores the layer it belongs to as biome_layer, to count them"
+  return StoreNamedAttribute(
+    instances,
+    name: "biome_layer",
+    value: layer,
+    data_type: INT,
+    domain: INSTANCE)
+}
+
+geometry graph forest_edge(
+    seed: Int,
+    tree_line: Float(subtype: DISTANCE) = 17.0,
+    camera: Object
+) -> Geometry {
+  "A hillside 180 m wide, a path up it, and on it four layers: trees, bushes, rocks and grass, each by its own rules, each kept off the layers before it; as camera sees them"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // Each layer: its density and spacing, its rules, the layers it keeps off and by how far,
+  // how it is placed, and how far the camera sees it
+  eye = camera_view(camera: camera)
+  "Trees" #teal {
+    t = biome_layer(
+      ground,
+      instance: GeometryToInstance(pine(), pine(), broadleaf()),
+      density: 0.06,
+      spacing: 3.0,
+      seed: seed,
+      slope_max: 0.47,
+      altitude_max: tree_line,
+      paths: path,
+      clearance: 3.0,
+      noise: 1.0,
+      noise_size: 25.0,
+      radius: 0.0,
+      align: 0.0,
+      scale_min: 0.7,
+      scale_max: 1.3,
+      tilt: 0.06,
+      // Past 90 m, the proxies: a cone, a ball
+      lod_distance: 90.0,
+      cull_distance: 10000.0,
+      thinning: 0.0,
+      proxy: GeometryToInstance(pine_proxy(), pine_proxy(), broadleaf_proxy()),
+      use_proxy: true,
+      camera: eye.position,
+      use_camera: eye.found,
+      frustum: true,
+      view: eye.view,
+      projection: eye.projection,
+      viewport_only: false,
+      // A tree whose foot is out of the frame may still reach into it: half a frame more
+      margin: 0.5)
+  }
+  "Bushes" #orange {
+    // At the foot of the trees but 2 m off their trunks, a little higher up the hill
+    b = biome_layer(
+      ground,
+      instance: bush(),
+      density: 0.08,
+      spacing: 1.5,
+      seed: seed + 1,
+      slope_max: 0.6,
+      altitude_max: tree_line + 3.0,
+      paths: path,
+      clearance: 1.8,
+      noise: 0.6,
+      noise_size: 10.0,
+      avoid: t.points,
+      radius: 2.0,
+      align: 0.3,
+      // Fewer past 60 m, none past 140 m
+      lod_distance: 60.0,
+      cull_distance: 140.0,
+      thinning: 0.6,
+      camera: eye.position,
+      use_camera: eye.found,
+      frustum: true,
+      view: eye.view,
+      projection: eye.projection,
+      viewport_only: false)
+  }
+  "Rocks" #violet {
+    // On the bank too, laid along the ground, off the trees and the bushes
+    r = biome_layer(
+      ground,
+      instance: rock(),
+      density: 0.12,
+      spacing: 1.5,
+      seed: seed + 2,
+      slope_max: 1.3,
+      paths: path,
+      clearance: 1.5,
+      noise: 0.7,
+      noise_size: 8.0,
+      avoid: t.points + b.points,
+      radius: 1.2,
+      align: 1.0,
+      scale_min: 0.5,
+      scale_max: 1.6,
+      tilt: 0.3,
+      lod_distance: 60.0,
+      cull_distance: 140.0,
+      thinning: 0.6,
+      camera: eye.position,
+      use_camera: eye.found,
+      frustum: true,
+      view: eye.view,
+      projection: eye.projection,
+      viewport_only: false)
+  }
+  "Grass" #green {
+    // Tufts everywhere the others leave room, but on the bank and the path
+    g = biome_layer(
+      ground,
+      instance: tuft(),
+      density: 3.0,
+      spacing: 0.25,
+      seed: seed + 3,
+      slope_max: 0.6,
+      paths: path,
+      clearance: 1.4,
+      avoid: t.points + b.points + r.points,
+      radius: 0.6,
+      align: 0.7,
+      tilt: 0.2,
+      // A tuft is a few pixels past 25 m: fewer and fewer, none past 80 m
+      lod_distance: 25.0,
+      cull_distance: 80.0,
+      thinning: 0.8,
+      camera: eye.position,
+      use_camera: eye.found,
+      frustum: true,
+      view: eye.view,
+      projection: eye.projection,
+      viewport_only: false)
+  }
+  return SetMaterial(ground, material: Meadow)
+    + strip
+    + tag(t.instances, layer: 1)
+    + tag(b.instances, layer: 2)
+    + tag(r.instances, layer: 3)
+    + tag(g.instances, layer: 4)
+}
+</script></bn-file>
+    <p>The steps before it, to start again from any of them:</p>
+    <div class="cards">
+      <bn-file><script type="text/bn">
+// @module forest_edge_step1
+// @title Forest edge, step 1: a hillside and a path
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph forest_edge() -> Geometry {
+  "A hillside 180 m wide and a path up it"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  return SetMaterial(ground, material: Meadow) + strip
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module forest_edge_step2
+// @title Forest edge, step 2: trees by density and spacing
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use scatter
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph forest_edge(seed: Int) -> Geometry {
+  "A hillside 180 m wide, a path up it, and pines scattered all over it"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // 6 trees per 100 square metres, none closer than 3 m to another
+  points = scatter(ground, density: 0.06, spacing: 3.0, seed: seed)
+  trees = InstanceOnPoints(points, instance: pine())
+  return SetMaterial(ground, material: Meadow) + strip + trees
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module forest_edge_step3
+// @title Forest edge, step 3: kept by slope and altitude
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use scatter
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph forest_edge(seed: Int, tree_line: Float(subtype: DISTANCE) = 17.0) -> Geometry {
+  "A hillside 180 m wide, a path up it, and pines on its gentle slopes below the tree line"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // 6 trees per 100 square metres, none closer than 3 m to another, none on the bank
+  // (steeper than 27 degrees) nor above the tree line (17 m); fewer toward both edges
+  points = scatter(
+    ground,
+    density: 0.06,
+    spacing: 3.0,
+    seed: seed,
+    thinning: 1.0,
+    slope_max: 0.47,
+    slope_softness: 0.1,
+    altitude_max: tree_line,
+    altitude_softness: 4.0)
+  trees = InstanceOnPoints(points, instance: pine())
+  return SetMaterial(ground, material: Meadow) + strip + trees
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module forest_edge_step4
+// @title Forest edge, step 4: a clear path, and glades
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use scatter
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph forest_edge(seed: Int, tree_line: Float(subtype: DISTANCE) = 17.0) -> Geometry {
+  "A hillside 180 m wide, a path up it, and groves of pines on its gentle slopes below the tree line, off the path"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // 6 trees per 100 square metres, none closer than 3 m to another, none on the bank
+  // (steeper than 27 degrees) nor above the tree line (17 m); fewer toward every edge
+  points = scatter(
+    ground,
+    density: 0.06,
+    spacing: 3.0,
+    seed: seed,
+    thinning: 1.0,
+    slope_max: 0.47,
+    slope_softness: 0.1,
+    altitude_max: tree_line,
+    altitude_softness: 4.0,
+    // Nothing within 3 m of the path, fewer for 4 m more
+    paths: path,
+    clearance: 3.0,
+    falloff: 4.0,
+    // Groves about 25 m wide over 70 % of the ground, glades between them
+    noise: 1.0,
+    noise_size: 25.0,
+    coverage: 0.7)
+  trees = InstanceOnPoints(points, instance: pine())
+  return SetMaterial(ground, material: Meadow) + strip + trees
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module forest_edge_step5
+// @title Forest edge, step 5: no two trees alike
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use scatter
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Leaves() -> (surface: Shader) {
+  "Fresh green, from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.06, 0.15, 0.03),
+    b: (0.17, 0.24, 0.05),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph broadleaf() -> Geometry {
+  "A round tree 8 m tall: a lumpy crown on a trunk"
+  lumps = NoiseTexture(vector: Position(), scale: 0.6, detail: 2.0).factor - 0.5
+  crown = IcoSphere(radius: 2.6, subdivisions: 3).mesh
+    |> SetPosition(offset: Normal() * lumps * 2.0)
+    |> TransformGeometry(translation: (0.0, 0.0, 5.4), scale: (1.0, 1.0, 1.1))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Leaves)
+  return crown + trunk(height: 3.6, radius: 0.22)
+}
+
+geometry graph forest_edge(seed: Int, tree_line: Float(subtype: DISTANCE) = 17.0) -> Geometry {
+  "A hillside 180 m wide, a path up it, and groves of pines and round trees on its gentle slopes below the tree line, off the path"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // 6 trees per 100 square metres, none closer than 3 m to another, none on the bank
+  // (steeper than 27 degrees) nor above the tree line (17 m); fewer toward every edge
+  points = scatter(
+    ground,
+    density: 0.06,
+    spacing: 3.0,
+    seed: seed,
+    thinning: 1.0,
+    slope_max: 0.47,
+    slope_softness: 0.1,
+    altitude_max: tree_line,
+    altitude_softness: 4.0,
+    // Nothing within 3 m of the path, fewer for 4 m more
+    paths: path,
+    clearance: 3.0,
+    falloff: 4.0,
+    // Groves about 25 m wide over 70 % of the ground, glades between them
+    noise: 1.0,
+    noise_size: 25.0,
+    coverage: 0.7)
+  // Two pines for a round tree, picked at random; up, whatever the slope; spun, a little
+  // tilted, 0.7 to 1.3 times their size, and down to half of it at the edge of a grove
+  trees = place_instances(
+    points,
+    instance: GeometryToInstance(pine(), pine(), broadleaf()),
+    seed: seed,
+    align: 0.0,
+    tilt: 0.06,
+    scale_min: 0.7,
+    scale_max: 1.3,
+    edge_scale: 0.5,
+    pick_instance: true)
+  return SetMaterial(ground, material: Meadow) + strip + trees
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module forest_edge_step6
+// @title Forest edge, step 6: four layers that keep off one another
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @offer groups, example
+// @example forest_edge
+
+use biomes
+
+shader graph meadow(
+    grass: Color = (0.1, 0.19, 0.04),
+    dry: Color = (0.27, 0.25, 0.1),
+    rock: Color = (0.26, 0.21, 0.15)
+) -> Shader {
+  "Grass, drier in patches, bare rock where the ground is steep"
+  g = Geometry()
+  patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
+  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  // The normal of flat ground is straight up: past 32 degrees the rock shows
+  steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
+  return PrincipledBSDF(
+    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
+    roughness: 0.9)
+}
+
+shader(material: true) graph Meadow() -> (surface: Shader) {
+  return (surface: meadow())
+}
+
+shader(material: true) graph Dirt() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.3, 0.2, 0.11), roughness: 0.95))
+}
+
+shader(material: true) graph Needles() -> (surface: Shader) {
+  "Dark green, a little lighter or darker from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.025, 0.07, 0.025),
+    b: (0.06, 0.13, 0.035),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
+}
+
+shader(material: true) graph Leaves() -> (surface: Shader) {
+  "Fresh green, from one tree to the next"
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.06, 0.15, 0.03),
+    b: (0.17, 0.24, 0.05),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
+}
+
+shader(material: true) graph Shrub() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.05, 0.11, 0.025),
+    b: (0.12, 0.17, 0.04),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.75))
+}
+
+shader(material: true) graph Stone() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.13, 0.12, 0.11),
+    b: (0.24, 0.22, 0.19),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.85))
+}
+
+shader(material: true) graph Blades() -> (surface: Shader) {
+  tint = Mix(
+    factor: ObjectInfo().random,
+    a: (0.08, 0.18, 0.03),
+    b: (0.24, 0.26, 0.08),
+    data_type: RGBA)
+  return (surface: PrincipledBSDF(base_color: tint, roughness: 0.6))
+}
+
+shader(material: true) graph Bark() -> (surface: Shader) {
+  return (surface: PrincipledBSDF(base_color: (0.12, 0.08, 0.05), roughness: 0.85))
+}
+
+geometry graph hill_height(p: Vector = Position()) -> Float {
+  "A hillside rising to a crest 40 m away, a steep bank across it, hummocks of noise"
+  crest = 40.0 + sin(p.x * 0.04) * 8.0
+  d = (p.y - crest) / 40.0
+  hill = 24.0 * exp(0.0 - d * d)
+  // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
+  foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
+  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+    * Clamp(value: 0.6 + p.x / 50.0)
+    * 5.0
+  hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
+  return hill + bank + hummocks
+}
+
+geometry graph hill_path() -> Geometry {
+  "A path that winds up the hillside and over its crest, on its ground"
+  line = CurveLine(start: (-6.0, -90.0, 0.0), end: (14.0, 60.0, 0.0))
+    |> ResampleCurve(count: 300)
+  p = Position()
+  xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+}
+
+geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
+  "A trunk standing on the origin"
+  return Cylinder(vertices: 8, radius: radius, depth: height).mesh
+    |> TransformGeometry(translation: CombineXYZ(z: height * 0.5))
+    |> SetMaterial(material: Bark)
+}
+
+geometry graph pine() -> Geometry {
+  "A pine 10 m tall: three cones of needles on a trunk"
+  low = Cone(vertices: 12, radius_bottom: 2.6, depth: 4.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 2.2))
+  middle = Cone(vertices: 12, radius_bottom: 2.0, depth: 4.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 4.2))
+  top = Cone(vertices: 12, radius_bottom: 1.3, depth: 3.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 6.5))
+  return SetMaterial(low + middle + top, material: Needles) + trunk(height: 3.0)
+}
+
+geometry graph broadleaf() -> Geometry {
+  "A round tree 8 m tall: a lumpy crown on a trunk"
+  lumps = NoiseTexture(vector: Position(), scale: 0.6, detail: 2.0).factor - 0.5
+  crown = IcoSphere(radius: 2.6, subdivisions: 3).mesh
+    |> SetPosition(offset: Normal() * lumps * 2.0)
+    |> TransformGeometry(translation: (0.0, 0.0, 5.4), scale: (1.0, 1.0, 1.1))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Leaves)
+  return crown + trunk(height: 3.6, radius: 0.22)
+}
+
+geometry graph bush() -> Geometry {
+  "A bush 1.3 m tall, lumpy and flattened"
+  lumps = NoiseTexture(vector: Position(), scale: 1.5, detail: 2.0).factor - 0.5
+  return IcoSphere(radius: 0.9, subdivisions: 2).mesh
+    |> SetPosition(offset: Normal() * lumps * 0.8)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.45), scale: (1.0, 1.0, 0.75))
+    |> SetShadeSmooth()
+    |> SetMaterial(material: Shrub)
+}
+
+geometry graph rock() -> Geometry {
+  "A rock a metre long, sunk a little into the ground"
+  lumps = NoiseTexture(vector: Position(), scale: 1.2, detail: 3.0).factor - 0.5
+  return IcoSphere(radius: 0.6, subdivisions: 2).mesh
+    |> SetPosition(offset: Normal() * lumps * 0.5)
+    |> TransformGeometry(translation: (0.0, 0.0, 0.08), scale: (1.0, 0.8, 0.55))
+    |> SetMaterial(material: Stone)
+}
+
+geometry graph blade(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
+  "A blade of grass, leant away from the middle of its tuft"
+  return Cone(vertices: 3, radius_bottom: 0.035, depth: height).mesh
+    |> TransformGeometry(rotation: CombineXYZ(x: lean, z: turn))
+}
+
+geometry graph tuft() -> Geometry {
+  "Five blades of grass"
+  blades = blade(turn: 0.0, lean: 0.1, height: 0.7)
+    + blade(turn: 1.3)
+    + blade(turn: 2.5, lean: 0.4, height: 0.5)
+    + blade(turn: 3.8, height: 0.65)
+    + blade(turn: 5.0, lean: 0.45, height: 0.45)
+  return SetMaterial(blades, material: Blades)
+}
+
+geometry graph tag(instances: Geometry, layer: Int) -> Geometry {
+  "Each instance stores the layer it belongs to as biome_layer, to count them"
+  return StoreNamedAttribute(
+    instances,
+    name: "biome_layer",
+    value: layer,
+    data_type: INT,
+    domain: INSTANCE)
+}
+
+geometry graph forest_edge(seed: Int, tree_line: Float(subtype: DISTANCE) = 17.0) -> Geometry {
+  "A hillside 180 m wide, a path up it, and on it four layers: trees, bushes, rocks and grass, each by its own rules, each kept off the layers before it"
+  // A point every 50 cm: small hummocks, and a smooth bank
+  ground = Grid(size_x: 180.0, size_y: 180.0, vertices_x: 361, vertices_y: 361).mesh
+    |> SetPosition(offset: CombineXYZ(z: hill_height()))
+    |> SetShadeSmooth()
+  path = hill_path()
+  // The path, a strip of dirt 2.4 m wide laid on the ground
+  strip = CurveToMesh(path, profile_curve: CurveLine(start: (-1.2, 0.0, 0.0), end: (1.2, 0.0, 0.0)))
+    |> SetPosition(offset: (0.0, 0.0, 0.08))
+    |> SetMaterial(material: Dirt)
+  // Each layer: its density and spacing, its rules, the layers it keeps off and by how far,
+  // how it is placed. thinning 0: the view comes in the next step
+  "Trees" #teal {
+    t = biome_layer(
+      ground,
+      instance: GeometryToInstance(pine(), pine(), broadleaf()),
+      density: 0.06,
+      spacing: 3.0,
+      seed: seed,
+      slope_max: 0.47,
+      altitude_max: tree_line,
+      paths: path,
+      clearance: 3.0,
+      noise: 1.0,
+      noise_size: 25.0,
+      radius: 0.0,
+      align: 0.0,
+      scale_min: 0.7,
+      scale_max: 1.3,
+      tilt: 0.06,
+      thinning: 0.0)
+  }
+  "Bushes" #orange {
+    // At the foot of the trees but 2 m off their trunks, a little higher up the hill
+    b = biome_layer(
+      ground,
+      instance: bush(),
+      density: 0.08,
+      spacing: 1.5,
+      seed: seed + 1,
+      slope_max: 0.6,
+      altitude_max: tree_line + 3.0,
+      paths: path,
+      clearance: 1.8,
+      noise: 0.6,
+      noise_size: 10.0,
+      avoid: t.points,
+      radius: 2.0,
+      align: 0.3,
+      thinning: 0.0)
+  }
+  "Rocks" #violet {
+    // On the bank too, laid along the ground, off the trees and the bushes
+    r = biome_layer(
+      ground,
+      instance: rock(),
+      density: 0.12,
+      spacing: 1.5,
+      seed: seed + 2,
+      slope_max: 1.3,
+      paths: path,
+      clearance: 1.5,
+      noise: 0.7,
+      noise_size: 8.0,
+      avoid: t.points + b.points,
+      radius: 1.2,
+      align: 1.0,
+      scale_min: 0.5,
+      scale_max: 1.6,
+      tilt: 0.3,
+      thinning: 0.0)
+  }
+  "Grass" #green {
+    // Tufts everywhere the others leave room, but on the bank and the path
+    g = biome_layer(
+      ground,
+      instance: tuft(),
+      density: 3.0,
+      spacing: 0.25,
+      seed: seed + 3,
+      slope_max: 0.6,
+      paths: path,
+      clearance: 1.4,
+      avoid: t.points + b.points + r.points,
+      radius: 0.6,
+      align: 0.7,
+      tilt: 0.2,
+      thinning: 0.0)
+  }
+  return SetMaterial(ground, material: Meadow)
+    + strip
+    + tag(t.instances, layer: 1)
+    + tag(b.instances, layer: 2)
+    + tag(r.instances, layer: 3)
+    + tag(g.instances, layer: 4)
+}
+</script></bn-file>
+    </div>
+    <p class="muted">
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/forest_edge"><code>examples/tutorials/forest_edge/</code></a>.
+    </p>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>

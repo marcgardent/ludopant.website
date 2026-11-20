@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Material Layers — BaseNode Packs — Ludopant</title>
+<meta name="description" content="Material Layers, a pack of 2 Base Node modules for Blender 5.2+: layered PBR materials in shader nodes, stacked by masks and heights, projected without UVs.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/material-layers/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Material Layers — BaseNode Packs — Ludopant">
+<meta property="og:description" content="Material Layers, a pack of 2 Base Node modules for Blender 5.2+: layered PBR materials in shader nodes, stacked by masks and heights, projected without UVs.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/material-layers/">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/img/material-layers.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › Material Layers</p>
+<p class="store">Coming soon on Superhive</p>
+<h1>Material Layers</h1>
+<p class="lead">Layered PBR materials in shader nodes, stacked by masks and heights, projected without UVs.</p>
+<p class="cover"><img src="../img/material-layers.png" alt="Material Layers: Layered PBR materials in shader nodes, stacked by masks and heights, projected without UVs"></p>
+<dl class="facts">
+<dt>For</dt><dd>Look-development and game artists</dd>
+<dt>Modelled on</dt><dd>Unreal Substrate, Substance Painter layers</dd>
+<dt>Modules</dt><dd>2</dd>
+<dt>Blender</dt><dd>5.2 and later, tested at each release</dd>
+<dt>Store</dt><dd>Coming soon on Superhive</dd>
+</dl>
+<p>A layer carries its PBR channels together (base color, metallic, roughness, normal, height, emission, coat); layers stack by mask, by height where the higher one wins, or by blend modes per channel, with a detail layer and normals combined by reoriented or whiteout normal mapping, into a Principled BSDF. Triplanar and box projection of any texture, triplanar normal maps, and detail coordinates tiled at another scale.</p>
+
+<h2>The modules</h2>
+<p>A module is a <code>.bn</code> file of node groups. Once the pack is installed, a graph calls it with <code>use</code>, and Blender builds its groups.</p>
+<table>
+<tr><th>Module</th><th>What it gives</th></tr>
+<tr><td><code>material_layers</code></td><td>Layered materials in shader nodes: a layer is a Bundle of PBR channels (base color, metallic, roughness, normal, height, emission, coat), stacked by mask, by height (the higher wins, with a contrast) or by blend modes per channel (multiply, screen, overlay), a detail layer, normals combined by reoriented or whiteout normal mapping, and a Principled BSDF of the result</td></tr>
+<tr><td><code>projections</code></td><td>Textures without UVs for layered materials: triplanar projection (sharpness, scale per axis, object or world space) and box mapping of a texture given as a Closure, triplanar normal maps blended by whiteout per axis, and the coordinates of a detail texture tiled at another scale</td></tr>
+</table>
+
+<h2>Free in Base Node, and what the pack adds</h2>
+<p>Free and open source, on <a href="https://marcgardent.github.io/base-node-language/">the Base Node site</a>: the language, the Blender add-on, the formatter and parsers, and the free modules of the standard library. The pack's modules build on the free module <code>math</code>. The pack adds the modules above, their showcase files and this tutorial.</p>
+<table>
+<tr><th>Capability</th><th>Blender's own nodes</th><th>With the pack</th></tr>
+<tr><td>Material layering with masks</td><td>Partial — Mix Shader</td><td>Covered — By mask, by height, per channel<br><span class="mods"><code>material_layers</code></span></td></tr>
+<tr><td>Triplanar and projections</td><td>Partial — Box projection only</td><td>Covered — Triplanar, triplanar normals<br><span class="mods"><code>projections</code></span></td></tr>
+</table>
+
+<h2>Tutorial</h2>
+<a class="tuto-card" href="../tutorials/rover-hull.html">
+  <img src="../tutorials/img/rover-hull-step7.png" alt="" loading="lazy">
+  <span class="body"><strong>Rover hull</strong><span>Paint a rover's hull in Blender with layered materials and no UVs: painted metal, bare metal on the edges, dust stacked by height, grime by blend modes per channel, triplanar textures and normal maps, a detail layer, with the Material Layers pack, in .bn.</span><span class="count">7 steps</span></span>
+</a>
+
+<h2>Compared</h2>
+<ul>
+<li><a href="../vs/substance-painter.html">Base Node VS Substance 3D Painter</a></li>
+</ul>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>
