@@ -1,0 +1,51 @@
+<!-- Description of the Blender Extensions listing of Base Node, as HTML. The site takes Markdown:
+     the text to paste is base-node-for-blender/listing.md in github.com/marcgardent/base-node-language. -->
+<p><img src="https://ludopant.com/base-node/img/cover.webp" alt="Base Node: .bn text on the left, the same tree as Blender nodes on the right, Alt+Z between them" width="1920"></p>
+<p>Base Node writes Geometry Nodes, Shader and Compositor node trees as text, and builds the text back into nodes. A tree becomes a <code>.bn</code> file of small functions. You can edit nodes as code, review them in diffs and share them as plain text.</p>
+
+<h2>Nodes and text in the same area</h2>
+<ul>
+  <li><kbd>Alt+Z</kbd> in the Node Editor shows the edited tree as <code>.bn</code> text in the same area. Press it again to write the text into the tree and go back to the nodes.</li>
+  <li>While you type, the tree follows the text as soon as the text is valid. A text with errors changes nothing and lists its errors in the sidebar. <kbd>Alt+P</kbd> applies the text by hand when <em>Apply while typing</em> is off.</li>
+  <li>The tree stays the only data. The text is a temporary view, removed when you go back to the nodes. An unchanged text leaves the tree and its layout as they were.</li>
+  <li>Comments are kept in the tree: each <code>//</code> comment is stored on the node of its statement and comes back the next time the text opens. The Node Editor draws them above their nodes.</li>
+  <li><kbd>Ctrl+Shift+C</kbd> copies the edited tree as <code>.bn</code> text, with the groups it calls, to paste in a forum post or a chat. <kbd>Ctrl+Shift+V</kbd> builds the <code>.bn</code> text of the clipboard in the current file. <em>Copy Selected as .bn</em> copies only the selected nodes.</li>
+  <li><kbd>Ctrl+Shift+A</kbd> arranges the selected nodes, or the whole tree: links go left to right, in line with their sockets, and each frame keeps its nodes together. It works in every node editor.</li>
+</ul>
+
+<h2>Writing <code>.bn</code></h2>
+<ul>
+  <li>Suggestions for nodes, sockets and the graphs of used modules with <kbd>Ctrl+Space</kbd> (in <code>.bn</code> texts only; <kbd>Ctrl+Alt+Space</kbd> still maximizes the area). Alt+Space or Shift+Space can be chosen in the preferences.</li>
+  <li>Syntax highlighting, errors underlined as you type and listed in the sidebar, with a suggestion when one is close.</li>
+  <li>Target checks: a text that declares its targets (<code>// @target blender gltf</code>) has what they do not accept pointed out. Targets include the <code>gltf</code> variant (the shader nodes a glTF export keeps) and, as experimental variants, <code>eevee</code> and <code>cycles</code>.</li>
+  <li>Color Ramps and curves (RGB Curves, Float Curve, Vector Curves, Hue Correct) are written in the text, stop by stop and point by point.</li>
+  <li><strong>Format</strong> rewrites a text in the canonical layout and keeps its comments.</li>
+</ul>
+
+<h2>Modules and standard library</h2>
+<ul>
+  <li><code>use math</code> reuses the graphs of another <code>.bn</code> file as node groups.</li>
+  <li>Eleven modules are bundled: <code>math</code> (shaping curves, waves, vectors, noise), <code>sdf2d</code> (2D signed distance fields), <code>curves2d</code> (resampling, curvature, path operations), <code>patterns2d</code> (tilings, grids, radial arrays), <code>planar2d</code> (planar maps: intersections, faces, region boundaries), <code>fillet2d</code> (fillets, chamfers and bevels of 2D corners), and for the compositor <code>mask2d</code> (masks from signed distance fields), <code>merge</code> (over, under, in, out, atop, screen, multiply), <code>grade</code> (grade, color correct, saturation, hue shift, soft clip, log to lin), <code>stmap</code> (STMap remapping) and <code>qc</code> (test patterns and image checks: false color, clipping, NaN, zebra, difference).</li>
+  <li>A <code>use</code> looks in the texts of the .blend, next to the imported file, in a <em>Module Folder</em> you choose, then in the bundled library.</li>
+</ul>
+
+<h2>Import</h2>
+<ul>
+  <li><strong>File &gt; Import &gt; Base Node (.bn)</strong> builds the graphs of one or more <code>.bn</code> files.</li>
+  <li><strong>Drop a <code>.bn</code> file</strong> on the 3D Viewport, the Node Editor or the Text Editor. A dialog shows its title, author and license and the choices it offers: install it as a library in the <em>Module Folder</em>, import its graphs, add an object with its example, or add its modifier to an object. Only files are read: a dropped link or text is ignored.</li>
+  <li>A shader graph also becomes a material of its name. A compositor graph becomes the scene's compositor when the scene has none. A material's own tree opens as text too (<kbd>Alt+Z</kbd>).</li>
+</ul>
+
+<h2>Files, clipboard and network</h2>
+<ul>
+  <li>Files: the add-on reads the <code>.bn</code> files you import or drop and the modules they use. The only file it writes outside the .blend is a dropped file you choose to install as a library, copied into the <em>Module Folder</em> you set.</li>
+  <li>Clipboard: written only by Copy as .bn, read only by Paste .bn.</li>
+  <li>Network: none.</li>
+</ul>
+
+<h2>Links</h2>
+<ul>
+  <li>Language reference, tutorials and examples: <a href="https://basenode.ludopant.com/">basenode.ludopant.com</a></li>
+  <li>Source and issues: <a href="https://github.com/marcgardent/base-node-language">github.com/marcgardent/base-node-language</a></li>
+</ul>
+  

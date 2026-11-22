@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base Node — Ludopant</title>
+<meta name="description" content="Base Node, a free Blender add-on: Geometry Nodes, Shader and Compositor node trees written as .bn text and built back into nodes, with a standard library of eleven modules.">
+<link rel="icon" href="../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.doc { padding: 40px 0 80px; }
+.doc .wrap { max-width: 880px; }
+.doc .crumb { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
+.doc .crumb a { color: var(--muted); }
+.doc h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 24px; }
+.doc h2 { font-size: 28px; letter-spacing: -.01em; margin: 56px 0 12px; line-height: 1.2; }
+.doc h3 { font-size: 20px; margin: 36px 0 10px; line-height: 1.3; }
+.doc p, .doc li { max-width: 72ch; }
+.doc img, .doc video { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 10px; border: 1px solid var(--line); }
+.doc kbd { font: 600 .82em ui-monospace, "SF Mono", Menlo, monospace; padding: 1px 6px; border: 1px solid var(--line);
+  border-bottom-width: 2px; border-radius: 5px; background: var(--surface); }
+.doc code { font: .9em ui-monospace, "SF Mono", Menlo, monospace; }
+.doc .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 32px; padding: 0; list-style: none; }
+.doc .tabs a { display: inline-block; text-decoration: none; font-size: 15px; font-weight: 600; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 8px; padding: 6px 14px; }
+.doc .tabs a:hover { color: var(--text); }
+.doc .tabs a[aria-current] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.doc .cover { width: min(1200px, calc(100vw - 32px)); margin: 0 0 40px 50%; transform: translateX(-50%); max-width: none; }
+.doc .cover img { width: 100%; border-radius: 14px; }
+.doc .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+.doc .grid figure, .doc figure { margin: 16px 0; }
+.doc figcaption { font-size: 14px; color: var(--muted); margin-top: 6px; }
+.doc table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.doc th, .doc td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.doc th { color: var(--muted); font-weight: 600; width: 32%; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a href="../" aria-label="Ludopant, home"><img class="logo" src="../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../#products">Products</a>
+      <a href="../#studio">Studio</a>
+      <a href="../#contact">Contact</a>
+      <a class="lang" href="../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc">
+<div class="wrap">
+<p class="crumb"><a href="../#products">Products</a> › Base Node</p>
+<span class="status ready">Free and open source</span>
+<h1>Base Node</h1>
+<ul class="tabs">
+  <li><a href="index.html" aria-current="page">Overview</a></li>
+  <li><a href="https://basenode.ludopant.com/reference/">Language reference</a></li>
+  <li><a href="https://basenode.ludopant.com/tutorials/">Tutorials</a></li>
+  <li><a href="https://github.com/marcgardent/base-node-language">Source</a></li>
+</ul>
+<p class="cover"><img src="img/cover.webp" alt="Base Node: .bn text on the left, the same tree as Blender nodes on the right, Alt+Z between them; Built-in IDE, Checks by Profiles, Ready for Shader, Geometry and Compositor nodes" width="1920" height="1080"></p>
+
+<h2>Node trees as text, and text as node trees</h2>
+
+<p><strong>Base Node</strong> writes Geometry Nodes, Shader and Compositor node trees as text, and builds the text back into nodes. A tree becomes a <code>.bn</code> file of small functions. You can edit nodes as code, review them in diffs and share them as plain text.</p>
+
+<p>The add-on is free, under the GPL 3.0 or later. Blender 5.2 LTS and later, tested on 5.2 LTS and 5.3.</p>
+
+<figure>
+<video autoplay loop muted playsinline poster="img/chrono-hud.webp" width="960" height="640"><source src="img/chrono-hud.mp4" type="video/mp4"></video>
+<figcaption><code>chrono_hud.bn</code>, an animated HUD built from the bundled modules sdf2d, curves2d, patterns2d and math.</figcaption>
+</figure>
+
+<h2>What you get</h2>
+
+<h3>Nodes and text in the same area</h3>
+<ul>
+  <li><kbd>Alt</kbd>+<kbd>Z</kbd> in the Node Editor shows the edited tree as <code>.bn</code> text in the same area. Press it again to write the text into the tree and go back to the nodes.</li>
+  <li>While you type, the tree follows the text as soon as the text is valid. A text with errors changes nothing and lists its errors in the sidebar. <kbd>Alt</kbd>+<kbd>P</kbd> applies the text by hand when <em>Apply while typing</em> is off.</li>
+  <li>The tree stays the only data. The text is a temporary view, removed when you go back to the nodes. An unchanged text leaves the tree and its layout as they were.</li>
+  <li>Comments are kept in the tree: each <code>//</code> comment is stored on the node of its statement and comes back the next time the text opens. The Node Editor draws them above their nodes.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> copies the edited tree as <code>.bn</code> text, with the groups it calls, to paste in a forum post or a chat. <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> builds the <code>.bn</code> text of the clipboard in the current file.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd> arranges the selected nodes, or the whole tree: links go left to right, in line with their sockets, and each frame keeps its nodes together. It works in every node editor.</li>
+</ul>
+<figure>
+<img src="img/tuple-tiles-nodes.webp" alt="The Geometry Nodes tree built from tuple_tiles.bn, arranged left to right, with its comments" width="1601" height="1001" loading="lazy">
+<figcaption><code>tuple_tiles.bn</code> built as Geometry Nodes, with its comments.</figcaption>
+</figure>
+
+<h3>Writing <code>.bn</code></h3>
+<ul>
+  <li>Suggestions for nodes, sockets and the graphs of used modules with <kbd>Ctrl</kbd>+<kbd>Space</kbd>, in <code>.bn</code> texts only. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd> still maximizes the area.</li>
+  <li>Syntax highlighting, errors underlined as you type and listed in the sidebar, with a suggestion when one is close.</li>
+  <li>Target checks: a text that declares its targets (<code>// @target blender gltf</code>) has what they do not accept pointed out. Targets include the <code>gltf</code> variant (the shader nodes a glTF export keeps) and, as experimental variants, <code>eevee</code> and <code>cycles</code>.</li>
+  <li>Color Ramps and curves (RGB Curves, Float Curve, Vector Curves, Hue Correct) are written in the text, stop by stop and point by point.</li>
+  <li><strong>Format</strong> rewrites a text in the canonical layout and keeps its comments.</li>
+</ul>
+
+<h3>A standard library of eleven modules</h3>
+<p><code>use math</code> reuses the graphs of another <code>.bn</code> file as node groups. A <code>use</code> looks in the texts of the .blend, next to the imported file, in a <em>Module Folder</em> you choose, then in the bundled library.</p>
+<table>
+  <tr><th>Geometry and shading</th><td><code>math</code> (shaping curves, waves, vectors, noise), <code>sdf2d</code> (2D signed distance fields), <code>curves2d</code> (resampling, curvature, path operations), <code>patterns2d</code> (tilings, grids, radial arrays), <code>planar2d</code> (planar maps: intersections, faces, region boundaries), <code>fillet2d</code> (fillets, chamfers and bevels of 2D corners)</td></tr>
+  <tr><th>Compositor</th><td><code>mask2d</code> (masks from signed distance fields), <code>merge</code> (over, under, in, out, atop, screen, multiply), <code>grade</code> (grade, color correct, saturation, hue shift, soft clip, log to lin), <code>stmap</code> (STMap remapping), <code>qc</code> (test patterns and image checks: false color, clipping, NaN, zebra, difference)</td></tr>
+</table>
+<div class="grid">
+  <figure><img src="img/sdf2d.webp" alt="Shapes of sdf2d: star, hexagon, cross, chamfer union and subtraction, arc" width="1200" height="800" loading="lazy"><figcaption>sdf2d</figcaption></figure>
+  <figure><img src="img/curves2d.webp" alt="Curves of curves2d: morph, arrow, ring, parallel contours, ribbon, contour noise" width="1200" height="800" loading="lazy"><figcaption>curves2d</figcaption></figure>
+  <figure><img src="img/patterns2d.webp" alt="Patterns of patterns2d: hexagon and triangle tilings, phyllotaxis, scattered points, grid" width="1200" height="800" loading="lazy"><figcaption>patterns2d</figcaption></figure>
+</div>
+<div class="grid">
+  <figure><img src="img/qc.webp" alt="qc in the compositor: color bars, hue wheel, false color, clipping and difference checks" width="640" height="360" loading="lazy"><figcaption>qc</figcaption></figure>
+  <figure><img src="img/stmap.webp" alt="stmap in the compositor: UV ramp, tiling, mirroring and warping of an image" width="640" height="360" loading="lazy"><figcaption>stmap</figcaption></figure>
+  <figure><img src="img/merge.webp" alt="merge in the compositor: over, under, in, out, atop, screen and multiply of two shapes" width="640" height="360" loading="lazy"><figcaption>merge</figcaption></figure>
+</div>
+
+<h3>Import and drag and drop</h3>
+<ul>
+  <li><strong>File › Import › Base Node (.bn)</strong> builds the graphs of one or more <code>.bn</code> files.</li>
+  <li><strong>Drop a <code>.bn</code> file</strong> on the 3D Viewport, the Node Editor or the Text Editor. A dialog shows its title, author and license and the choices it offers: install it as a library in the <em>Module Folder</em>, import its graphs, add an object with its example, or add its modifier to an object. Only files are read: a dropped link or text is ignored.</li>
+  <li>A shader graph also becomes a material of its name. A compositor graph becomes the scene's compositor when the scene has none. A material's own tree opens as text too (<kbd>Alt</kbd>+<kbd>Z</kbd>).</li>
+</ul>
+
+<h2>Written in <code>.bn</code></h2>
+<p>Each of these is one <code>.bn</code> file, built by the add-on.</p>
+<div class="grid">
+  <figure><video autoplay loop muted playsinline poster="img/metaball-symphony.webp" width="960" height="640"><source src="img/metaball-symphony.mp4" type="video/mp4"></video><figcaption><code>metaball_symphony.bn</code>, from the bundled modules</figcaption></figure>
+  <figure><video autoplay loop muted playsinline poster="img/differential-growth.webp" width="960" height="640"><source src="img/differential-growth.mp4" type="video/mp4"></video><figcaption><code>differential_growth.bn</code>, a simulation</figcaption></figure>
+  <figure><video autoplay loop muted playsinline poster="img/reaction-diffusion.webp" width="960" height="640"><source src="img/reaction-diffusion.mp4" type="video/mp4"></video><figcaption><code>reaction_diffusion.bn</code>, a simulation</figcaption></figure>
+  <figure><img src="img/tuple-tiles.webp" alt="A board of coloured tiles of different heights, rendered from tuple_tiles.bn" width="960" height="640" loading="lazy"><figcaption><code>tuple_tiles.bn</code>, rendered</figcaption></figure>
+</div>
+
+<h2>Nothing sent, little written</h2>
+<table>
+  <tr><th>Files</th><td>Reads the <code>.bn</code> files you import or drop and the modules they use. The only file written outside the .blend is a dropped file you choose to install as a library, copied into the <em>Module Folder</em> you set.</td></tr>
+  <tr><th>Clipboard</th><td>Written only by Copy as .bn, read only by Paste .bn.</td></tr>
+  <tr><th>Network</th><td>None.</td></tr>
+</table>
+
+<h2>Get it</h2>
+<ul>
+  <li>In Blender: <em>Edit › Preferences › Get Extensions › Repositories › + › Add Remote Repository</em>, paste <code>https://basenode.ludopant.com/extensions/index.json</code>, then install Base Node. A listing on Blender Extensions is on its way.</li>
+  <li>Free, under the GPL 3.0 or later. Source and issues: <a href="https://github.com/marcgardent/base-node-language">github.com/marcgardent/base-node-language</a>.</li>
+  <li>Language reference, tutorials and examples: <a href="https://basenode.ludopant.com/">basenode.ludopant.com</a>.</li>
+  <li>More libraries written in <code>.bn</code>: <a href="../basenode-packs/">BaseNode Packs</a>.</li>
+</ul>
+
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
