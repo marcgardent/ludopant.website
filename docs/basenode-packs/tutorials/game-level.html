@@ -16,8 +16,8 @@
 <link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../packs.css">
-<script type="module" src="https://basenode.ludopant.com/view/bn-view.js"></script>
-<script type="module" src="https://basenode.ludopant.com/view/bn-file.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-view.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-file.js"></script>
 </head>
 <body>
 <!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
@@ -53,12 +53,12 @@
       <li><strong>The language.</strong> One geometry graph that grows a block at a time; a graph of your own, <code>house</code>, that returns two geometries; a closure handed to a shader group; one mesh reused as the input of the next module (the road flattens the ground, the ground carries the houses, the pads level the ground). Compare two steps to see what changed.</li>
     </ul>
     <p>
-      This page goes faster on the basics than <a href="https://basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>, which starts from a flat square: a noise, <code>SetPosition</code>, a material. Read it first if those are new to you.
+      This page goes faster on the basics than <a href="https://blender.basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>, which starts from a flat square: a noise, <code>SetPosition</code>, a material. Read it first if those are new to you.
     </p>
 
     <h2 id="before">Before you start</h2>
     <p>
-      You need Blender 5, the <a href="https://basenode.ludopant.com/#blender">Base Node add-on</a>, version 0.13.1 or later, and the <a href="../game-art/">Game Art Tools</a> pack: it carries the four modules this tutorial assembles.
+      You need Blender 5, the <a href="https://blender.basenode.ludopant.com/#blender">Base Node add-on</a>, version 0.13.1 or later, and the <a href="https://ludopant.com/basenode-packs/#pack-game-art">Game Art Tools</a> pack: it carries the four modules this tutorial assembles.
       The pack is sold by the author of Base Node, apart from the open source project. The steps are free to read, copy and change; the modules they <code>use</code> are not.
     </p>
     <table>
@@ -76,7 +76,7 @@
       <li><strong>Paste it.</strong> Press the copy button of its block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>, on any mesh object: the graph makes its own ground and ignores the mesh it is given.</li>
     </ul>
     <p>
-      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/game_level/render.py"><code>render.py</code></a>, under the same daylight sky and sun, from the same camera except where a caption says otherwise.
+      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-for-blender/blob/main/examples/tutorials/game_level/render.py"><code>render.py</code></a>, under the same daylight sky and sun, from the same camera except where a caption says otherwise.
     </p>
 
     <h2 id="step-1"><span class="n">1.</span> Rolling ground</h2>
@@ -96,9 +96,9 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
@@ -106,13 +106,12 @@ shader(material: true) graph Ground() -> (surface: Shader) {
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  return (surface: haze(PrincipledBSDF(base_color: grass, roughness: 0.92)))
+  return (surface: haze(surface: PrincipledBSDF(base_color: grass, roughness: 0.92)))
 }
 
 geometry graph game_level() -> Geometry {
@@ -121,17 +120,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   plain = Grid(size_x: 20000.0, size_y: 20000.0, vertices_x: 2, vertices_y: 2)
@@ -170,9 +165,9 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
@@ -180,37 +175,35 @@ shader(material: true) graph Ground() -> (surface: Shader) {
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  return (surface: haze(PrincipledBSDF(base_color: grass, roughness: 0.92)))
+  return (surface: haze(surface: PrincipledBSDF(base_color: grass, roughness: 0.92)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
@@ -220,17 +213,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -241,7 +230,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -289,53 +278,51 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
   "Grass in tufts of two greens, in meadows lighter and darker, worn to dirt on the verges"
   o = TextureCoordinate().object
-  worn = Attribute(attribute_name: "road_mask").factor
+  worn = Attribute[attribute_name: "road_mask"]().factor
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
   fine = NoiseTexture(vector: o, scale: 6.0, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  dirt = Mix(factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2), data_type: RGBA)
+  dirt = Mix[RGBA](factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2))
   // The mask fades from the road's edge: the dirt gives way to grass in a ragged line
   verge = Clamp(value: worn * 1.6 + (fine - 0.5) * 0.8)
-  color = Mix(factor: verge, a: grass, b: dirt, data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: color, roughness: 0.92)))
+  color = Mix[RGBA](factor: verge, a: grass, b: dirt)
+  return (surface: haze(surface: PrincipledBSDF(base_color: color, roughness: 0.92)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
@@ -345,17 +332,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -366,7 +349,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -379,8 +362,8 @@ geometry graph game_level() -> Geometry {
   // The ground under the road laid 12 cm below it, eased back to its own height over 5 m; its
   // road_mask, which the material wears to dirt, fading over 1.5 m past the shoulders
   levelled = rough
-    |> flatten_terrain(made, depth: 0.12, falloff: 5.0)
-    |> road_mask_on_terrain(made, falloff: 1.5)
+    |> flatten_terrain(road: made, depth: 0.12, falloff: 5.0)
+    |> road_mask_on_terrain(road: made, falloff: 1.5)
   plain = Grid(size_x: 20000.0, size_y: 20000.0, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: (0.0, 0.0, -4.0))
   land = JoinGeometry(plain, beyond, levelled)
@@ -419,61 +402,59 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
   "Grass in tufts of two greens, in meadows lighter and darker, worn to dirt on the verges"
   o = TextureCoordinate().object
-  worn = Attribute(attribute_name: "road_mask").factor
+  worn = Attribute[attribute_name: "road_mask"]().factor
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
   fine = NoiseTexture(vector: o, scale: 6.0, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  dirt = Mix(factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2), data_type: RGBA)
+  dirt = Mix[RGBA](factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2))
   // The mask fades from the road's edge: the dirt gives way to grass in a ragged line
   verge = Clamp(value: worn * 1.6 + (fine - 0.5) * 0.8)
-  color = Mix(factor: verge, a: grass, b: dirt, data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: color, roughness: 0.92)))
+  color = Mix[RGBA](factor: verge, a: grass, b: dirt)
+  return (surface: haze(surface: PrincipledBSDF(base_color: color, roughness: 0.92)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
 shader(material: true) graph Trims() -> (surface: Shader) {
   "A trim sheet of four rows from the top: walls with windows, guard rail, stone, cornice; roofs"
-  uv = UVMap(uv_map: "UVMap").uv
-  row = Attribute(attribute_name: "trim_row").factor
-  tint = Attribute(attribute_name: "tint").color
+  uv = UVMap[uv_map: "UVMap"]().uv
+  row = Attribute[attribute_name: "trim_row"]().factor
+  tint = Attribute[attribute_name: "tint"]().color
   up = Clamp(value: (Geometry().normal.z - 0.6) * 10.0)
   // The sheet is 6 m across, its rows 3.2, 1.6, 0.8 and 0.4 m tall: row 0, the wall, runs from
   // v 0.467 to 1; a window every 2.4 m along it
@@ -486,9 +467,9 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   sill = Clamp(value: (0.33 - abs(bay - 0.5)) * 60.0) * Clamp(value: (0.03 - abs(v0 - 0.22)) * 60.0)
   plaster = tint
     * (0.85 + 0.15 * NoiseTexture(vector: TextureCoordinate().object, scale: 3.0).factor)
-  glass = Mix(factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26), data_type: RGBA)
-  trimmed = Mix(factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8), data_type: RGBA)
-  wall = Mix(factor: pane, a: trimmed, b: glass, data_type: RGBA)
+  glass = Mix[RGBA](factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26))
+  trimmed = Mix[RGBA](factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8))
+  wall = Mix[RGBA](factor: pane, a: trimmed, b: glass)
   // Row 1, the guard rail: galvanised steel with two grooves; row 2 stone blocks; row 3 cornice
   rail = (0.55, 0.57, 0.58) * (0.8 + 0.2 * sin(uv.y * 40.0 * 3.1415927))
   seams = Clamp(value: abs(fract(along / 0.8) - 0.5) * 40.0 - 18.0)
@@ -496,10 +477,10 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   is_rail = Clamp(value: 1.0 - abs(row - 1.0))
   is_stone = Clamp(value: 1.0 - abs(row - 2.0))
   is_cornice = Clamp(value: row - 2.0)
-  railed = Mix(factor: is_rail, a: wall, b: rail, data_type: RGBA)
-  stoned = Mix(factor: is_stone, a: railed, b: stone, data_type: RGBA)
-  facade = Mix(factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74), data_type: RGBA)
-  color = Mix(factor: up, a: facade, b: (0.2, 0.19, 0.18), data_type: RGBA)
+  railed = Mix[RGBA](factor: is_rail, a: wall, b: rail)
+  stoned = Mix[RGBA](factor: is_stone, a: railed, b: stone)
+  facade = Mix[RGBA](factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74))
+  color = Mix[RGBA](factor: up, a: facade, b: (0.2, 0.19, 0.18))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -531,7 +512,7 @@ geometry graph house(
     |> TransformGeometry(translation: CombineXYZ(x: width * 0.2, y: -depth * 0.15, z: top + 0.6))
   ground = terrain_height(terrain, p: at).height
   body = storeys + plinth + unit
-    |> StoreNamedAttribute(name: "tint", value: tint, data_type: FLOAT_COLOR)
+    |> StoreNamedAttribute[FLOAT_COLOR](name: "tint", value: tint)
     |> TransformGeometry(rotation: CombineXYZ(z: turn))
     |> SetPosition(offset: CombineXYZ(x: at.x, y: at.y, z: ground))
   pad = Grid(size_x: width + 3.0, size_y: depth + 3.0, vertices_x: 6, vertices_y: 6)
@@ -547,17 +528,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -568,7 +545,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -581,8 +558,8 @@ geometry graph game_level() -> Geometry {
   // The ground under the road laid 12 cm below it, eased back to its own height over 5 m; its
   // road_mask, which the material wears to dirt, fading over 1.5 m past the shoulders
   levelled = rough
-    |> flatten_terrain(made, depth: 0.12, falloff: 5.0)
-    |> road_mask_on_terrain(made, falloff: 1.5)
+    |> flatten_terrain(road: made, depth: 0.12, falloff: 5.0)
+    |> road_mask_on_terrain(road: made, falloff: 1.5)
   // Six houses along the road, turned to face it, each on a pad levelled into the slope
   a = house(
     at: (-22.2, 4.0, 0.0),
@@ -634,7 +611,7 @@ geometry graph game_level() -> Geometry {
     terrain: levelled)
   pads = a.pad + b.pad + c.pad + d.pad + e.pad + f.pad
   ground = levelled
-    |> flatten_terrain(pads, depth: 0.05, falloff: 3.5)
+    |> flatten_terrain(road: pads, depth: 0.05, falloff: 3.5)
   // Each wall face to the row of a sheet 6 m across that its width calls for: walls (3 m) take
   // the first row, plinths and rooftop units (1.1 m, 0.9 m) the third, ledges (0.3 m) the fourth
   town = a.house + b.house + c.house + d.house + e.house + f.house
@@ -654,7 +631,7 @@ geometry graph game_level() -> Geometry {
   rail = trim_strip(rail_path, width: 0.5, upright: true, sheet_size: 6.0, row: 1)
   posts = rail_path
     |> ResampleCurve(mode: Length, length: 2.0)
-    |> CurveToPoints(mode: EVALUATED).points
+    |> CurveToPoints[EVALUATED]().points
     |> InstanceOnPoints(
       instance: Cube(size: (0.12, 0.12, 1.0)).mesh
         |> TransformGeometry(translation: (0.0, 0.0, -0.45)))
@@ -703,64 +680,62 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
   "Grass in tufts of two greens, in meadows lighter and darker, worn to dirt on the verges, dark mud on the stream's banks"
   o = TextureCoordinate().object
-  worn = Attribute(attribute_name: "road_mask").factor
-  wet = Attribute(attribute_name: "wet").factor
+  worn = Attribute[attribute_name: "road_mask"]().factor
+  wet = Attribute[attribute_name: "wet"]().factor
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
   fine = NoiseTexture(vector: o, scale: 6.0, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  dirt = Mix(factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2), data_type: RGBA)
+  dirt = Mix[RGBA](factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2))
   // The mask fades from the road's edge: the dirt gives way to grass in a ragged line
   verge = Clamp(value: worn * 1.6 + (fine - 0.5) * 0.8)
-  color = Mix(factor: verge, a: grass, b: dirt, data_type: RGBA)
-  muddy = Mix(factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09), data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
+  color = Mix[RGBA](factor: verge, a: grass, b: dirt)
+  muddy = Mix[RGBA](factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09))
+  return (surface: haze(surface: PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
 shader(material: true) graph Stream() -> (surface: Shader) {
   "Water panned along the flowmap: long soft streaks running with the flow, lighter on the shallows"
   m = flowmap_read()
-  uv = UVMap(uv_map: "UVMap").uv
+  uv = UVMap[uv_map: "UVMap"]().uv
   // The texture to pan, as a closure: flow_texture reads it at the two phases of the blend
-  streaks = closure(vector: Vector) -> (color: Color) {
+  streaks = graph(vector: Vector) -> (color: Color) {
     return (
       color: NoiseTexture(
         vector: vector * CombineXYZ(x: 9.0, y: 0.7, z: 1.0),
@@ -773,9 +748,9 @@ shader(material: true) graph Stream() -> (surface: Shader) {
   ripple = Clamp(value: (flowing.color.x - 0.35) * 2.0)
   streak = Clamp(value: (flowing.color.x - 0.55) * 3.0)
   shallow = Clamp(value: abs(uv.x - 0.5) * 2.6 - 0.5)
-  deep = Mix(factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13), data_type: RGBA)
-  lit = Mix(factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58), data_type: RGBA)
-  color = Mix(factor: shallow, a: lit, b: (0.13, 0.15, 0.1), data_type: RGBA)
+  deep = Mix[RGBA](factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13))
+  lit = Mix[RGBA](factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58))
+  color = Mix[RGBA](factor: shallow, a: lit, b: (0.13, 0.15, 0.1))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -785,9 +760,9 @@ shader(material: true) graph Stream() -> (surface: Shader) {
 
 shader(material: true) graph Trims() -> (surface: Shader) {
   "A trim sheet of four rows from the top: walls with windows, guard rail, stone, cornice; roofs"
-  uv = UVMap(uv_map: "UVMap").uv
-  row = Attribute(attribute_name: "trim_row").factor
-  tint = Attribute(attribute_name: "tint").color
+  uv = UVMap[uv_map: "UVMap"]().uv
+  row = Attribute[attribute_name: "trim_row"]().factor
+  tint = Attribute[attribute_name: "tint"]().color
   up = Clamp(value: (Geometry().normal.z - 0.6) * 10.0)
   // The sheet is 6 m across, its rows 3.2, 1.6, 0.8 and 0.4 m tall: row 0, the wall, runs from
   // v 0.467 to 1; a window every 2.4 m along it
@@ -800,9 +775,9 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   sill = Clamp(value: (0.33 - abs(bay - 0.5)) * 60.0) * Clamp(value: (0.03 - abs(v0 - 0.22)) * 60.0)
   plaster = tint
     * (0.85 + 0.15 * NoiseTexture(vector: TextureCoordinate().object, scale: 3.0).factor)
-  glass = Mix(factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26), data_type: RGBA)
-  trimmed = Mix(factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8), data_type: RGBA)
-  wall = Mix(factor: pane, a: trimmed, b: glass, data_type: RGBA)
+  glass = Mix[RGBA](factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26))
+  trimmed = Mix[RGBA](factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8))
+  wall = Mix[RGBA](factor: pane, a: trimmed, b: glass)
   // Row 1, the guard rail: galvanised steel with two grooves; row 2 stone blocks; row 3 cornice
   rail = (0.55, 0.57, 0.58) * (0.8 + 0.2 * sin(uv.y * 40.0 * 3.1415927))
   seams = Clamp(value: abs(fract(along / 0.8) - 0.5) * 40.0 - 18.0)
@@ -810,10 +785,10 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   is_rail = Clamp(value: 1.0 - abs(row - 1.0))
   is_stone = Clamp(value: 1.0 - abs(row - 2.0))
   is_cornice = Clamp(value: row - 2.0)
-  railed = Mix(factor: is_rail, a: wall, b: rail, data_type: RGBA)
-  stoned = Mix(factor: is_stone, a: railed, b: stone, data_type: RGBA)
-  facade = Mix(factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74), data_type: RGBA)
-  color = Mix(factor: up, a: facade, b: (0.2, 0.19, 0.18), data_type: RGBA)
+  railed = Mix[RGBA](factor: is_rail, a: wall, b: rail)
+  stoned = Mix[RGBA](factor: is_stone, a: railed, b: stone)
+  facade = Mix[RGBA](factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74))
+  color = Mix[RGBA](factor: up, a: facade, b: (0.2, 0.19, 0.18))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -845,7 +820,7 @@ geometry graph house(
     |> TransformGeometry(translation: CombineXYZ(x: width * 0.2, y: -depth * 0.15, z: top + 0.6))
   ground = terrain_height(terrain, p: at).height
   body = storeys + plinth + unit
-    |> StoreNamedAttribute(name: "tint", value: tint, data_type: FLOAT_COLOR)
+    |> StoreNamedAttribute[FLOAT_COLOR](name: "tint", value: tint)
     |> TransformGeometry(rotation: CombineXYZ(z: turn))
     |> SetPosition(offset: CombineXYZ(x: at.x, y: at.y, z: ground))
   pad = Grid(size_x: width + 3.0, size_y: depth + 3.0, vertices_x: 6, vertices_y: 6)
@@ -861,17 +836,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -882,7 +853,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -895,8 +866,8 @@ geometry graph game_level() -> Geometry {
   // The ground under the road laid 12 cm below it, eased back to its own height over 5 m; its
   // road_mask, which the material wears to dirt, fading over 1.5 m past the shoulders
   levelled = rough
-    |> flatten_terrain(made, depth: 0.12, falloff: 5.0)
-    |> road_mask_on_terrain(made, falloff: 1.5)
+    |> flatten_terrain(road: made, depth: 0.12, falloff: 5.0)
+    |> road_mask_on_terrain(road: made, falloff: 1.5)
   // Six houses along the road, turned to face it, each on a pad levelled into the slope
   a = house(
     at: (-22.2, 4.0, 0.0),
@@ -948,7 +919,7 @@ geometry graph game_level() -> Geometry {
     terrain: levelled)
   pads = a.pad + b.pad + c.pad + d.pad + e.pad + f.pad
   ground = levelled
-    |> flatten_terrain(pads, depth: 0.05, falloff: 3.5)
+    |> flatten_terrain(road: pads, depth: 0.05, falloff: 3.5)
   // Each wall face to the row of a sheet 6 m across that its width calls for: walls (3 m) take
   // the first row, plinths and rooftop units (1.1 m, 0.9 m) the third, ledges (0.3 m) the fourth
   town = a.house + b.house + c.house + d.house + e.house + f.house
@@ -968,7 +939,7 @@ geometry graph game_level() -> Geometry {
   rail = trim_strip(rail_path, width: 0.5, upright: true, sheet_size: 6.0, row: 1)
   posts = rail_path
     |> ResampleCurve(mode: Length, length: 2.0)
-    |> CurveToPoints(mode: EVALUATED).points
+    |> CurveToPoints[EVALUATED]().points
     |> InstanceOnPoints(
       instance: Cube(size: (0.12, 0.12, 1.0)).mesh
         |> TransformGeometry(translation: (0.0, 0.0, -0.45)))
@@ -981,7 +952,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   water = road(
       bed,
-      ground,
+      terrain: ground,
       width: 3.2,
       lanes: 1,
       shoulder: 0.0,
@@ -994,7 +965,7 @@ geometry graph game_level() -> Geometry {
   // the ground over 1.4 m: they bury the edges of the water. The banks wet for 1.5 m
   channel = road(
     bed,
-    ground,
+    terrain: ground,
     width: 1.2,
     lanes: 1,
     shoulder: 0.0,
@@ -1002,8 +973,8 @@ geometry graph game_level() -> Geometry {
     smooth: 30,
     lift: -0.25)
   carved = ground
-    |> flatten_terrain(channel, depth: 0.5, falloff: 1.4)
-    |> road_mask_on_terrain(water, falloff: 1.5, name: "wet")
+    |> flatten_terrain(road: channel, depth: 0.5, falloff: 1.4)
+    |> road_mask_on_terrain(road: water, falloff: 1.5, name: "wet")
   plain = Grid(size_x: 20000.0, size_y: 20000.0, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: (0.0, 0.0, -4.0))
   land = JoinGeometry(plain, beyond, carved)
@@ -1053,64 +1024,62 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
   "Grass in tufts of two greens, in meadows lighter and darker, worn to dirt on the verges, dark mud on the stream's banks"
   o = TextureCoordinate().object
-  worn = Attribute(attribute_name: "road_mask").factor
-  wet = Attribute(attribute_name: "wet").factor
+  worn = Attribute[attribute_name: "road_mask"]().factor
+  wet = Attribute[attribute_name: "wet"]().factor
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
   fine = NoiseTexture(vector: o, scale: 6.0, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  dirt = Mix(factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2), data_type: RGBA)
+  dirt = Mix[RGBA](factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2))
   // The mask fades from the road's edge: the dirt gives way to grass in a ragged line
   verge = Clamp(value: worn * 1.6 + (fine - 0.5) * 0.8)
-  color = Mix(factor: verge, a: grass, b: dirt, data_type: RGBA)
-  muddy = Mix(factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09), data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
+  color = Mix[RGBA](factor: verge, a: grass, b: dirt)
+  muddy = Mix[RGBA](factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09))
+  return (surface: haze(surface: PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
 shader(material: true) graph Stream() -> (surface: Shader) {
   "Water panned along the flowmap: long soft streaks running with the flow, lighter on the shallows"
   m = flowmap_read()
-  uv = UVMap(uv_map: "UVMap").uv
+  uv = UVMap[uv_map: "UVMap"]().uv
   // The texture to pan, as a closure: flow_texture reads it at the two phases of the blend
-  streaks = closure(vector: Vector) -> (color: Color) {
+  streaks = graph(vector: Vector) -> (color: Color) {
     return (
       color: NoiseTexture(
         vector: vector * CombineXYZ(x: 9.0, y: 0.7, z: 1.0),
@@ -1123,9 +1092,9 @@ shader(material: true) graph Stream() -> (surface: Shader) {
   ripple = Clamp(value: (flowing.color.x - 0.35) * 2.0)
   streak = Clamp(value: (flowing.color.x - 0.55) * 3.0)
   shallow = Clamp(value: abs(uv.x - 0.5) * 2.6 - 0.5)
-  deep = Mix(factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13), data_type: RGBA)
-  lit = Mix(factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58), data_type: RGBA)
-  color = Mix(factor: shallow, a: lit, b: (0.13, 0.15, 0.1), data_type: RGBA)
+  deep = Mix[RGBA](factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13))
+  lit = Mix[RGBA](factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58))
+  color = Mix[RGBA](factor: shallow, a: lit, b: (0.13, 0.15, 0.1))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -1135,9 +1104,9 @@ shader(material: true) graph Stream() -> (surface: Shader) {
 
 shader(material: true) graph Trims() -> (surface: Shader) {
   "A trim sheet of four rows from the top: walls with windows, guard rail, stone, cornice; roofs"
-  uv = UVMap(uv_map: "UVMap").uv
-  row = Attribute(attribute_name: "trim_row").factor
-  tint = Attribute(attribute_name: "tint").color
+  uv = UVMap[uv_map: "UVMap"]().uv
+  row = Attribute[attribute_name: "trim_row"]().factor
+  tint = Attribute[attribute_name: "tint"]().color
   up = Clamp(value: (Geometry().normal.z - 0.6) * 10.0)
   // The sheet is 6 m across, its rows 3.2, 1.6, 0.8 and 0.4 m tall: row 0, the wall, runs from
   // v 0.467 to 1; a window every 2.4 m along it
@@ -1150,9 +1119,9 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   sill = Clamp(value: (0.33 - abs(bay - 0.5)) * 60.0) * Clamp(value: (0.03 - abs(v0 - 0.22)) * 60.0)
   plaster = tint
     * (0.85 + 0.15 * NoiseTexture(vector: TextureCoordinate().object, scale: 3.0).factor)
-  glass = Mix(factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26), data_type: RGBA)
-  trimmed = Mix(factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8), data_type: RGBA)
-  wall = Mix(factor: pane, a: trimmed, b: glass, data_type: RGBA)
+  glass = Mix[RGBA](factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26))
+  trimmed = Mix[RGBA](factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8))
+  wall = Mix[RGBA](factor: pane, a: trimmed, b: glass)
   // Row 1, the guard rail: galvanised steel with two grooves; row 2 stone blocks; row 3 cornice
   rail = (0.55, 0.57, 0.58) * (0.8 + 0.2 * sin(uv.y * 40.0 * 3.1415927))
   seams = Clamp(value: abs(fract(along / 0.8) - 0.5) * 40.0 - 18.0)
@@ -1160,10 +1129,10 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   is_rail = Clamp(value: 1.0 - abs(row - 1.0))
   is_stone = Clamp(value: 1.0 - abs(row - 2.0))
   is_cornice = Clamp(value: row - 2.0)
-  railed = Mix(factor: is_rail, a: wall, b: rail, data_type: RGBA)
-  stoned = Mix(factor: is_stone, a: railed, b: stone, data_type: RGBA)
-  facade = Mix(factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74), data_type: RGBA)
-  color = Mix(factor: up, a: facade, b: (0.2, 0.19, 0.18), data_type: RGBA)
+  railed = Mix[RGBA](factor: is_rail, a: wall, b: rail)
+  stoned = Mix[RGBA](factor: is_stone, a: railed, b: stone)
+  facade = Mix[RGBA](factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74))
+  color = Mix[RGBA](factor: up, a: facade, b: (0.2, 0.19, 0.18))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -1195,7 +1164,7 @@ geometry graph house(
     |> TransformGeometry(translation: CombineXYZ(x: width * 0.2, y: -depth * 0.15, z: top + 0.6))
   ground = terrain_height(terrain, p: at).height
   body = storeys + plinth + unit
-    |> StoreNamedAttribute(name: "tint", value: tint, data_type: FLOAT_COLOR)
+    |> StoreNamedAttribute[FLOAT_COLOR](name: "tint", value: tint)
     |> TransformGeometry(rotation: CombineXYZ(z: turn))
     |> SetPosition(offset: CombineXYZ(x: at.x, y: at.y, z: ground))
   pad = Grid(size_x: width + 3.0, size_y: depth + 3.0, vertices_x: 6, vertices_y: 6)
@@ -1207,9 +1176,9 @@ geometry graph house(
 
 shader(material: true) graph Foliage() -> (surface: Shader) {
   "Leaves, each tree a shade between two greens"
-  tint = Attribute(attribute_type: INSTANCER, attribute_name: "tree_tint").factor
-  color = Mix(factor: tint, a: (0.035, 0.1, 0.03), b: (0.12, 0.2, 0.05), data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: color, roughness: 0.8)))
+  tint = Attribute[INSTANCER, attribute_name: "tree_tint"]().factor
+  color = Mix[RGBA](factor: tint, a: (0.035, 0.1, 0.03), b: (0.12, 0.2, 0.05))
+  return (surface: haze(surface: PrincipledBSDF(base_color: color, roughness: 0.8)))
 }
 
 shader(material: true) graph Bark() -> (surface: Shader) {
@@ -1235,17 +1204,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -1256,7 +1221,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -1269,8 +1234,8 @@ geometry graph game_level() -> Geometry {
   // The ground under the road laid 12 cm below it, eased back to its own height over 5 m; its
   // road_mask, which the material wears to dirt, fading over 1.5 m past the shoulders
   levelled = rough
-    |> flatten_terrain(made, depth: 0.12, falloff: 5.0)
-    |> road_mask_on_terrain(made, falloff: 1.5)
+    |> flatten_terrain(road: made, depth: 0.12, falloff: 5.0)
+    |> road_mask_on_terrain(road: made, falloff: 1.5)
   // Six houses along the road, turned to face it, each on a pad levelled into the slope
   a = house(
     at: (-22.2, 4.0, 0.0),
@@ -1322,7 +1287,7 @@ geometry graph game_level() -> Geometry {
     terrain: levelled)
   pads = a.pad + b.pad + c.pad + d.pad + e.pad + f.pad
   ground = levelled
-    |> flatten_terrain(pads, depth: 0.05, falloff: 3.5)
+    |> flatten_terrain(road: pads, depth: 0.05, falloff: 3.5)
   // Each wall face to the row of a sheet 6 m across that its width calls for: walls (3 m) take
   // the first row, plinths and rooftop units (1.1 m, 0.9 m) the third, ledges (0.3 m) the fourth
   town = a.house + b.house + c.house + d.house + e.house + f.house
@@ -1342,7 +1307,7 @@ geometry graph game_level() -> Geometry {
   rail = trim_strip(rail_path, width: 0.5, upright: true, sheet_size: 6.0, row: 1)
   posts = rail_path
     |> ResampleCurve(mode: Length, length: 2.0)
-    |> CurveToPoints(mode: EVALUATED).points
+    |> CurveToPoints[EVALUATED]().points
     |> InstanceOnPoints(
       instance: Cube(size: (0.12, 0.12, 1.0)).mesh
         |> TransformGeometry(translation: (0.0, 0.0, -0.45)))
@@ -1355,7 +1320,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   water = road(
       bed,
-      ground,
+      terrain: ground,
       width: 3.2,
       lanes: 1,
       shoulder: 0.0,
@@ -1368,7 +1333,7 @@ geometry graph game_level() -> Geometry {
   // the ground over 1.4 m: they bury the edges of the water. The banks wet for 1.5 m
   channel = road(
     bed,
-    ground,
+    terrain: ground,
     width: 1.2,
     lanes: 1,
     shoulder: 0.0,
@@ -1376,16 +1341,15 @@ geometry graph game_level() -> Geometry {
     smooth: 30,
     lift: -0.25)
   carved = ground
-    |> flatten_terrain(channel, depth: 0.5, falloff: 1.4)
-    |> road_mask_on_terrain(water, falloff: 1.5, name: "wet")
+    |> flatten_terrain(road: channel, depth: 0.5, falloff: 1.4)
+    |> road_mask_on_terrain(road: water, falloff: 1.5, name: "wet")
   // Trees in groves, kept off the road, the pads and the stream by a road mask of their own,
   // 6 m wide, and 25 m clear of the camera
   cleared = carved
-    |> road_mask_on_terrain(made + pads + water, falloff: 6.0, name: "clear")
+    |> road_mask_on_terrain(road: made + pads + water, falloff: 6.0, name: "clear")
   groves = NoiseTexture(vector: Position() * 0.04, scale: 1.0).factor
   spots = cleared
-    |> DistributePointsOnFaces(
-      distribute_method: POISSON,
+    |> DistributePointsOnFaces[POISSON](
       distance_min: 3.5,
       density_max: 0.08,
       density_factor: (1.0 - NamedAttribute(name: "clear").attribute)
@@ -1444,64 +1408,62 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
   "Grass in tufts of two greens, in meadows lighter and darker, worn to dirt on the verges, dark mud on the stream's banks"
   o = TextureCoordinate().object
-  worn = Attribute(attribute_name: "road_mask").factor
-  wet = Attribute(attribute_name: "wet").factor
+  worn = Attribute[attribute_name: "road_mask"]().factor
+  wet = Attribute[attribute_name: "wet"]().factor
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
   fine = NoiseTexture(vector: o, scale: 6.0, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  dirt = Mix(factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2), data_type: RGBA)
+  dirt = Mix[RGBA](factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2))
   // The mask fades from the road's edge: the dirt gives way to grass in a ragged line
   verge = Clamp(value: worn * 1.6 + (fine - 0.5) * 0.8)
-  color = Mix(factor: verge, a: grass, b: dirt, data_type: RGBA)
-  muddy = Mix(factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09), data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
+  color = Mix[RGBA](factor: verge, a: grass, b: dirt)
+  muddy = Mix[RGBA](factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09))
+  return (surface: haze(surface: PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
 shader(material: true) graph Stream() -> (surface: Shader) {
   "Water panned along the flowmap: long soft streaks running with the flow, lighter on the shallows"
   m = flowmap_read()
-  uv = UVMap(uv_map: "UVMap").uv
+  uv = UVMap[uv_map: "UVMap"]().uv
   // The texture to pan, as a closure: flow_texture reads it at the two phases of the blend
-  streaks = closure(vector: Vector) -> (color: Color) {
+  streaks = graph(vector: Vector) -> (color: Color) {
     return (
       color: NoiseTexture(
         vector: vector * CombineXYZ(x: 9.0, y: 0.7, z: 1.0),
@@ -1514,9 +1476,9 @@ shader(material: true) graph Stream() -> (surface: Shader) {
   ripple = Clamp(value: (flowing.color.x - 0.35) * 2.0)
   streak = Clamp(value: (flowing.color.x - 0.55) * 3.0)
   shallow = Clamp(value: abs(uv.x - 0.5) * 2.6 - 0.5)
-  deep = Mix(factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13), data_type: RGBA)
-  lit = Mix(factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58), data_type: RGBA)
-  color = Mix(factor: shallow, a: lit, b: (0.13, 0.15, 0.1), data_type: RGBA)
+  deep = Mix[RGBA](factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13))
+  lit = Mix[RGBA](factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58))
+  color = Mix[RGBA](factor: shallow, a: lit, b: (0.13, 0.15, 0.1))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -1526,10 +1488,10 @@ shader(material: true) graph Stream() -> (surface: Shader) {
 
 shader(material: true) graph Trims() -> (surface: Shader) {
   "A trim sheet of four rows from the top: walls with windows, guard rail, stone, cornice; roofs; the grime baked into the vertex color at the foot of the walls"
-  uv = UVMap(uv_map: "UVMap").uv
-  row = Attribute(attribute_name: "trim_row").factor
-  tint = Attribute(attribute_name: "tint").color
-  grime = Attribute(attribute_name: "Color").color.x
+  uv = UVMap[uv_map: "UVMap"]().uv
+  row = Attribute[attribute_name: "trim_row"]().factor
+  tint = Attribute[attribute_name: "tint"]().color
+  grime = Attribute[attribute_name: "Color"]().color.x
   up = Clamp(value: (Geometry().normal.z - 0.6) * 10.0)
   // The sheet is 6 m across, its rows 3.2, 1.6, 0.8 and 0.4 m tall: row 0, the wall, runs from
   // v 0.467 to 1; a window every 2.4 m along it
@@ -1542,9 +1504,9 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   sill = Clamp(value: (0.33 - abs(bay - 0.5)) * 60.0) * Clamp(value: (0.03 - abs(v0 - 0.22)) * 60.0)
   plaster = tint
     * (0.85 + 0.15 * NoiseTexture(vector: TextureCoordinate().object, scale: 3.0).factor)
-  glass = Mix(factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26), data_type: RGBA)
-  trimmed = Mix(factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8), data_type: RGBA)
-  wall = Mix(factor: pane, a: trimmed, b: glass, data_type: RGBA)
+  glass = Mix[RGBA](factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26))
+  trimmed = Mix[RGBA](factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8))
+  wall = Mix[RGBA](factor: pane, a: trimmed, b: glass)
   // Row 1, the guard rail: galvanised steel with two grooves; row 2 stone blocks; row 3 cornice
   rail = (0.55, 0.57, 0.58) * (0.8 + 0.2 * sin(uv.y * 40.0 * 3.1415927))
   seams = Clamp(value: abs(fract(along / 0.8) - 0.5) * 40.0 - 18.0)
@@ -1552,11 +1514,11 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   is_rail = Clamp(value: 1.0 - abs(row - 1.0))
   is_stone = Clamp(value: 1.0 - abs(row - 2.0))
   is_cornice = Clamp(value: row - 2.0)
-  railed = Mix(factor: is_rail, a: wall, b: rail, data_type: RGBA)
-  stoned = Mix(factor: is_stone, a: railed, b: stone, data_type: RGBA)
-  facade = Mix(factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74), data_type: RGBA)
-  roofed = Mix(factor: up, a: facade, b: (0.2, 0.19, 0.18), data_type: RGBA)
-  color = Mix(factor: grime, a: roofed, b: roofed * (0.3, 0.26, 0.2), data_type: RGBA)
+  railed = Mix[RGBA](factor: is_rail, a: wall, b: rail)
+  stoned = Mix[RGBA](factor: is_stone, a: railed, b: stone)
+  facade = Mix[RGBA](factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74))
+  roofed = Mix[RGBA](factor: up, a: facade, b: (0.2, 0.19, 0.18))
+  color = Mix[RGBA](factor: grime, a: roofed, b: roofed * (0.3, 0.26, 0.2))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -1588,7 +1550,7 @@ geometry graph house(
     |> TransformGeometry(translation: CombineXYZ(x: width * 0.2, y: -depth * 0.15, z: top + 0.6))
   ground = terrain_height(terrain, p: at).height
   body = storeys + plinth + unit
-    |> StoreNamedAttribute(name: "tint", value: tint, data_type: FLOAT_COLOR)
+    |> StoreNamedAttribute[FLOAT_COLOR](name: "tint", value: tint)
     |> TransformGeometry(rotation: CombineXYZ(z: turn))
     |> SetPosition(offset: CombineXYZ(x: at.x, y: at.y, z: ground))
   pad = Grid(size_x: width + 3.0, size_y: depth + 3.0, vertices_x: 6, vertices_y: 6)
@@ -1600,9 +1562,9 @@ geometry graph house(
 
 shader(material: true) graph Foliage() -> (surface: Shader) {
   "Leaves, each tree a shade between two greens"
-  tint = Attribute(attribute_type: INSTANCER, attribute_name: "tree_tint").factor
-  color = Mix(factor: tint, a: (0.035, 0.1, 0.03), b: (0.12, 0.2, 0.05), data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: color, roughness: 0.8)))
+  tint = Attribute[INSTANCER, attribute_name: "tree_tint"]().factor
+  color = Mix[RGBA](factor: tint, a: (0.035, 0.1, 0.03), b: (0.12, 0.2, 0.05))
+  return (surface: haze(surface: PrincipledBSDF(base_color: color, roughness: 0.8)))
 }
 
 shader(material: true) graph Bark() -> (surface: Shader) {
@@ -1628,17 +1590,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -1649,7 +1607,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -1662,8 +1620,8 @@ geometry graph game_level() -> Geometry {
   // The ground under the road laid 12 cm below it, eased back to its own height over 5 m; its
   // road_mask, which the material wears to dirt, fading over 1.5 m past the shoulders
   levelled = rough
-    |> flatten_terrain(made, depth: 0.12, falloff: 5.0)
-    |> road_mask_on_terrain(made, falloff: 1.5)
+    |> flatten_terrain(road: made, depth: 0.12, falloff: 5.0)
+    |> road_mask_on_terrain(road: made, falloff: 1.5)
   // Six houses along the road, turned to face it, each on a pad levelled into the slope
   a = house(
     at: (-22.2, 4.0, 0.0),
@@ -1715,7 +1673,7 @@ geometry graph game_level() -> Geometry {
     terrain: levelled)
   pads = a.pad + b.pad + c.pad + d.pad + e.pad + f.pad
   ground = levelled
-    |> flatten_terrain(pads, depth: 0.05, falloff: 3.5)
+    |> flatten_terrain(road: pads, depth: 0.05, falloff: 3.5)
   // Each wall face to the row of a sheet 6 m across that its width calls for: walls (3 m) take
   // the first row, plinths and rooftop units (1.1 m, 0.9 m) the third, ledges (0.3 m) the fourth.
   // For the engine: grime baked into the vertex color, in its red, over the first 3 m above the
@@ -1739,7 +1697,7 @@ geometry graph game_level() -> Geometry {
   rail = trim_strip(rail_path, width: 0.5, upright: true, sheet_size: 6.0, row: 1)
   posts = rail_path
     |> ResampleCurve(mode: Length, length: 2.0)
-    |> CurveToPoints(mode: EVALUATED).points
+    |> CurveToPoints[EVALUATED]().points
     |> InstanceOnPoints(
       instance: Cube(size: (0.12, 0.12, 1.0)).mesh
         |> TransformGeometry(translation: (0.0, 0.0, -0.45)))
@@ -1752,7 +1710,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   water = road(
       bed,
-      ground,
+      terrain: ground,
       width: 3.2,
       lanes: 1,
       shoulder: 0.0,
@@ -1765,7 +1723,7 @@ geometry graph game_level() -> Geometry {
   // the ground over 1.4 m: they bury the edges of the water. The banks wet for 1.5 m
   channel = road(
     bed,
-    ground,
+    terrain: ground,
     width: 1.2,
     lanes: 1,
     shoulder: 0.0,
@@ -1773,16 +1731,15 @@ geometry graph game_level() -> Geometry {
     smooth: 30,
     lift: -0.25)
   carved = ground
-    |> flatten_terrain(channel, depth: 0.5, falloff: 1.4)
-    |> road_mask_on_terrain(water, falloff: 1.5, name: "wet")
+    |> flatten_terrain(road: channel, depth: 0.5, falloff: 1.4)
+    |> road_mask_on_terrain(road: water, falloff: 1.5, name: "wet")
   // Trees in groves, kept off the road, the pads and the stream by a road mask of their own,
   // 6 m wide, and 25 m clear of the camera
   cleared = carved
-    |> road_mask_on_terrain(made + pads + water, falloff: 6.0, name: "clear")
+    |> road_mask_on_terrain(road: made + pads + water, falloff: 6.0, name: "clear")
   groves = NoiseTexture(vector: Position() * 0.04, scale: 1.0).factor
   spots = cleared
-    |> DistributePointsOnFaces(
-      distribute_method: POISSON,
+    |> DistributePointsOnFaces[POISSON](
       distance_min: 3.5,
       density_max: 0.08,
       density_factor: (1.0 - NamedAttribute(name: "clear").attribute)
@@ -1874,64 +1831,62 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
   "Grass in tufts of two greens, in meadows lighter and darker, worn to dirt on the verges, dark mud on the stream's banks"
   o = TextureCoordinate().object
-  worn = Attribute(attribute_name: "road_mask").factor
-  wet = Attribute(attribute_name: "wet").factor
+  worn = Attribute[attribute_name: "road_mask"]().factor
+  wet = Attribute[attribute_name: "wet"]().factor
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
   fine = NoiseTexture(vector: o, scale: 6.0, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  dirt = Mix(factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2), data_type: RGBA)
+  dirt = Mix[RGBA](factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2))
   // The mask fades from the road's edge: the dirt gives way to grass in a ragged line
   verge = Clamp(value: worn * 1.6 + (fine - 0.5) * 0.8)
-  color = Mix(factor: verge, a: grass, b: dirt, data_type: RGBA)
-  muddy = Mix(factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09), data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
+  color = Mix[RGBA](factor: verge, a: grass, b: dirt)
+  muddy = Mix[RGBA](factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09))
+  return (surface: haze(surface: PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
 shader(material: true) graph Stream() -> (surface: Shader) {
   "Water panned along the flowmap: long soft streaks running with the flow, lighter on the shallows"
   m = flowmap_read()
-  uv = UVMap(uv_map: "UVMap").uv
+  uv = UVMap[uv_map: "UVMap"]().uv
   // The texture to pan, as a closure: flow_texture reads it at the two phases of the blend
-  streaks = closure(vector: Vector) -> (color: Color) {
+  streaks = graph(vector: Vector) -> (color: Color) {
     return (
       color: NoiseTexture(
         vector: vector * CombineXYZ(x: 9.0, y: 0.7, z: 1.0),
@@ -1944,9 +1899,9 @@ shader(material: true) graph Stream() -> (surface: Shader) {
   ripple = Clamp(value: (flowing.color.x - 0.35) * 2.0)
   streak = Clamp(value: (flowing.color.x - 0.55) * 3.0)
   shallow = Clamp(value: abs(uv.x - 0.5) * 2.6 - 0.5)
-  deep = Mix(factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13), data_type: RGBA)
-  lit = Mix(factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58), data_type: RGBA)
-  color = Mix(factor: shallow, a: lit, b: (0.13, 0.15, 0.1), data_type: RGBA)
+  deep = Mix[RGBA](factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13))
+  lit = Mix[RGBA](factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58))
+  color = Mix[RGBA](factor: shallow, a: lit, b: (0.13, 0.15, 0.1))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -1956,10 +1911,10 @@ shader(material: true) graph Stream() -> (surface: Shader) {
 
 shader(material: true) graph Trims() -> (surface: Shader) {
   "A trim sheet of four rows from the top: walls with windows, guard rail, stone, cornice; roofs; the grime baked into the vertex color at the foot of the walls"
-  uv = UVMap(uv_map: "UVMap").uv
-  row = Attribute(attribute_name: "trim_row").factor
-  tint = Attribute(attribute_name: "tint").color
-  grime = Attribute(attribute_name: "Color").color.x
+  uv = UVMap[uv_map: "UVMap"]().uv
+  row = Attribute[attribute_name: "trim_row"]().factor
+  tint = Attribute[attribute_name: "tint"]().color
+  grime = Attribute[attribute_name: "Color"]().color.x
   up = Clamp(value: (Geometry().normal.z - 0.6) * 10.0)
   // The sheet is 6 m across, its rows 3.2, 1.6, 0.8 and 0.4 m tall: row 0, the wall, runs from
   // v 0.467 to 1; a window every 2.4 m along it
@@ -1972,9 +1927,9 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   sill = Clamp(value: (0.33 - abs(bay - 0.5)) * 60.0) * Clamp(value: (0.03 - abs(v0 - 0.22)) * 60.0)
   plaster = tint
     * (0.85 + 0.15 * NoiseTexture(vector: TextureCoordinate().object, scale: 3.0).factor)
-  glass = Mix(factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26), data_type: RGBA)
-  trimmed = Mix(factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8), data_type: RGBA)
-  wall = Mix(factor: pane, a: trimmed, b: glass, data_type: RGBA)
+  glass = Mix[RGBA](factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26))
+  trimmed = Mix[RGBA](factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8))
+  wall = Mix[RGBA](factor: pane, a: trimmed, b: glass)
   // Row 1, the guard rail: galvanised steel with two grooves; row 2 stone blocks; row 3 cornice
   rail = (0.55, 0.57, 0.58) * (0.8 + 0.2 * sin(uv.y * 40.0 * 3.1415927))
   seams = Clamp(value: abs(fract(along / 0.8) - 0.5) * 40.0 - 18.0)
@@ -1982,11 +1937,11 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   is_rail = Clamp(value: 1.0 - abs(row - 1.0))
   is_stone = Clamp(value: 1.0 - abs(row - 2.0))
   is_cornice = Clamp(value: row - 2.0)
-  railed = Mix(factor: is_rail, a: wall, b: rail, data_type: RGBA)
-  stoned = Mix(factor: is_stone, a: railed, b: stone, data_type: RGBA)
-  facade = Mix(factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74), data_type: RGBA)
-  roofed = Mix(factor: up, a: facade, b: (0.2, 0.19, 0.18), data_type: RGBA)
-  color = Mix(factor: grime, a: roofed, b: roofed * (0.3, 0.26, 0.2), data_type: RGBA)
+  railed = Mix[RGBA](factor: is_rail, a: wall, b: rail)
+  stoned = Mix[RGBA](factor: is_stone, a: railed, b: stone)
+  facade = Mix[RGBA](factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74))
+  roofed = Mix[RGBA](factor: up, a: facade, b: (0.2, 0.19, 0.18))
+  color = Mix[RGBA](factor: grime, a: roofed, b: roofed * (0.3, 0.26, 0.2))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -2018,7 +1973,7 @@ geometry graph house(
     |> TransformGeometry(translation: CombineXYZ(x: width * 0.2, y: -depth * 0.15, z: top + 0.6))
   ground = terrain_height(terrain, p: at).height
   body = storeys + plinth + unit
-    |> StoreNamedAttribute(name: "tint", value: tint, data_type: FLOAT_COLOR)
+    |> StoreNamedAttribute[FLOAT_COLOR](name: "tint", value: tint)
     |> TransformGeometry(rotation: CombineXYZ(z: turn))
     |> SetPosition(offset: CombineXYZ(x: at.x, y: at.y, z: ground))
   pad = Grid(size_x: width + 3.0, size_y: depth + 3.0, vertices_x: 6, vertices_y: 6)
@@ -2030,9 +1985,9 @@ geometry graph house(
 
 shader(material: true) graph Foliage() -> (surface: Shader) {
   "Leaves, each tree a shade between two greens"
-  tint = Attribute(attribute_type: INSTANCER, attribute_name: "tree_tint").factor
-  color = Mix(factor: tint, a: (0.035, 0.1, 0.03), b: (0.12, 0.2, 0.05), data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: color, roughness: 0.8)))
+  tint = Attribute[INSTANCER, attribute_name: "tree_tint"]().factor
+  color = Mix[RGBA](factor: tint, a: (0.035, 0.1, 0.03), b: (0.12, 0.2, 0.05))
+  return (surface: haze(surface: PrincipledBSDF(base_color: color, roughness: 0.8)))
 }
 
 shader(material: true) graph Bark() -> (surface: Shader) {
@@ -2058,17 +2013,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -2079,7 +2030,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -2092,8 +2043,8 @@ geometry graph game_level() -> Geometry {
   // The ground under the road laid 12 cm below it, eased back to its own height over 5 m; its
   // road_mask, which the material wears to dirt, fading over 1.5 m past the shoulders
   levelled = rough
-    |> flatten_terrain(made, depth: 0.12, falloff: 5.0)
-    |> road_mask_on_terrain(made, falloff: 1.5)
+    |> flatten_terrain(road: made, depth: 0.12, falloff: 5.0)
+    |> road_mask_on_terrain(road: made, falloff: 1.5)
   // Six houses along the road, turned to face it, each on a pad levelled into the slope
   a = house(
     at: (-22.2, 4.0, 0.0),
@@ -2145,7 +2096,7 @@ geometry graph game_level() -> Geometry {
     terrain: levelled)
   pads = a.pad + b.pad + c.pad + d.pad + e.pad + f.pad
   ground = levelled
-    |> flatten_terrain(pads, depth: 0.05, falloff: 3.5)
+    |> flatten_terrain(road: pads, depth: 0.05, falloff: 3.5)
   // Each wall face to the row of a sheet 6 m across that its width calls for: walls (3 m) take
   // the first row, plinths and rooftop units (1.1 m, 0.9 m) the third, ledges (0.3 m) the fourth.
   // For the engine: grime baked into the vertex color, in its red, over the first 3 m above the
@@ -2169,7 +2120,7 @@ geometry graph game_level() -> Geometry {
   rail = trim_strip(rail_path, width: 0.5, upright: true, sheet_size: 6.0, row: 1)
   posts = rail_path
     |> ResampleCurve(mode: Length, length: 2.0)
-    |> CurveToPoints(mode: EVALUATED).points
+    |> CurveToPoints[EVALUATED]().points
     |> InstanceOnPoints(
       instance: Cube(size: (0.12, 0.12, 1.0)).mesh
         |> TransformGeometry(translation: (0.0, 0.0, -0.45)))
@@ -2182,7 +2133,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   water = road(
       bed,
-      ground,
+      terrain: ground,
       width: 3.2,
       lanes: 1,
       shoulder: 0.0,
@@ -2195,7 +2146,7 @@ geometry graph game_level() -> Geometry {
   // the ground over 1.4 m: they bury the edges of the water. The banks wet for 1.5 m
   channel = road(
     bed,
-    ground,
+    terrain: ground,
     width: 1.2,
     lanes: 1,
     shoulder: 0.0,
@@ -2203,16 +2154,15 @@ geometry graph game_level() -> Geometry {
     smooth: 30,
     lift: -0.25)
   carved = ground
-    |> flatten_terrain(channel, depth: 0.5, falloff: 1.4)
-    |> road_mask_on_terrain(water, falloff: 1.5, name: "wet")
+    |> flatten_terrain(road: channel, depth: 0.5, falloff: 1.4)
+    |> road_mask_on_terrain(road: water, falloff: 1.5, name: "wet")
   // Trees in groves, kept off the road, the pads and the stream by a road mask of their own,
   // 6 m wide, and 25 m clear of the camera
   cleared = carved
-    |> road_mask_on_terrain(made + pads + water, falloff: 6.0, name: "clear")
+    |> road_mask_on_terrain(road: made + pads + water, falloff: 6.0, name: "clear")
   groves = NoiseTexture(vector: Position() * 0.04, scale: 1.0).factor
   spots = cleared
-    |> DistributePointsOnFaces(
-      distribute_method: POISSON,
+    |> DistributePointsOnFaces[POISSON](
       distance_min: 3.5,
       density_max: 0.08,
       density_factor: (1.0 - NamedAttribute(name: "clear").attribute)
@@ -2257,9 +2207,9 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
@@ -2267,13 +2217,12 @@ shader(material: true) graph Ground() -> (surface: Shader) {
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  return (surface: haze(PrincipledBSDF(base_color: grass, roughness: 0.92)))
+  return (surface: haze(surface: PrincipledBSDF(base_color: grass, roughness: 0.92)))
 }
 
 geometry graph game_level() -> Geometry {
@@ -2282,17 +2231,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   plain = Grid(size_x: 20000.0, size_y: 20000.0, vertices_x: 2, vertices_y: 2)
@@ -2316,9 +2261,9 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
@@ -2326,37 +2271,35 @@ shader(material: true) graph Ground() -> (surface: Shader) {
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  return (surface: haze(PrincipledBSDF(base_color: grass, roughness: 0.92)))
+  return (surface: haze(surface: PrincipledBSDF(base_color: grass, roughness: 0.92)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
@@ -2366,17 +2309,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -2387,7 +2326,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -2419,53 +2358,51 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
   "Grass in tufts of two greens, in meadows lighter and darker, worn to dirt on the verges"
   o = TextureCoordinate().object
-  worn = Attribute(attribute_name: "road_mask").factor
+  worn = Attribute[attribute_name: "road_mask"]().factor
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
   fine = NoiseTexture(vector: o, scale: 6.0, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  dirt = Mix(factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2), data_type: RGBA)
+  dirt = Mix[RGBA](factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2))
   // The mask fades from the road's edge: the dirt gives way to grass in a ragged line
   verge = Clamp(value: worn * 1.6 + (fine - 0.5) * 0.8)
-  color = Mix(factor: verge, a: grass, b: dirt, data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: color, roughness: 0.92)))
+  color = Mix[RGBA](factor: verge, a: grass, b: dirt)
+  return (surface: haze(surface: PrincipledBSDF(base_color: color, roughness: 0.92)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
@@ -2475,17 +2412,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -2496,7 +2429,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -2509,8 +2442,8 @@ geometry graph game_level() -> Geometry {
   // The ground under the road laid 12 cm below it, eased back to its own height over 5 m; its
   // road_mask, which the material wears to dirt, fading over 1.5 m past the shoulders
   levelled = rough
-    |> flatten_terrain(made, depth: 0.12, falloff: 5.0)
-    |> road_mask_on_terrain(made, falloff: 1.5)
+    |> flatten_terrain(road: made, depth: 0.12, falloff: 5.0)
+    |> road_mask_on_terrain(road: made, falloff: 1.5)
   plain = Grid(size_x: 20000.0, size_y: 20000.0, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: (0.0, 0.0, -4.0))
   land = JoinGeometry(plain, beyond, levelled)
@@ -2534,61 +2467,59 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
   "Grass in tufts of two greens, in meadows lighter and darker, worn to dirt on the verges"
   o = TextureCoordinate().object
-  worn = Attribute(attribute_name: "road_mask").factor
+  worn = Attribute[attribute_name: "road_mask"]().factor
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
   fine = NoiseTexture(vector: o, scale: 6.0, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  dirt = Mix(factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2), data_type: RGBA)
+  dirt = Mix[RGBA](factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2))
   // The mask fades from the road's edge: the dirt gives way to grass in a ragged line
   verge = Clamp(value: worn * 1.6 + (fine - 0.5) * 0.8)
-  color = Mix(factor: verge, a: grass, b: dirt, data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: color, roughness: 0.92)))
+  color = Mix[RGBA](factor: verge, a: grass, b: dirt)
+  return (surface: haze(surface: PrincipledBSDF(base_color: color, roughness: 0.92)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
 shader(material: true) graph Trims() -> (surface: Shader) {
   "A trim sheet of four rows from the top: walls with windows, guard rail, stone, cornice; roofs"
-  uv = UVMap(uv_map: "UVMap").uv
-  row = Attribute(attribute_name: "trim_row").factor
-  tint = Attribute(attribute_name: "tint").color
+  uv = UVMap[uv_map: "UVMap"]().uv
+  row = Attribute[attribute_name: "trim_row"]().factor
+  tint = Attribute[attribute_name: "tint"]().color
   up = Clamp(value: (Geometry().normal.z - 0.6) * 10.0)
   // The sheet is 6 m across, its rows 3.2, 1.6, 0.8 and 0.4 m tall: row 0, the wall, runs from
   // v 0.467 to 1; a window every 2.4 m along it
@@ -2601,9 +2532,9 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   sill = Clamp(value: (0.33 - abs(bay - 0.5)) * 60.0) * Clamp(value: (0.03 - abs(v0 - 0.22)) * 60.0)
   plaster = tint
     * (0.85 + 0.15 * NoiseTexture(vector: TextureCoordinate().object, scale: 3.0).factor)
-  glass = Mix(factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26), data_type: RGBA)
-  trimmed = Mix(factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8), data_type: RGBA)
-  wall = Mix(factor: pane, a: trimmed, b: glass, data_type: RGBA)
+  glass = Mix[RGBA](factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26))
+  trimmed = Mix[RGBA](factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8))
+  wall = Mix[RGBA](factor: pane, a: trimmed, b: glass)
   // Row 1, the guard rail: galvanised steel with two grooves; row 2 stone blocks; row 3 cornice
   rail = (0.55, 0.57, 0.58) * (0.8 + 0.2 * sin(uv.y * 40.0 * 3.1415927))
   seams = Clamp(value: abs(fract(along / 0.8) - 0.5) * 40.0 - 18.0)
@@ -2611,10 +2542,10 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   is_rail = Clamp(value: 1.0 - abs(row - 1.0))
   is_stone = Clamp(value: 1.0 - abs(row - 2.0))
   is_cornice = Clamp(value: row - 2.0)
-  railed = Mix(factor: is_rail, a: wall, b: rail, data_type: RGBA)
-  stoned = Mix(factor: is_stone, a: railed, b: stone, data_type: RGBA)
-  facade = Mix(factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74), data_type: RGBA)
-  color = Mix(factor: up, a: facade, b: (0.2, 0.19, 0.18), data_type: RGBA)
+  railed = Mix[RGBA](factor: is_rail, a: wall, b: rail)
+  stoned = Mix[RGBA](factor: is_stone, a: railed, b: stone)
+  facade = Mix[RGBA](factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74))
+  color = Mix[RGBA](factor: up, a: facade, b: (0.2, 0.19, 0.18))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -2646,7 +2577,7 @@ geometry graph house(
     |> TransformGeometry(translation: CombineXYZ(x: width * 0.2, y: -depth * 0.15, z: top + 0.6))
   ground = terrain_height(terrain, p: at).height
   body = storeys + plinth + unit
-    |> StoreNamedAttribute(name: "tint", value: tint, data_type: FLOAT_COLOR)
+    |> StoreNamedAttribute[FLOAT_COLOR](name: "tint", value: tint)
     |> TransformGeometry(rotation: CombineXYZ(z: turn))
     |> SetPosition(offset: CombineXYZ(x: at.x, y: at.y, z: ground))
   pad = Grid(size_x: width + 3.0, size_y: depth + 3.0, vertices_x: 6, vertices_y: 6)
@@ -2662,17 +2593,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -2683,7 +2610,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -2696,8 +2623,8 @@ geometry graph game_level() -> Geometry {
   // The ground under the road laid 12 cm below it, eased back to its own height over 5 m; its
   // road_mask, which the material wears to dirt, fading over 1.5 m past the shoulders
   levelled = rough
-    |> flatten_terrain(made, depth: 0.12, falloff: 5.0)
-    |> road_mask_on_terrain(made, falloff: 1.5)
+    |> flatten_terrain(road: made, depth: 0.12, falloff: 5.0)
+    |> road_mask_on_terrain(road: made, falloff: 1.5)
   // Six houses along the road, turned to face it, each on a pad levelled into the slope
   a = house(
     at: (-22.2, 4.0, 0.0),
@@ -2749,7 +2676,7 @@ geometry graph game_level() -> Geometry {
     terrain: levelled)
   pads = a.pad + b.pad + c.pad + d.pad + e.pad + f.pad
   ground = levelled
-    |> flatten_terrain(pads, depth: 0.05, falloff: 3.5)
+    |> flatten_terrain(road: pads, depth: 0.05, falloff: 3.5)
   // Each wall face to the row of a sheet 6 m across that its width calls for: walls (3 m) take
   // the first row, plinths and rooftop units (1.1 m, 0.9 m) the third, ledges (0.3 m) the fourth
   town = a.house + b.house + c.house + d.house + e.house + f.house
@@ -2769,7 +2696,7 @@ geometry graph game_level() -> Geometry {
   rail = trim_strip(rail_path, width: 0.5, upright: true, sheet_size: 6.0, row: 1)
   posts = rail_path
     |> ResampleCurve(mode: Length, length: 2.0)
-    |> CurveToPoints(mode: EVALUATED).points
+    |> CurveToPoints[EVALUATED]().points
     |> InstanceOnPoints(
       instance: Cube(size: (0.12, 0.12, 1.0)).mesh
         |> TransformGeometry(translation: (0.0, 0.0, -0.45)))
@@ -2802,64 +2729,62 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
   "Grass in tufts of two greens, in meadows lighter and darker, worn to dirt on the verges, dark mud on the stream's banks"
   o = TextureCoordinate().object
-  worn = Attribute(attribute_name: "road_mask").factor
-  wet = Attribute(attribute_name: "wet").factor
+  worn = Attribute[attribute_name: "road_mask"]().factor
+  wet = Attribute[attribute_name: "wet"]().factor
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
   fine = NoiseTexture(vector: o, scale: 6.0, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  dirt = Mix(factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2), data_type: RGBA)
+  dirt = Mix[RGBA](factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2))
   // The mask fades from the road's edge: the dirt gives way to grass in a ragged line
   verge = Clamp(value: worn * 1.6 + (fine - 0.5) * 0.8)
-  color = Mix(factor: verge, a: grass, b: dirt, data_type: RGBA)
-  muddy = Mix(factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09), data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
+  color = Mix[RGBA](factor: verge, a: grass, b: dirt)
+  muddy = Mix[RGBA](factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09))
+  return (surface: haze(surface: PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
 shader(material: true) graph Stream() -> (surface: Shader) {
   "Water panned along the flowmap: long soft streaks running with the flow, lighter on the shallows"
   m = flowmap_read()
-  uv = UVMap(uv_map: "UVMap").uv
+  uv = UVMap[uv_map: "UVMap"]().uv
   // The texture to pan, as a closure: flow_texture reads it at the two phases of the blend
-  streaks = closure(vector: Vector) -> (color: Color) {
+  streaks = graph(vector: Vector) -> (color: Color) {
     return (
       color: NoiseTexture(
         vector: vector * CombineXYZ(x: 9.0, y: 0.7, z: 1.0),
@@ -2872,9 +2797,9 @@ shader(material: true) graph Stream() -> (surface: Shader) {
   ripple = Clamp(value: (flowing.color.x - 0.35) * 2.0)
   streak = Clamp(value: (flowing.color.x - 0.55) * 3.0)
   shallow = Clamp(value: abs(uv.x - 0.5) * 2.6 - 0.5)
-  deep = Mix(factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13), data_type: RGBA)
-  lit = Mix(factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58), data_type: RGBA)
-  color = Mix(factor: shallow, a: lit, b: (0.13, 0.15, 0.1), data_type: RGBA)
+  deep = Mix[RGBA](factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13))
+  lit = Mix[RGBA](factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58))
+  color = Mix[RGBA](factor: shallow, a: lit, b: (0.13, 0.15, 0.1))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -2884,9 +2809,9 @@ shader(material: true) graph Stream() -> (surface: Shader) {
 
 shader(material: true) graph Trims() -> (surface: Shader) {
   "A trim sheet of four rows from the top: walls with windows, guard rail, stone, cornice; roofs"
-  uv = UVMap(uv_map: "UVMap").uv
-  row = Attribute(attribute_name: "trim_row").factor
-  tint = Attribute(attribute_name: "tint").color
+  uv = UVMap[uv_map: "UVMap"]().uv
+  row = Attribute[attribute_name: "trim_row"]().factor
+  tint = Attribute[attribute_name: "tint"]().color
   up = Clamp(value: (Geometry().normal.z - 0.6) * 10.0)
   // The sheet is 6 m across, its rows 3.2, 1.6, 0.8 and 0.4 m tall: row 0, the wall, runs from
   // v 0.467 to 1; a window every 2.4 m along it
@@ -2899,9 +2824,9 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   sill = Clamp(value: (0.33 - abs(bay - 0.5)) * 60.0) * Clamp(value: (0.03 - abs(v0 - 0.22)) * 60.0)
   plaster = tint
     * (0.85 + 0.15 * NoiseTexture(vector: TextureCoordinate().object, scale: 3.0).factor)
-  glass = Mix(factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26), data_type: RGBA)
-  trimmed = Mix(factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8), data_type: RGBA)
-  wall = Mix(factor: pane, a: trimmed, b: glass, data_type: RGBA)
+  glass = Mix[RGBA](factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26))
+  trimmed = Mix[RGBA](factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8))
+  wall = Mix[RGBA](factor: pane, a: trimmed, b: glass)
   // Row 1, the guard rail: galvanised steel with two grooves; row 2 stone blocks; row 3 cornice
   rail = (0.55, 0.57, 0.58) * (0.8 + 0.2 * sin(uv.y * 40.0 * 3.1415927))
   seams = Clamp(value: abs(fract(along / 0.8) - 0.5) * 40.0 - 18.0)
@@ -2909,10 +2834,10 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   is_rail = Clamp(value: 1.0 - abs(row - 1.0))
   is_stone = Clamp(value: 1.0 - abs(row - 2.0))
   is_cornice = Clamp(value: row - 2.0)
-  railed = Mix(factor: is_rail, a: wall, b: rail, data_type: RGBA)
-  stoned = Mix(factor: is_stone, a: railed, b: stone, data_type: RGBA)
-  facade = Mix(factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74), data_type: RGBA)
-  color = Mix(factor: up, a: facade, b: (0.2, 0.19, 0.18), data_type: RGBA)
+  railed = Mix[RGBA](factor: is_rail, a: wall, b: rail)
+  stoned = Mix[RGBA](factor: is_stone, a: railed, b: stone)
+  facade = Mix[RGBA](factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74))
+  color = Mix[RGBA](factor: up, a: facade, b: (0.2, 0.19, 0.18))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -2944,7 +2869,7 @@ geometry graph house(
     |> TransformGeometry(translation: CombineXYZ(x: width * 0.2, y: -depth * 0.15, z: top + 0.6))
   ground = terrain_height(terrain, p: at).height
   body = storeys + plinth + unit
-    |> StoreNamedAttribute(name: "tint", value: tint, data_type: FLOAT_COLOR)
+    |> StoreNamedAttribute[FLOAT_COLOR](name: "tint", value: tint)
     |> TransformGeometry(rotation: CombineXYZ(z: turn))
     |> SetPosition(offset: CombineXYZ(x: at.x, y: at.y, z: ground))
   pad = Grid(size_x: width + 3.0, size_y: depth + 3.0, vertices_x: 6, vertices_y: 6)
@@ -2960,17 +2885,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -2981,7 +2902,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -2994,8 +2915,8 @@ geometry graph game_level() -> Geometry {
   // The ground under the road laid 12 cm below it, eased back to its own height over 5 m; its
   // road_mask, which the material wears to dirt, fading over 1.5 m past the shoulders
   levelled = rough
-    |> flatten_terrain(made, depth: 0.12, falloff: 5.0)
-    |> road_mask_on_terrain(made, falloff: 1.5)
+    |> flatten_terrain(road: made, depth: 0.12, falloff: 5.0)
+    |> road_mask_on_terrain(road: made, falloff: 1.5)
   // Six houses along the road, turned to face it, each on a pad levelled into the slope
   a = house(
     at: (-22.2, 4.0, 0.0),
@@ -3047,7 +2968,7 @@ geometry graph game_level() -> Geometry {
     terrain: levelled)
   pads = a.pad + b.pad + c.pad + d.pad + e.pad + f.pad
   ground = levelled
-    |> flatten_terrain(pads, depth: 0.05, falloff: 3.5)
+    |> flatten_terrain(road: pads, depth: 0.05, falloff: 3.5)
   // Each wall face to the row of a sheet 6 m across that its width calls for: walls (3 m) take
   // the first row, plinths and rooftop units (1.1 m, 0.9 m) the third, ledges (0.3 m) the fourth
   town = a.house + b.house + c.house + d.house + e.house + f.house
@@ -3067,7 +2988,7 @@ geometry graph game_level() -> Geometry {
   rail = trim_strip(rail_path, width: 0.5, upright: true, sheet_size: 6.0, row: 1)
   posts = rail_path
     |> ResampleCurve(mode: Length, length: 2.0)
-    |> CurveToPoints(mode: EVALUATED).points
+    |> CurveToPoints[EVALUATED]().points
     |> InstanceOnPoints(
       instance: Cube(size: (0.12, 0.12, 1.0)).mesh
         |> TransformGeometry(translation: (0.0, 0.0, -0.45)))
@@ -3080,7 +3001,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   water = road(
       bed,
-      ground,
+      terrain: ground,
       width: 3.2,
       lanes: 1,
       shoulder: 0.0,
@@ -3093,7 +3014,7 @@ geometry graph game_level() -> Geometry {
   // the ground over 1.4 m: they bury the edges of the water. The banks wet for 1.5 m
   channel = road(
     bed,
-    ground,
+    terrain: ground,
     width: 1.2,
     lanes: 1,
     shoulder: 0.0,
@@ -3101,8 +3022,8 @@ geometry graph game_level() -> Geometry {
     smooth: 30,
     lift: -0.25)
   carved = ground
-    |> flatten_terrain(channel, depth: 0.5, falloff: 1.4)
-    |> road_mask_on_terrain(water, falloff: 1.5, name: "wet")
+    |> flatten_terrain(road: channel, depth: 0.5, falloff: 1.4)
+    |> road_mask_on_terrain(road: water, falloff: 1.5, name: "wet")
   plain = Grid(size_x: 20000.0, size_y: 20000.0, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: (0.0, 0.0, -4.0))
   land = JoinGeometry(plain, beyond, carved)
@@ -3132,64 +3053,62 @@ shader graph haze(surface: Shader) -> Shader {
   "surface faded into the pale air of the horizon with its distance from the camera: 60 % of the way at 330 m, all of it from 1 km on, where the sky takes over"
   far = distance(TextureCoordinate().object, (-64.0, -17.0, 12.0))
   return MixShader(
-    Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
-    surface,
-    Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
+    factor: Clamp(value: (far - 70.0) / 260.0) * 0.6 + Clamp(value: (far - 330.0) / 700.0) * 0.4,
+    a: surface,
+    b: Emission(color: (0.95, 0.94, 0.94), strength: 1.0))
 }
 
 shader(material: true) graph Ground() -> (surface: Shader) {
   "Grass in tufts of two greens, in meadows lighter and darker, worn to dirt on the verges, dark mud on the stream's banks"
   o = TextureCoordinate().object
-  worn = Attribute(attribute_name: "road_mask").factor
-  wet = Attribute(attribute_name: "wet").factor
+  worn = Attribute[attribute_name: "road_mask"]().factor
+  wet = Attribute[attribute_name: "wet"]().factor
   grain = NoiseTexture(vector: o, scale: 0.6, detail: 5.0).factor
   meadows = NoiseTexture(vector: o, scale: 0.03, detail: 3.0).factor
   fine = NoiseTexture(vector: o, scale: 6.0, detail: 3.0).factor
-  tufts = Mix(
+  tufts = Mix[RGBA](
     factor: Clamp(value: (grain - 0.5) * 2.5 + 0.5),
     a: (0.05, 0.14, 0.025),
-    b: (0.2, 0.3, 0.05),
-    data_type: RGBA)
+    b: (0.2, 0.3, 0.05))
   grass = tufts * (0.6 + Clamp(value: (meadows - 0.35) * 2.0) * 0.6)
-  dirt = Mix(factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2), data_type: RGBA)
+  dirt = Mix[RGBA](factor: fine, a: (0.24, 0.18, 0.12), b: (0.36, 0.29, 0.2))
   // The mask fades from the road's edge: the dirt gives way to grass in a ragged line
   verge = Clamp(value: worn * 1.6 + (fine - 0.5) * 0.8)
-  color = Mix(factor: verge, a: grass, b: dirt, data_type: RGBA)
-  muddy = Mix(factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09), data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
+  color = Mix[RGBA](factor: verge, a: grass, b: dirt)
+  muddy = Mix[RGBA](factor: Clamp(value: wet * 0.8), a: color, b: (0.16, 0.13, 0.09))
+  return (surface: haze(surface: PrincipledBSDF(base_color: muddy, roughness: 0.92 - wet * 0.4)))
 }
 
 shader(material: true) graph Asphalt() -> (surface: Shader) {
   "Asphalt, a dashed centre line and two edge lines, from the road's UV map; gravel shoulders"
-  uv = UVMap(uv_map: "UVMap").uv
-  mask = Attribute(attribute_name: "road_mask").factor
+  uv = UVMap[uv_map: "UVMap"]().uv
+  mask = Attribute[attribute_name: "road_mask"]().factor
   o = TextureCoordinate().object
   grain = NoiseTexture(vector: o, scale: 14.0, detail: 4.0).factor
   patches = NoiseTexture(vector: o, scale: 0.4, detail: 2.0).factor
-  tar = Mix(
+  tar = Mix[RGBA](
     factor: grain * 0.6 + patches * 0.4,
     a: (0.045, 0.045, 0.05),
-    b: (0.11, 0.105, 0.105),
-    data_type: RGBA)
-  gravel = Mix(factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3), data_type: RGBA)
+    b: (0.11, 0.105, 0.105))
+  gravel = Mix[RGBA](factor: grain, a: (0.24, 0.21, 0.17), b: (0.4, 0.36, 0.3))
   // u runs 0 to 1 across 9.4 m (7 m of carriageway, two shoulders of 1.2 m), v a tile every 6 m:
   // the centre line at u 0.5, dashes 3 m long; the edge lines 3.3 m either side of it
   dash = Clamp(value: (0.007 - abs(uv.x - 0.5)) * 2000.0)
     * Clamp(value: (fract(uv.y) - 0.5) * 2000.0)
   edges = Clamp(value: (0.007 - abs(abs(uv.x - 0.5) - 0.351)) * 2000.0)
   paint = max(dash, edges) * Clamp(value: 0.7 + grain * 0.6)
-  road = Mix(factor: paint, a: tar, b: (0.86, 0.84, 0.76), data_type: RGBA)
+  road = Mix[RGBA](factor: paint, a: tar, b: (0.86, 0.84, 0.76))
   // road_mask is 1 on the carriageway, 0 at the outer edge of the shoulders
-  color = Mix(factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road, data_type: RGBA)
+  color = Mix[RGBA](factor: Clamp(value: mask * 3.0 - 1.9), a: gravel, b: road)
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8 - paint * 0.25))
 }
 
 shader(material: true) graph Stream() -> (surface: Shader) {
   "Water panned along the flowmap: long soft streaks running with the flow, lighter on the shallows"
   m = flowmap_read()
-  uv = UVMap(uv_map: "UVMap").uv
+  uv = UVMap[uv_map: "UVMap"]().uv
   // The texture to pan, as a closure: flow_texture reads it at the two phases of the blend
-  streaks = closure(vector: Vector) -> (color: Color) {
+  streaks = graph(vector: Vector) -> (color: Color) {
     return (
       color: NoiseTexture(
         vector: vector * CombineXYZ(x: 9.0, y: 0.7, z: 1.0),
@@ -3202,9 +3121,9 @@ shader(material: true) graph Stream() -> (surface: Shader) {
   ripple = Clamp(value: (flowing.color.x - 0.35) * 2.0)
   streak = Clamp(value: (flowing.color.x - 0.55) * 3.0)
   shallow = Clamp(value: abs(uv.x - 0.5) * 2.6 - 0.5)
-  deep = Mix(factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13), data_type: RGBA)
-  lit = Mix(factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58), data_type: RGBA)
-  color = Mix(factor: shallow, a: lit, b: (0.13, 0.15, 0.1), data_type: RGBA)
+  deep = Mix[RGBA](factor: ripple * 0.5, a: (0.01, 0.045, 0.055), b: (0.04, 0.12, 0.13))
+  lit = Mix[RGBA](factor: streak * 0.6, a: deep, b: (0.45, 0.58, 0.58))
+  color = Mix[RGBA](factor: shallow, a: lit, b: (0.13, 0.15, 0.1))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -3214,9 +3133,9 @@ shader(material: true) graph Stream() -> (surface: Shader) {
 
 shader(material: true) graph Trims() -> (surface: Shader) {
   "A trim sheet of four rows from the top: walls with windows, guard rail, stone, cornice; roofs"
-  uv = UVMap(uv_map: "UVMap").uv
-  row = Attribute(attribute_name: "trim_row").factor
-  tint = Attribute(attribute_name: "tint").color
+  uv = UVMap[uv_map: "UVMap"]().uv
+  row = Attribute[attribute_name: "trim_row"]().factor
+  tint = Attribute[attribute_name: "tint"]().color
   up = Clamp(value: (Geometry().normal.z - 0.6) * 10.0)
   // The sheet is 6 m across, its rows 3.2, 1.6, 0.8 and 0.4 m tall: row 0, the wall, runs from
   // v 0.467 to 1; a window every 2.4 m along it
@@ -3229,9 +3148,9 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   sill = Clamp(value: (0.33 - abs(bay - 0.5)) * 60.0) * Clamp(value: (0.03 - abs(v0 - 0.22)) * 60.0)
   plaster = tint
     * (0.85 + 0.15 * NoiseTexture(vector: TextureCoordinate().object, scale: 3.0).factor)
-  glass = Mix(factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26), data_type: RGBA)
-  trimmed = Mix(factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8), data_type: RGBA)
-  wall = Mix(factor: pane, a: trimmed, b: glass, data_type: RGBA)
+  glass = Mix[RGBA](factor: v0, a: (0.04, 0.06, 0.08), b: (0.14, 0.2, 0.26))
+  trimmed = Mix[RGBA](factor: max(frame, sill), a: plaster, b: (0.88, 0.86, 0.8))
+  wall = Mix[RGBA](factor: pane, a: trimmed, b: glass)
   // Row 1, the guard rail: galvanised steel with two grooves; row 2 stone blocks; row 3 cornice
   rail = (0.55, 0.57, 0.58) * (0.8 + 0.2 * sin(uv.y * 40.0 * 3.1415927))
   seams = Clamp(value: abs(fract(along / 0.8) - 0.5) * 40.0 - 18.0)
@@ -3239,10 +3158,10 @@ shader(material: true) graph Trims() -> (surface: Shader) {
   is_rail = Clamp(value: 1.0 - abs(row - 1.0))
   is_stone = Clamp(value: 1.0 - abs(row - 2.0))
   is_cornice = Clamp(value: row - 2.0)
-  railed = Mix(factor: is_rail, a: wall, b: rail, data_type: RGBA)
-  stoned = Mix(factor: is_stone, a: railed, b: stone, data_type: RGBA)
-  facade = Mix(factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74), data_type: RGBA)
-  color = Mix(factor: up, a: facade, b: (0.2, 0.19, 0.18), data_type: RGBA)
+  railed = Mix[RGBA](factor: is_rail, a: wall, b: rail)
+  stoned = Mix[RGBA](factor: is_stone, a: railed, b: stone)
+  facade = Mix[RGBA](factor: is_cornice, a: stoned, b: (0.82, 0.8, 0.74))
+  color = Mix[RGBA](factor: up, a: facade, b: (0.2, 0.19, 0.18))
   return (
     surface: PrincipledBSDF(
       base_color: color,
@@ -3274,7 +3193,7 @@ geometry graph house(
     |> TransformGeometry(translation: CombineXYZ(x: width * 0.2, y: -depth * 0.15, z: top + 0.6))
   ground = terrain_height(terrain, p: at).height
   body = storeys + plinth + unit
-    |> StoreNamedAttribute(name: "tint", value: tint, data_type: FLOAT_COLOR)
+    |> StoreNamedAttribute[FLOAT_COLOR](name: "tint", value: tint)
     |> TransformGeometry(rotation: CombineXYZ(z: turn))
     |> SetPosition(offset: CombineXYZ(x: at.x, y: at.y, z: ground))
   pad = Grid(size_x: width + 3.0, size_y: depth + 3.0, vertices_x: 6, vertices_y: 6)
@@ -3286,9 +3205,9 @@ geometry graph house(
 
 shader(material: true) graph Foliage() -> (surface: Shader) {
   "Leaves, each tree a shade between two greens"
-  tint = Attribute(attribute_type: INSTANCER, attribute_name: "tree_tint").factor
-  color = Mix(factor: tint, a: (0.035, 0.1, 0.03), b: (0.12, 0.2, 0.05), data_type: RGBA)
-  return (surface: haze(PrincipledBSDF(base_color: color, roughness: 0.8)))
+  tint = Attribute[INSTANCER, attribute_name: "tree_tint"]().factor
+  color = Mix[RGBA](factor: tint, a: (0.035, 0.1, 0.03), b: (0.12, 0.2, 0.05))
+  return (surface: haze(surface: PrincipledBSDF(base_color: color, roughness: 0.8)))
 }
 
 shader(material: true) graph Bark() -> (surface: Shader) {
@@ -3314,17 +3233,13 @@ geometry graph game_level() -> Geometry {
   hills = (NoiseTexture(vector: p * 0.025, scale: 1.0, detail: 2.0).factor - 0.5) * 7.0
   // The level, a point every 60 cm; over its last 10 m it sinks by 1 m to meet the land beyond
   inside = min(min(p.x + 80.0, 160.0 - p.x), 70.0 - abs(p.y))
-  rim = MapRange(value: inside, from_max: 10.0, interpolation_type: SMOOTHERSTEP)
+  rim = MapRange[SMOOTHERSTEP](value: inside, from_max: 10.0)
   rough = Grid(size_x: 240.0, size_y: 140.0, vertices_x: 401, vertices_y: 234)
     |> TransformGeometry(translation: (40.0, 0.0, 0.0))
     |> SetPosition(offset: CombineXYZ(z: hills - (1.0 - rim)))
   // The land beyond: the same hills a point every 5 m, 1 m lower to stay under the level, eased
   // down to a plain 4 m below from 300 m to 600 m out, where the haze hides it
-  out = MapRange(
-    value: length(p),
-    from_min: 300.0,
-    from_max: 600.0,
-    interpolation_type: SMOOTHERSTEP)
+  out = MapRange[SMOOTHERSTEP](value: length(p), from_min: 300.0, from_max: 600.0)
   beyond = Grid(size_x: 1200.0, size_y: 1200.0, vertices_x: 241, vertices_y: 241)
     |> SetPosition(offset: CombineXYZ(z: Mix(factor: out, a: hills - 1.0, b: -4.0)))
   // A road across the level in a long, gentle S from west to east: 7 m of carriageway in two
@@ -3335,7 +3250,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   made = road(
     path,
-    rough,
+    terrain: rough,
     width: 7.0,
     lanes: 2,
     shoulder: 1.2,
@@ -3348,8 +3263,8 @@ geometry graph game_level() -> Geometry {
   // The ground under the road laid 12 cm below it, eased back to its own height over 5 m; its
   // road_mask, which the material wears to dirt, fading over 1.5 m past the shoulders
   levelled = rough
-    |> flatten_terrain(made, depth: 0.12, falloff: 5.0)
-    |> road_mask_on_terrain(made, falloff: 1.5)
+    |> flatten_terrain(road: made, depth: 0.12, falloff: 5.0)
+    |> road_mask_on_terrain(road: made, falloff: 1.5)
   // Six houses along the road, turned to face it, each on a pad levelled into the slope
   a = house(
     at: (-22.2, 4.0, 0.0),
@@ -3401,7 +3316,7 @@ geometry graph game_level() -> Geometry {
     terrain: levelled)
   pads = a.pad + b.pad + c.pad + d.pad + e.pad + f.pad
   ground = levelled
-    |> flatten_terrain(pads, depth: 0.05, falloff: 3.5)
+    |> flatten_terrain(road: pads, depth: 0.05, falloff: 3.5)
   // Each wall face to the row of a sheet 6 m across that its width calls for: walls (3 m) take
   // the first row, plinths and rooftop units (1.1 m, 0.9 m) the third, ledges (0.3 m) the fourth
   town = a.house + b.house + c.house + d.house + e.house + f.house
@@ -3421,7 +3336,7 @@ geometry graph game_level() -> Geometry {
   rail = trim_strip(rail_path, width: 0.5, upright: true, sheet_size: 6.0, row: 1)
   posts = rail_path
     |> ResampleCurve(mode: Length, length: 2.0)
-    |> CurveToPoints(mode: EVALUATED).points
+    |> CurveToPoints[EVALUATED]().points
     |> InstanceOnPoints(
       instance: Cube(size: (0.12, 0.12, 1.0)).mesh
         |> TransformGeometry(translation: (0.0, 0.0, -0.45)))
@@ -3434,7 +3349,7 @@ geometry graph game_level() -> Geometry {
     |> MeshToCurve()
   water = road(
       bed,
-      ground,
+      terrain: ground,
       width: 3.2,
       lanes: 1,
       shoulder: 0.0,
@@ -3447,7 +3362,7 @@ geometry graph game_level() -> Geometry {
   // the ground over 1.4 m: they bury the edges of the water. The banks wet for 1.5 m
   channel = road(
     bed,
-    ground,
+    terrain: ground,
     width: 1.2,
     lanes: 1,
     shoulder: 0.0,
@@ -3455,16 +3370,15 @@ geometry graph game_level() -> Geometry {
     smooth: 30,
     lift: -0.25)
   carved = ground
-    |> flatten_terrain(channel, depth: 0.5, falloff: 1.4)
-    |> road_mask_on_terrain(water, falloff: 1.5, name: "wet")
+    |> flatten_terrain(road: channel, depth: 0.5, falloff: 1.4)
+    |> road_mask_on_terrain(road: water, falloff: 1.5, name: "wet")
   // Trees in groves, kept off the road, the pads and the stream by a road mask of their own,
   // 6 m wide, and 25 m clear of the camera
   cleared = carved
-    |> road_mask_on_terrain(made + pads + water, falloff: 6.0, name: "clear")
+    |> road_mask_on_terrain(road: made + pads + water, falloff: 6.0, name: "clear")
   groves = NoiseTexture(vector: Position() * 0.04, scale: 1.0).factor
   spots = cleared
-    |> DistributePointsOnFaces(
-      distribute_method: POISSON,
+    |> DistributePointsOnFaces[POISSON](
       distance_min: 3.5,
       density_max: 0.08,
       density_factor: (1.0 - NamedAttribute(name: "clear").attribute)
@@ -3493,7 +3407,7 @@ geometry graph game_level() -> Geometry {
 </script></bn-file>
     </div>
     <p class="muted">
-      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/game_level"><code>examples/tutorials/game_level/</code></a>.
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-for-blender/tree/main/examples/tutorials/game_level"><code>examples/tutorials/game_level/</code></a>.
     </p>
 </div>
 </main>

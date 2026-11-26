@@ -16,8 +16,8 @@
 <link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../packs.css">
-<script type="module" src="https://basenode.ludopant.com/view/bn-view.js"></script>
-<script type="module" src="https://basenode.ludopant.com/view/bn-file.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-view.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-file.js"></script>
 </head>
 <body>
 <!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
@@ -53,12 +53,12 @@
       <li><strong>The language.</strong> A layer is one value, a <code>Bundle</code> of seven channels, passed from graph to graph; a texture is passed to a graph as a <code>closure</code>; <code>"Paint" #orange { … }</code> frames each layer's lines in the node editor. Each file is the one before plus a few lines: compare two steps to see what changed.</li>
     </ul>
     <p>
-      This page goes faster on the basics than <a href="https://basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>, which starts from a flat square: a noise, a shader group, a material. Read it first if those are new to you.
+      This page goes faster on the basics than <a href="https://blender.basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>, which starts from a flat square: a noise, a shader group, a material. Read it first if those are new to you.
     </p>
 
     <h2 id="before">Before you start</h2>
     <p>
-      You need Blender 5, the <a href="https://basenode.ludopant.com/#blender">Base Node add-on</a>, and the <a href="../material-layers/">Material Layers</a> pack, sold by the author of Base Node apart from the open source project: it carries the two modules this tutorial assembles.
+      You need Blender 5, the <a href="https://blender.basenode.ludopant.com/#blender">Base Node add-on</a>, and the <a href="https://ludopant.com/basenode-packs/#pack-material-layers">Material Layers</a> pack, sold by the author of Base Node apart from the open source project: it carries the two modules this tutorial assembles.
       The steps below are free to read, copy and change; the modules they <code>use</code> are not.
     </p>
     <table>
@@ -75,7 +75,7 @@
     </ul>
     <p>
       Render with Cycles: the edge mask of step 3 comes from the <code>Bevel</code> node, which EEVEE does not have.
-      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/rover_hull/render.py"><code>render.py</code></a>, which adds the desert, the rocks and the wheels around the hull, bevels its edges a little, and gives it hatches, a solar panel, an antenna dish and two camera lenses: the painted parts take the step's own material, and none has a UV map either.
+      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-for-blender/blob/main/examples/tutorials/rover_hull/render.py"><code>render.py</code></a>, which adds the desert, the rocks and the wheels around the hull, bevels its edges a little, and gives it hatches, a solar panel, an antenna dish and two camera lenses: the painted parts take the step's own material, and none has a UV map either.
     </p>
 
     <h2 id="idea">A stack of layers</h2>
@@ -169,7 +169,7 @@ shader graph hull_paint(paint: Color = (0.55, 0.12, 0.012)) -> Shader {
   surface = projection_frame(space: Object).normal
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
@@ -243,10 +243,10 @@ shader graph hull_paint(
   "Painted metal, worn to bare metal on its edges"
   // Bevel rounds the normal within 3 cm of an edge; in object space, as every normal here
   rounded = Bevel(radius: 0.03).normal
-  surface = normalize(VectorTransform(vector: rounded, vector_type: NORMAL))
+  surface = normalize(VectorTransform[NORMAL](vector: rounded))
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
@@ -338,15 +338,15 @@ shader graph hull_paint(
   "Painted metal panels, worn to bare metal on their edges"
   // Bevel rounds the normal within 3 cm of an edge; in object space, as every normal here
   rounded = Bevel(radius: 0.03).normal
-  surface = normalize(VectorTransform(vector: rounded, vector_type: NORMAL))
+  surface = normalize(VectorTransform[NORMAL](vector: rounded))
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
     // Seams every 40 cm both ways, as a normal map stores the slopes of a groove
-    seams = closure(vector: Vector) -> (color: Color) {
+    seams = graph(vector: Vector) -> (color: Color) {
       return (
         color: CombineColor(
           red: seam(t: vector.x * 2.5),
@@ -444,15 +444,15 @@ shader graph hull_paint(
   frame = projection_frame(space: Object)
   // Bevel rounds the normal within 3 cm of an edge; in object space, as every normal here
   rounded = Bevel(radius: 0.03).normal
-  surface = normalize(VectorTransform(vector: rounded, vector_type: NORMAL))
+  surface = normalize(VectorTransform[NORMAL](vector: rounded))
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
     // Seams every 40 cm both ways, as a normal map stores the slopes of a groove
-    seams = closure(vector: Vector) -> (color: Color) {
+    seams = graph(vector: Vector) -> (color: Color) {
       return (
         color: CombineColor(
           red: seam(t: vector.x * 2.5),
@@ -565,15 +565,15 @@ shader graph hull_paint(
   frame = projection_frame(space: Object)
   // Bevel rounds the normal within 3 cm of an edge; in object space, as every normal here
   rounded = Bevel(radius: 0.03).normal
-  surface = normalize(VectorTransform(vector: rounded, vector_type: NORMAL))
+  surface = normalize(VectorTransform[NORMAL](vector: rounded))
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
     // Seams every 40 cm both ways, as a normal map stores the slopes of a groove
-    seams = closure(vector: Vector) -> (color: Color) {
+    seams = graph(vector: Vector) -> (color: Color) {
       return (
         color: CombineColor(
           red: seam(t: vector.x * 2.5),
@@ -700,15 +700,15 @@ shader graph hull_paint(
   frame = projection_frame(space: Object)
   // Bevel rounds the normal within 3 cm of an edge; in object space, as every normal here
   rounded = Bevel(radius: 0.03).normal
-  surface = normalize(VectorTransform(vector: rounded, vector_type: NORMAL))
+  surface = normalize(VectorTransform[NORMAL](vector: rounded))
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
     // Seams every 40 cm both ways, as a normal map stores the slopes of a groove
-    seams = closure(vector: Vector) -> (color: Color) {
+    seams = graph(vector: Vector) -> (color: Color) {
       return (
         color: CombineColor(
           red: seam(t: vector.x * 2.5),
@@ -758,7 +758,7 @@ shader graph hull_paint(
   }
   "Detail" #green {
     // Fine scratches, eight times finer than the paint's texture and turned: no tile lines up
-    scratches = closure(vector: Vector) -> (color: Color) {
+    scratches = graph(vector: Vector) -> (color: Color) {
       fine = detail_coords(vector: vector, scale: 8.0, rotation: 0.5)
       return (color: NoiseTexture(vector: fine * (1.0, 30.0, 0.0), scale: 2.0, detail: 4.0).color)
     }
@@ -869,15 +869,15 @@ shader graph hull_paint(
   frame = projection_frame(space: Object)
   // Bevel rounds the normal within 3 cm of an edge; in object space, as every normal here
   rounded = Bevel(radius: 0.03).normal
-  surface = normalize(VectorTransform(vector: rounded, vector_type: NORMAL))
+  surface = normalize(VectorTransform[NORMAL](vector: rounded))
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
     // Seams every 40 cm both ways, as a normal map stores the slopes of a groove
-    seams = closure(vector: Vector) -> (color: Color) {
+    seams = graph(vector: Vector) -> (color: Color) {
       return (
         color: CombineColor(
           red: seam(t: vector.x * 2.5),
@@ -927,7 +927,7 @@ shader graph hull_paint(
   }
   "Detail" #green {
     // Fine scratches, eight times finer than the paint's texture and turned: no tile lines up
-    scratches = closure(vector: Vector) -> (color: Color) {
+    scratches = graph(vector: Vector) -> (color: Color) {
       fine = detail_coords(vector: vector, scale: 8.0, rotation: 0.5)
       return (color: NoiseTexture(vector: fine * (1.0, 30.0, 0.0), scale: 2.0, detail: 4.0).color)
     }
@@ -1035,7 +1035,7 @@ shader graph hull_paint(paint: Color = (0.55, 0.12, 0.012)) -> Shader {
   surface = projection_frame(space: Object).normal
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
@@ -1094,10 +1094,10 @@ shader graph hull_paint(
   "Painted metal, worn to bare metal on its edges"
   // Bevel rounds the normal within 3 cm of an edge; in object space, as every normal here
   rounded = Bevel(radius: 0.03).normal
-  surface = normalize(VectorTransform(vector: rounded, vector_type: NORMAL))
+  surface = normalize(VectorTransform[NORMAL](vector: rounded))
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
@@ -1173,15 +1173,15 @@ shader graph hull_paint(
   "Painted metal panels, worn to bare metal on their edges"
   // Bevel rounds the normal within 3 cm of an edge; in object space, as every normal here
   rounded = Bevel(radius: 0.03).normal
-  surface = normalize(VectorTransform(vector: rounded, vector_type: NORMAL))
+  surface = normalize(VectorTransform[NORMAL](vector: rounded))
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
     // Seams every 40 cm both ways, as a normal map stores the slopes of a groove
-    seams = closure(vector: Vector) -> (color: Color) {
+    seams = graph(vector: Vector) -> (color: Color) {
       return (
         color: CombineColor(
           red: seam(t: vector.x * 2.5),
@@ -1264,15 +1264,15 @@ shader graph hull_paint(
   frame = projection_frame(space: Object)
   // Bevel rounds the normal within 3 cm of an edge; in object space, as every normal here
   rounded = Bevel(radius: 0.03).normal
-  surface = normalize(VectorTransform(vector: rounded, vector_type: NORMAL))
+  surface = normalize(VectorTransform[NORMAL](vector: rounded))
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
     // Seams every 40 cm both ways, as a normal map stores the slopes of a groove
-    seams = closure(vector: Vector) -> (color: Color) {
+    seams = graph(vector: Vector) -> (color: Color) {
       return (
         color: CombineColor(
           red: seam(t: vector.x * 2.5),
@@ -1369,15 +1369,15 @@ shader graph hull_paint(
   frame = projection_frame(space: Object)
   // Bevel rounds the normal within 3 cm of an edge; in object space, as every normal here
   rounded = Bevel(radius: 0.03).normal
-  surface = normalize(VectorTransform(vector: rounded, vector_type: NORMAL))
+  surface = normalize(VectorTransform[NORMAL](vector: rounded))
   "Paint" #orange {
     // A 2D texture, as an image would be: it reads x and y of the coordinates it is given
-    smears = closure(vector: Vector) -> (color: Color) {
+    smears = graph(vector: Vector) -> (color: Color) {
       return (color: NoiseTexture(vector: vector * (1.0, 2.5, 0.0), scale: 3.0, detail: 8.0).color)
     }
     tone = triplanar(texture: smears, sharpness: 8.0).color.x
     // Seams every 40 cm both ways, as a normal map stores the slopes of a groove
-    seams = closure(vector: Vector) -> (color: Color) {
+    seams = graph(vector: Vector) -> (color: Color) {
       return (
         color: CombineColor(
           red: seam(t: vector.x * 2.5),
@@ -1457,7 +1457,7 @@ geometry graph rover_hull() -> Geometry {
 </script></bn-file>
     </div>
     <p class="muted">
-      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/rover_hull"><code>examples/tutorials/rover_hull/</code></a>.
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-for-blender/tree/main/examples/tutorials/rover_hull"><code>examples/tutorials/rover_hull/</code></a>.
     </p>
 </div>
 </main>

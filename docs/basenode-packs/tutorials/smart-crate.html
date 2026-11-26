@@ -16,8 +16,8 @@
 <link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../packs.css">
-<script type="module" src="https://basenode.ludopant.com/view/bn-view.js"></script>
-<script type="module" src="https://basenode.ludopant.com/view/bn-file.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-view.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-file.js"></script>
 </head>
 <body>
 <!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
@@ -49,7 +49,7 @@
 
     <h2 id="before">Before you start</h2>
     <p>
-      You need Blender 5 and the <a href="https://basenode.ludopant.com/#blender">Base Node add-on</a>, version 0.12.1 or later, and the <a href="../smart-materials/">Smart Materials</a> pack: it carries the three modules this tutorial assembles (<code>mesh_maps</code>, <code>generators</code>, <code>mesh_effects</code>). The steps below are free; the modules they call are not.
+      You need Blender 5 and the <a href="https://blender.basenode.ludopant.com/#blender">Base Node add-on</a>, version 0.12.1 or later, and the <a href="https://ludopant.com/basenode-packs/#pack-smart-materials">Smart Materials</a> pack: it carries the three modules this tutorial assembles (<code>mesh_maps</code>, <code>generators</code>, <code>mesh_effects</code>). The steps below are free; the modules they call are not.
     </p>
     <table>
       <tr><th>Module</th><th>Kind</th><th>What it gives</th></tr>
@@ -65,7 +65,7 @@
       <li><strong>Paste it.</strong> Press the copy button of its block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>, on any mesh object: the graph makes its own crate.</li>
     </ul>
     <p>
-      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/smart_crate/render.py"><code>render.py</code></a>.
+      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-for-blender/blob/main/examples/tutorials/smart_crate/render.py"><code>render.py</code></a>.
     </p>
 
     <h2 id="idea">Two halves</h2>
@@ -149,11 +149,11 @@ shader graph crate_steel(
   "Paint, then two layers: bare steel where the edges wear, grime in the corners"
   "Bare steel" #orange {
     worn = metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1)
-    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+    chipped = Mix[RGBA](factor: worn, a: paint, b: steel)
   }
   "Grime" #violet {
     dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
-    color = Mix(factor: dirty * 0.85, a: chipped, b: grime, data_type: RGBA)
+    color = Mix[RGBA](factor: dirty * 0.85, a: chipped, b: grime)
   }
   return PrincipledBSDF(
     base_color: color,
@@ -221,11 +221,11 @@ shader graph crate_steel(
     worn = max(
       e.chip,
       metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
-    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+    chipped = Mix[RGBA](factor: worn, a: paint, b: steel)
   }
   "Grime" #violet {
     dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
-    color = Mix(factor: dirty * 0.85, a: chipped, b: grime, data_type: RGBA)
+    color = Mix[RGBA](factor: dirty * 0.85, a: chipped, b: grime)
   }
   return PrincipledBSDF(
     base_color: color,
@@ -251,7 +251,13 @@ geometry graph smart_crate() -> Geometry {
   return body + lid
     |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
     |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
-    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> chip_edges(
+      depth: 0.006,
+      wear: 0.45,
+      width: 0.015,
+      selection: rivet < 0.5,
+      size: 0.04,
+      seed: 4)
     |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
     |> SetMaterial(material: CrateSteel)
 }
@@ -296,20 +302,19 @@ shader graph crate_steel(
     worn = max(
       e.chip,
       metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
-    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+    chipped = Mix[RGBA](factor: worn, a: paint, b: steel)
   }
   "Rust" #red {
     // A little rust in the cavities, and the streaks the mesh stores
     spread = dripping_rust(rust_spreading: 0.2, drips_intensity: 0.0, seed: 6)
-    rusty = Mix(
+    rusty = Mix[RGBA](
       factor: max(spread.mask * 0.8, Clamp(value: e.streak * 1.6)),
       a: chipped,
-      b: rust,
-      data_type: RGBA)
+      b: rust)
   }
   "Grime" #violet {
     dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
-    color = Mix(factor: dirty * 0.85, a: rusty, b: grime, data_type: RGBA)
+    color = Mix[RGBA](factor: dirty * 0.85, a: rusty, b: grime)
   }
   return PrincipledBSDF(
     base_color: color,
@@ -335,7 +340,13 @@ geometry graph smart_crate() -> Geometry {
   return body + lid
     |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
     |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
-    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> chip_edges(
+      depth: 0.006,
+      wear: 0.45,
+      width: 0.015,
+      selection: rivet < 0.5,
+      size: 0.04,
+      seed: 4)
     |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
     |> streaks(
       density: 80.0,
@@ -388,28 +399,27 @@ shader graph crate_steel(
   "Bare steel" #orange {
     // Not on the paint run down over the edges
     worn = max(
-      e.chip,
-      metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
+        e.chip,
+        metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
       * (1.0 - e.drip)
-    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+    chipped = Mix[RGBA](factor: worn, a: paint, b: steel)
   }
   "Rust" #red {
     // A little rust in the cavities, and the streaks the mesh stores
     spread = dripping_rust(rust_spreading: 0.2, drips_intensity: 0.0, seed: 6)
-    rusty = Mix(
+    rusty = Mix[RGBA](
       factor: max(spread.mask * 0.8, Clamp(value: e.streak * 1.6)),
       a: chipped,
-      b: rust,
-      data_type: RGBA)
+      b: rust)
   }
   "Grime" #violet {
     dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
-    soiled = Mix(factor: dirty * 0.85, a: rusty, b: grime, data_type: RGBA)
+    soiled = Mix[RGBA](factor: dirty * 0.85, a: rusty, b: grime)
   }
   "Dust" #yellow {
     // Settled on what faces up, and the specks the mesh scatters
     dusty = max(dust(dust_level: 0.35, grunge_scale: 0.2, seed: 4) * 0.5, e.dust)
-    color = Mix(factor: dusty, a: soiled, b: dust_color, data_type: RGBA)
+    color = Mix[RGBA](factor: dusty, a: soiled, b: dust_color)
   }
   return PrincipledBSDF(
     base_color: color,
@@ -439,7 +449,13 @@ geometry graph smart_crate() -> Geometry {
   return body + lid
     |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
     |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
-    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> chip_edges(
+      depth: 0.006,
+      wear: 0.45,
+      width: 0.015,
+      selection: rivet < 0.5,
+      size: 0.04,
+      seed: 4)
     |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
     |> streaks(
       density: 80.0,
@@ -513,28 +529,27 @@ shader graph crate_steel(
   "Bare steel" #orange {
     // Not on the paint run down over the edges
     worn = max(
-      e.chip,
-      metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
+        e.chip,
+        metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
       * (1.0 - e.drip)
-    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+    chipped = Mix[RGBA](factor: worn, a: paint, b: steel)
   }
   "Rust" #red {
     // A little rust in the cavities, and the streaks the mesh stores
     spread = dripping_rust(rust_spreading: 0.2, drips_intensity: 0.0, seed: 6)
-    rusty = Mix(
+    rusty = Mix[RGBA](
       factor: max(spread.mask * 0.8, Clamp(value: e.streak * 1.6)),
       a: chipped,
-      b: rust,
-      data_type: RGBA)
+      b: rust)
   }
   "Grime" #violet {
     dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
-    soiled = Mix(factor: dirty * 0.85, a: rusty, b: grime, data_type: RGBA)
+    soiled = Mix[RGBA](factor: dirty * 0.85, a: rusty, b: grime)
   }
   "Dust" #yellow {
     // Settled on what faces up, and the specks the mesh scatters
     dusty = max(dust(dust_level: 0.35, grunge_scale: 0.2, seed: 4) * 0.5, e.dust)
-    color = Mix(factor: dusty, a: soiled, b: dust_color, data_type: RGBA)
+    color = Mix[RGBA](factor: dusty, a: soiled, b: dust_color)
   }
   return PrincipledBSDF(
     base_color: color,
@@ -564,7 +579,13 @@ geometry graph smart_crate() -> Geometry {
   return body + lid
     |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
     |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
-    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> chip_edges(
+      depth: 0.006,
+      wear: 0.45,
+      width: 0.015,
+      selection: rivet < 0.5,
+      size: 0.04,
+      seed: 4)
     |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
     |> streaks(
       density: 80.0,
@@ -635,11 +656,11 @@ shader graph crate_steel(
   "Paint, then two layers: bare steel where the edges wear, grime in the corners"
   "Bare steel" #orange {
     worn = metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1)
-    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+    chipped = Mix[RGBA](factor: worn, a: paint, b: steel)
   }
   "Grime" #violet {
     dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
-    color = Mix(factor: dirty * 0.85, a: chipped, b: grime, data_type: RGBA)
+    color = Mix[RGBA](factor: dirty * 0.85, a: chipped, b: grime)
   }
   return PrincipledBSDF(
     base_color: color,
@@ -689,11 +710,11 @@ shader graph crate_steel(
     worn = max(
       e.chip,
       metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
-    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+    chipped = Mix[RGBA](factor: worn, a: paint, b: steel)
   }
   "Grime" #violet {
     dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
-    color = Mix(factor: dirty * 0.85, a: chipped, b: grime, data_type: RGBA)
+    color = Mix[RGBA](factor: dirty * 0.85, a: chipped, b: grime)
   }
   return PrincipledBSDF(
     base_color: color,
@@ -719,7 +740,13 @@ geometry graph smart_crate() -> Geometry {
   return body + lid
     |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
     |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
-    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> chip_edges(
+      depth: 0.006,
+      wear: 0.45,
+      width: 0.015,
+      selection: rivet < 0.5,
+      size: 0.04,
+      seed: 4)
     |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
     |> SetMaterial(material: CrateSteel)
 }
@@ -749,20 +776,19 @@ shader graph crate_steel(
     worn = max(
       e.chip,
       metal_edge_wear(wear_level: wear, grunge_amount: 0.7, grunge_scale: 0.05, seed: 1))
-    chipped = Mix(factor: worn, a: paint, b: steel, data_type: RGBA)
+    chipped = Mix[RGBA](factor: worn, a: paint, b: steel)
   }
   "Rust" #red {
     // A little rust in the cavities, and the streaks the mesh stores
     spread = dripping_rust(rust_spreading: 0.2, drips_intensity: 0.0, seed: 6)
-    rusty = Mix(
+    rusty = Mix[RGBA](
       factor: max(spread.mask * 0.8, Clamp(value: e.streak * 1.6)),
       a: chipped,
-      b: rust,
-      data_type: RGBA)
+      b: rust)
   }
   "Grime" #violet {
     dirty = dirt(dirt_level: 0.45, grime: 0.2, seed: 2)
-    color = Mix(factor: dirty * 0.85, a: rusty, b: grime, data_type: RGBA)
+    color = Mix[RGBA](factor: dirty * 0.85, a: rusty, b: grime)
   }
   return PrincipledBSDF(
     base_color: color,
@@ -788,7 +814,13 @@ geometry graph smart_crate() -> Geometry {
   return body + lid
     |> dents(size: 0.25, depth: 0.015, density: 0.4, seed: 7)
     |> rivets(spacing: 0.07, inset: 0.035, radius: 0.009, height: 0.6, angle: 1.2)
-    |> chip_edges(depth: 0.006, wear: 0.45, width: 0.015, selection: rivet < 0.5, size: 0.04, seed: 4)
+    |> chip_edges(
+      depth: 0.006,
+      wear: 0.45,
+      width: 0.015,
+      selection: rivet < 0.5,
+      size: 0.04,
+      seed: 4)
     |> mesh_maps(radius: 0.04, strength: 1.5, ao_distance: 0.6, ao_samples: 24, sky_distance: 0.6)
     |> streaks(
       density: 80.0,
@@ -803,7 +835,7 @@ geometry graph smart_crate() -> Geometry {
 </script></bn-file>
     </div>
     <p class="muted">
-      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/smart_crate"><code>examples/tutorials/smart_crate/</code></a>.
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-for-blender/tree/main/examples/tutorials/smart_crate"><code>examples/tutorials/smart_crate/</code></a>.
     </p>
 </div>
 </main>

@@ -16,8 +16,8 @@
 <link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../packs.css">
-<script type="module" src="https://basenode.ludopant.com/view/bn-view.js"></script>
-<script type="module" src="https://basenode.ludopant.com/view/bn-file.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-view.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-file.js"></script>
 </head>
 <body>
 <!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
@@ -53,7 +53,7 @@
       <li><strong>The language.</strong> Time in a graph: <code>SceneTime().frame</code> turned into a progress from 0 to 1 by a <code>Clamp</code>, one per part; small graphs that each take a progress; the same field (a letter's opacity) read by the material and by the particles; simulation zones you never write, because the modules hold them.</li>
     </ul>
     <p>
-      This page goes faster on the basics than <a href="https://basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>, which explains a graph, a pipe (<code>|&gt;</code>), a material and the way a step file is read. Read it first if those are new to you.
+      This page goes faster on the basics than <a href="https://blender.basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>, which explains a graph, a pipe (<code>|&gt;</code>), a material and the way a step file is read. Read it first if those are new to you.
     </p>
 
     <h2 id="before">Before you start</h2>
@@ -62,8 +62,8 @@
     </p>
     <ul>
       <li>Blender 5.</li>
-      <li>The <a href="https://basenode.ludopant.com/#blender">Base Node add-on</a>, version 0.13.1 or later.</li>
-      <li>The <a href="../motion-design/"><strong>Motion Design 2D</strong></a> pack, sold by the author of Base Node apart from the open source project. It carries the three modules this tutorial uses. The steps on this page are free to read, copy and change; the modules they call are not.</li>
+      <li>The <a href="https://blender.basenode.ludopant.com/#blender">Base Node add-on</a>, version 0.13.1 or later.</li>
+      <li>The <a href="https://ludopant.com/basenode-packs/#pack-motion-design"><strong>Motion Design 2D</strong></a> pack, sold by the author of Base Node apart from the open source project. It carries the three modules this tutorial uses. The steps on this page are free to read, copy and change; the modules they call are not.</li>
     </ul>
     <table>
       <tr><th>Module</th><th>After</th><th>What it gives</th></tr>
@@ -80,7 +80,7 @@
     </ul>
     <p>
       Look at it from above (<kbd>Numpad 7</kbd>), in <em>Material Preview</em>, and play it from the first frame (<kbd>Shift</kbd>+<kbd>Left</kbd>, then <kbd>Space</kbd>): from step 5 on, the sparks and the comet are simulations, and a simulation only knows a frame it has played its way to.
-      The animations are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/title_sequence/render.py"><code>render.py</code></a>, which adds a dark gradient card behind the title, an orthographic camera straight above it, and a bloom in the compositor. They are rendered with EEVEE, the 96 frames of the sequence one after the other.
+      The animations are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-for-blender/blob/main/examples/tutorials/title_sequence/render.py"><code>render.py</code></a>, which adds a dark gradient card behind the title, an orthographic camera straight above it, and a bloom in the compositor. They are rendered with EEVEE, the 96 frames of the sequence one after the other.
     </p>
 
     <h2 id="idea">A letter is an instance</h2>
@@ -137,7 +137,7 @@ geometry graph title_sequence() -> Geometry {
 
     <h2 id="step-2"><span class="n">2.</span> Revealed letter by letter</h2>
     <p>
-      Time comes in. <code>SceneTime().frame</code> is the frame being played; <code>Clamp((frame - 6) / 36)</code> makes it a <code>progress</code> that stays at 0 until frame 6, runs to 1 by frame 42 and stays there. Every animated part of this tutorial is driven this way, by a progress of its own.
+      Time comes in. <code>SceneTime().frame</code> is the frame being played; <code>Clamp(value: (frame - 6) / 36)</code> makes it a <code>progress</code> that stays at 0 until frame 6, runs to 1 by frame 42 and stays there. Every animated part of this tutorial is driven this way, by a progress of its own.
     </p>
     <p class="file">step2_reveal.bn: <code>title_sequence</code>, <code>Title</code></p>
     <bn-view graph="title_sequence" height="480"><script type="text/bn">
@@ -152,9 +152,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal)
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 geometry graph centred(geometry: Geometry) -> Geometry {
@@ -203,9 +206,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal)
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 geometry graph centred(geometry: Geometry) -> Geometry {
@@ -265,9 +271,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal, t
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 shader(material: true) graph Tagline() -> (surface: Shader) {
@@ -310,12 +319,12 @@ geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometr
   typed = typewriter(chars, progress: progress)
   line = BoundingBox(RealizeInstances(chars), use_radius: false)
   end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
-  some = DomainSize(typed, component: INSTANCES).instance_count > 0
-  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  some = DomainSize[INSTANCES](typed).instance_count > 0
+  x = some ? end + 0.08 : line.min.x
   shown = progress > 0.0 and (progress < 1.0 or blink)
   cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
-  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+  return text_mesh(typed) + Switch[GEOMETRY](switch: shown, true_: cursor)
     |> SetMaterial(material: Tagline)
     |> TransformGeometry(translation: (0.0, -1.05, 0.0))
 }
@@ -355,9 +364,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal, t
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 shader(material: true) graph Tagline() -> (surface: Shader) {
@@ -367,10 +379,11 @@ shader(material: true) graph Tagline() -> (surface: Shader) {
 
 shader(material: true) graph Spark() -> (surface: Shader) {
   "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
-  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
-  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
-  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
-  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+  life = Attribute[INSTANCER, attribute_name: "life_factor"]().factor
+  shown = Attribute[INSTANCER, attribute_name: "opacity"]().factor
+  hot = Mix[RGBA](factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0))
+  return (
+    surface: MixShader(factor: shown, a: TransparentBSDF(), b: Emission(color: hot, strength: 3.0)))
 }
 
 geometry graph centred(geometry: Geometry) -> Geometry {
@@ -406,22 +419,21 @@ geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometr
   typed = typewriter(chars, progress: progress)
   line = BoundingBox(RealizeInstances(chars), use_radius: false)
   end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
-  some = DomainSize(typed, component: INSTANCES).instance_count > 0
-  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  some = DomainSize[INSTANCES](typed).instance_count > 0
+  x = some ? end + 0.08 : line.min.x
   shown = progress > 0.0 and (progress < 1.0 or blink)
   cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
-  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+  return text_mesh(typed) + Switch[GEOMETRY](switch: shown, true_: cursor)
     |> SetMaterial(material: Tagline)
     |> TransformGeometry(translation: (0.0, -1.05, 0.0))
 }
 
 geometry graph sparks(letters: Geometry) -> Geometry {
   "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
-  landed = DeleteGeometry(
+  landed = DeleteGeometry[INSTANCE](
     letters,
-    selection: NamedAttribute(name: "opacity").attribute < 0.5,
-    domain: INSTANCE)
+    selection: NamedAttribute(name: "opacity").attribute < 0.5)
   return shape_emitter(landed)
     |> particles_2d(
       rate: 300.0,
@@ -482,9 +494,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal, t
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 shader(material: true) graph Tagline() -> (surface: Shader) {
@@ -494,27 +509,32 @@ shader(material: true) graph Tagline() -> (surface: Shader) {
 
 shader(material: true) graph Spark() -> (surface: Shader) {
   "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
-  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
-  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
-  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
-  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+  life = Attribute[INSTANCER, attribute_name: "life_factor"]().factor
+  shown = Attribute[INSTANCER, attribute_name: "opacity"]().factor
+  hot = Mix[RGBA](factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0))
+  return (
+    surface: MixShader(factor: shown, a: TransparentBSDF(), b: Emission(color: hot, strength: 3.0)))
 }
 
 shader(material: true) graph Comet() -> (surface: Shader) {
   "The head and its echoes: white now, toward the tint stored on the oldest, as opaque as their opacity"
-  tint = Attribute(attribute_name: "tint").color
-  shown = Attribute(attribute_name: "opacity").factor
-  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: tint, strength: 4.0)))
+  tint = Attribute[attribute_name: "tint"]().color
+  shown = Attribute[attribute_name: "opacity"]().factor
+  return (
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: tint, strength: 4.0)))
 }
 
 shader(material: true) graph Trail() -> (surface: Shader) {
   "A magenta trail, fading to its tail"
-  tail = Attribute(attribute_name: "trail_factor").factor
+  tail = Attribute[attribute_name: "trail_factor"]().factor
   return (
     surface: MixShader(
-      1.0 - tail,
-      TransparentBSDF(),
-      Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
+      factor: 1.0 - tail,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
 }
 
 geometry graph centred(geometry: Geometry) -> Geometry {
@@ -550,22 +570,21 @@ geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometr
   typed = typewriter(chars, progress: progress)
   line = BoundingBox(RealizeInstances(chars), use_radius: false)
   end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
-  some = DomainSize(typed, component: INSTANCES).instance_count > 0
-  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  some = DomainSize[INSTANCES](typed).instance_count > 0
+  x = some ? end + 0.08 : line.min.x
   shown = progress > 0.0 and (progress < 1.0 or blink)
   cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
-  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+  return text_mesh(typed) + Switch[GEOMETRY](switch: shown, true_: cursor)
     |> SetMaterial(material: Tagline)
     |> TransformGeometry(translation: (0.0, -1.05, 0.0))
 }
 
 geometry graph sparks(letters: Geometry) -> Geometry {
   "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
-  landed = DeleteGeometry(
+  landed = DeleteGeometry[INSTANCE](
     letters,
-    selection: NamedAttribute(name: "opacity").attribute < 0.5,
-    domain: INSTANCE)
+    selection: NamedAttribute(name: "opacity").attribute < 0.5)
   return shape_emitter(landed)
     |> particles_2d(
       rate: 300.0,
@@ -586,10 +605,15 @@ geometry graph sparks(letters: Geometry) -> Geometry {
 
 geometry graph comet(progress: Float(subtype: FACTOR)) -> Geometry {
   "A bright disc that sweeps in from the left, under the title, and out at the top right as progress goes from 0 to 1, easing in and out; its echoes over the frames before, and a trail that thins to its tail"
-  path = BezierSegment(64, (-7.5, -2.4, 0.0), (-1.5, -3.9, 0.0), (4.5, -2.6, 0.0), (6.8, 4.8, 0.0))
+  path = BezierSegment(
+    resolution: 64,
+    start: (-7.5, -2.4, 0.0),
+    start_handle: (-1.5, -3.9, 0.0),
+    end_handle: (4.5, -2.6, 0.0),
+    end: (6.8, 4.8, 0.0))
   eased = progress * progress * (3.0 - 2.0 * progress)
   at = SampleCurve(path, factor: eased).position
-  head = MeshCircle(vertices: 24, radius: 0.13, fill_type: NGON)
+  head = MeshCircle[NGON](vertices: 24, radius: 0.13)
     |> TransformGeometry(translation: at)
   echoed = head
     |> echoes(count: 6, every: 2, decay: 0.7, tint: (0.2, 0.75, 1.0, 1.0))
@@ -642,9 +666,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal, t
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 shader(material: true) graph Tagline() -> (surface: Shader) {
@@ -654,27 +681,32 @@ shader(material: true) graph Tagline() -> (surface: Shader) {
 
 shader(material: true) graph Spark() -> (surface: Shader) {
   "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
-  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
-  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
-  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
-  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+  life = Attribute[INSTANCER, attribute_name: "life_factor"]().factor
+  shown = Attribute[INSTANCER, attribute_name: "opacity"]().factor
+  hot = Mix[RGBA](factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0))
+  return (
+    surface: MixShader(factor: shown, a: TransparentBSDF(), b: Emission(color: hot, strength: 3.0)))
 }
 
 shader(material: true) graph Comet() -> (surface: Shader) {
   "The head and its echoes: white now, toward the tint stored on the oldest, as opaque as their opacity"
-  tint = Attribute(attribute_name: "tint").color
-  shown = Attribute(attribute_name: "opacity").factor
-  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: tint, strength: 4.0)))
+  tint = Attribute[attribute_name: "tint"]().color
+  shown = Attribute[attribute_name: "opacity"]().factor
+  return (
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: tint, strength: 4.0)))
 }
 
 shader(material: true) graph Trail() -> (surface: Shader) {
   "A magenta trail, fading to its tail"
-  tail = Attribute(attribute_name: "trail_factor").factor
+  tail = Attribute[attribute_name: "trail_factor"]().factor
   return (
     surface: MixShader(
-      1.0 - tail,
-      TransparentBSDF(),
-      Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
+      factor: 1.0 - tail,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
 }
 
 geometry graph centred(geometry: Geometry) -> Geometry {
@@ -717,22 +749,21 @@ geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometr
   typed = typewriter(chars, progress: progress)
   line = BoundingBox(RealizeInstances(chars), use_radius: false)
   end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
-  some = DomainSize(typed, component: INSTANCES).instance_count > 0
-  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  some = DomainSize[INSTANCES](typed).instance_count > 0
+  x = some ? end + 0.08 : line.min.x
   shown = progress > 0.0 and (progress < 1.0 or blink)
   cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
-  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+  return text_mesh(typed) + Switch[GEOMETRY](switch: shown, true_: cursor)
     |> SetMaterial(material: Tagline)
     |> TransformGeometry(translation: (0.0, -1.05, 0.0))
 }
 
 geometry graph sparks(letters: Geometry) -> Geometry {
   "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
-  landed = DeleteGeometry(
+  landed = DeleteGeometry[INSTANCE](
     letters,
-    selection: NamedAttribute(name: "opacity").attribute < 0.5,
-    domain: INSTANCE)
+    selection: NamedAttribute(name: "opacity").attribute < 0.5)
   return shape_emitter(landed)
     |> particles_2d(
       rate: 300.0,
@@ -753,9 +784,14 @@ geometry graph sparks(letters: Geometry) -> Geometry {
 
 geometry graph comet(progress: Float(subtype: FACTOR)) -> Geometry {
   "A bright disc that sweeps in from the left, under the title, and out at the top right as progress goes from 0 to 1, easing in and out; its echoes over the frames before, and a trail that thins to its tail"
-  path = BezierSegment(64, (-7.5, -2.4, 0.0), (-1.5, -3.9, 0.0), (4.5, -2.6, 0.0), (6.8, 4.8, 0.0))
-  at = SampleCurve(path, factor: ease(progress)).position
-  head = MeshCircle(vertices: 24, radius: 0.13, fill_type: NGON)
+  path = BezierSegment(
+    resolution: 64,
+    start: (-7.5, -2.4, 0.0),
+    start_handle: (-1.5, -3.9, 0.0),
+    end_handle: (4.5, -2.6, 0.0),
+    end: (6.8, 4.8, 0.0))
+  at = SampleCurve(path, factor: ease(t: progress)).position
+  head = MeshCircle[NGON](vertices: 24, radius: 0.13)
     |> TransformGeometry(translation: at)
   echoed = head
     |> echoes(count: 6, every: 2, decay: 0.7, tint: (0.2, 0.75, 1.0, 1.0))
@@ -781,7 +817,7 @@ geometry graph title_sequence() -> Geometry {
   // Every part, in from 0 to 1 and out from 0 to 1, by the frame
   letters = title(progress: Clamp(value: (f - 6.0) / 30.0), out: Clamp(value: (f - 66.0) / 12.0))
   typed = Clamp(value: (f - 34.0) / 30.0) - Clamp(value: (f - 64.0) / 10.0)
-  drawn = ease(Clamp(value: (f - 26.0) / 14.0)) - ease(Clamp(value: (f - 72.0) / 8.0))
+  drawn = ease(t: Clamp(value: (f - 26.0) / 14.0)) - ease(t: Clamp(value: (f - 72.0) / 8.0))
   return (text_mesh(letters) |> SetMaterial(material: Title))
     + sparks(letters)
     + rule(width: 7.6 * drawn)
@@ -838,9 +874,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal, t
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 shader(material: true) graph Tagline() -> (surface: Shader) {
@@ -850,27 +889,32 @@ shader(material: true) graph Tagline() -> (surface: Shader) {
 
 shader(material: true) graph Spark() -> (surface: Shader) {
   "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
-  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
-  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
-  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
-  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+  life = Attribute[INSTANCER, attribute_name: "life_factor"]().factor
+  shown = Attribute[INSTANCER, attribute_name: "opacity"]().factor
+  hot = Mix[RGBA](factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0))
+  return (
+    surface: MixShader(factor: shown, a: TransparentBSDF(), b: Emission(color: hot, strength: 3.0)))
 }
 
 shader(material: true) graph Comet() -> (surface: Shader) {
   "The head and its echoes: white now, toward the tint stored on the oldest, as opaque as their opacity"
-  tint = Attribute(attribute_name: "tint").color
-  shown = Attribute(attribute_name: "opacity").factor
-  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: tint, strength: 4.0)))
+  tint = Attribute[attribute_name: "tint"]().color
+  shown = Attribute[attribute_name: "opacity"]().factor
+  return (
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: tint, strength: 4.0)))
 }
 
 shader(material: true) graph Trail() -> (surface: Shader) {
   "A magenta trail, fading to its tail"
-  tail = Attribute(attribute_name: "trail_factor").factor
+  tail = Attribute[attribute_name: "trail_factor"]().factor
   return (
     surface: MixShader(
-      1.0 - tail,
-      TransparentBSDF(),
-      Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
+      factor: 1.0 - tail,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
 }
 
 geometry graph centred(geometry: Geometry) -> Geometry {
@@ -913,22 +957,21 @@ geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometr
   typed = typewriter(chars, progress: progress)
   line = BoundingBox(RealizeInstances(chars), use_radius: false)
   end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
-  some = DomainSize(typed, component: INSTANCES).instance_count > 0
-  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  some = DomainSize[INSTANCES](typed).instance_count > 0
+  x = some ? end + 0.08 : line.min.x
   shown = progress > 0.0 and (progress < 1.0 or blink)
   cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
-  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+  return text_mesh(typed) + Switch[GEOMETRY](switch: shown, true_: cursor)
     |> SetMaterial(material: Tagline)
     |> TransformGeometry(translation: (0.0, -1.05, 0.0))
 }
 
 geometry graph sparks(letters: Geometry) -> Geometry {
   "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
-  landed = DeleteGeometry(
+  landed = DeleteGeometry[INSTANCE](
     letters,
-    selection: NamedAttribute(name: "opacity").attribute < 0.5,
-    domain: INSTANCE)
+    selection: NamedAttribute(name: "opacity").attribute < 0.5)
   return shape_emitter(landed)
     |> particles_2d(
       rate: 300.0,
@@ -949,9 +992,14 @@ geometry graph sparks(letters: Geometry) -> Geometry {
 
 geometry graph comet(progress: Float(subtype: FACTOR)) -> Geometry {
   "A bright disc that sweeps in from the left, under the title, and out at the top right as progress goes from 0 to 1, easing in and out; its echoes over the frames before, and a trail that thins to its tail"
-  path = BezierSegment(64, (-7.5, -2.4, 0.0), (-1.5, -3.9, 0.0), (4.5, -2.6, 0.0), (6.8, 4.8, 0.0))
-  at = SampleCurve(path, factor: ease(progress)).position
-  head = MeshCircle(vertices: 24, radius: 0.13, fill_type: NGON)
+  path = BezierSegment(
+    resolution: 64,
+    start: (-7.5, -2.4, 0.0),
+    start_handle: (-1.5, -3.9, 0.0),
+    end_handle: (4.5, -2.6, 0.0),
+    end: (6.8, 4.8, 0.0))
+  at = SampleCurve(path, factor: ease(t: progress)).position
+  head = MeshCircle[NGON](vertices: 24, radius: 0.13)
     |> TransformGeometry(translation: at)
   echoed = head
     |> echoes(count: 6, every: 2, decay: 0.7, tint: (0.2, 0.75, 1.0, 1.0))
@@ -977,7 +1025,7 @@ geometry graph title_sequence() -> Geometry {
   // Every part, in from 0 to 1 and out from 0 to 1, by the frame
   letters = title(progress: Clamp(value: (f - 6.0) / 30.0), out: Clamp(value: (f - 66.0) / 12.0))
   typed = Clamp(value: (f - 34.0) / 30.0) - Clamp(value: (f - 64.0) / 10.0)
-  drawn = ease(Clamp(value: (f - 26.0) / 14.0)) - ease(Clamp(value: (f - 72.0) / 8.0))
+  drawn = ease(t: Clamp(value: (f - 26.0) / 14.0)) - ease(t: Clamp(value: (f - 72.0) / 8.0))
   return (text_mesh(letters) |> SetMaterial(material: Title))
     + sparks(letters)
     + rule(width: 7.6 * drawn)
@@ -1029,9 +1077,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal)
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 geometry graph centred(geometry: Geometry) -> Geometry {
@@ -1064,9 +1115,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal)
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 geometry graph centred(geometry: Geometry) -> Geometry {
@@ -1110,9 +1164,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal, t
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 shader(material: true) graph Tagline() -> (surface: Shader) {
@@ -1155,12 +1212,12 @@ geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometr
   typed = typewriter(chars, progress: progress)
   line = BoundingBox(RealizeInstances(chars), use_radius: false)
   end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
-  some = DomainSize(typed, component: INSTANCES).instance_count > 0
-  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  some = DomainSize[INSTANCES](typed).instance_count > 0
+  x = some ? end + 0.08 : line.min.x
   shown = progress > 0.0 and (progress < 1.0 or blink)
   cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
-  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+  return text_mesh(typed) + Switch[GEOMETRY](switch: shown, true_: cursor)
     |> SetMaterial(material: Tagline)
     |> TransformGeometry(translation: (0.0, -1.05, 0.0))
 }
@@ -1185,9 +1242,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal, t
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 shader(material: true) graph Tagline() -> (surface: Shader) {
@@ -1197,10 +1257,11 @@ shader(material: true) graph Tagline() -> (surface: Shader) {
 
 shader(material: true) graph Spark() -> (surface: Shader) {
   "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
-  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
-  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
-  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
-  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+  life = Attribute[INSTANCER, attribute_name: "life_factor"]().factor
+  shown = Attribute[INSTANCER, attribute_name: "opacity"]().factor
+  hot = Mix[RGBA](factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0))
+  return (
+    surface: MixShader(factor: shown, a: TransparentBSDF(), b: Emission(color: hot, strength: 3.0)))
 }
 
 geometry graph centred(geometry: Geometry) -> Geometry {
@@ -1236,22 +1297,21 @@ geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometr
   typed = typewriter(chars, progress: progress)
   line = BoundingBox(RealizeInstances(chars), use_radius: false)
   end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
-  some = DomainSize(typed, component: INSTANCES).instance_count > 0
-  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  some = DomainSize[INSTANCES](typed).instance_count > 0
+  x = some ? end + 0.08 : line.min.x
   shown = progress > 0.0 and (progress < 1.0 or blink)
   cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
-  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+  return text_mesh(typed) + Switch[GEOMETRY](switch: shown, true_: cursor)
     |> SetMaterial(material: Tagline)
     |> TransformGeometry(translation: (0.0, -1.05, 0.0))
 }
 
 geometry graph sparks(letters: Geometry) -> Geometry {
   "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
-  landed = DeleteGeometry(
+  landed = DeleteGeometry[INSTANCE](
     letters,
-    selection: NamedAttribute(name: "opacity").attribute < 0.5,
-    domain: INSTANCE)
+    selection: NamedAttribute(name: "opacity").attribute < 0.5)
   return shape_emitter(landed)
     |> particles_2d(
       rate: 300.0,
@@ -1293,9 +1353,12 @@ use text_animate (animate_characters, text_characters, text_mesh, text_reveal, t
 
 shader(material: true) graph Title() -> (surface: Shader) {
   "Warm white letters that give their own light, as opaque as their opacity"
-  shown = Attribute(attribute_name: "opacity").factor
+  shown = Attribute[attribute_name: "opacity"]().factor
   return (
-    surface: MixShader(shown, TransparentBSDF(), Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.86, 0.62), strength: 2.5)))
 }
 
 shader(material: true) graph Tagline() -> (surface: Shader) {
@@ -1305,27 +1368,32 @@ shader(material: true) graph Tagline() -> (surface: Shader) {
 
 shader(material: true) graph Spark() -> (surface: Shader) {
   "A spark, white-hot gold at its birth, magenta at its end, as opaque as its opacity"
-  life = Attribute(attribute_type: INSTANCER, attribute_name: "life_factor").factor
-  shown = Attribute(attribute_type: INSTANCER, attribute_name: "opacity").factor
-  hot = Mix(factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0), data_type: RGBA)
-  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: hot, strength: 3.0)))
+  life = Attribute[INSTANCER, attribute_name: "life_factor"]().factor
+  shown = Attribute[INSTANCER, attribute_name: "opacity"]().factor
+  hot = Mix[RGBA](factor: life, a: (1.0, 0.62, 0.18, 1.0), b: (1.0, 0.08, 0.55, 1.0))
+  return (
+    surface: MixShader(factor: shown, a: TransparentBSDF(), b: Emission(color: hot, strength: 3.0)))
 }
 
 shader(material: true) graph Comet() -> (surface: Shader) {
   "The head and its echoes: white now, toward the tint stored on the oldest, as opaque as their opacity"
-  tint = Attribute(attribute_name: "tint").color
-  shown = Attribute(attribute_name: "opacity").factor
-  return (surface: MixShader(shown, TransparentBSDF(), Emission(color: tint, strength: 4.0)))
+  tint = Attribute[attribute_name: "tint"]().color
+  shown = Attribute[attribute_name: "opacity"]().factor
+  return (
+    surface: MixShader(
+      factor: shown,
+      a: TransparentBSDF(),
+      b: Emission(color: tint, strength: 4.0)))
 }
 
 shader(material: true) graph Trail() -> (surface: Shader) {
   "A magenta trail, fading to its tail"
-  tail = Attribute(attribute_name: "trail_factor").factor
+  tail = Attribute[attribute_name: "trail_factor"]().factor
   return (
     surface: MixShader(
-      1.0 - tail,
-      TransparentBSDF(),
-      Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
+      factor: 1.0 - tail,
+      a: TransparentBSDF(),
+      b: Emission(color: (1.0, 0.1, 0.55), strength: 3.0)))
 }
 
 geometry graph centred(geometry: Geometry) -> Geometry {
@@ -1361,22 +1429,21 @@ geometry graph tagline(progress: Float(subtype: FACTOR), blink: Bool) -> Geometr
   typed = typewriter(chars, progress: progress)
   line = BoundingBox(RealizeInstances(chars), use_radius: false)
   end = BoundingBox(RealizeInstances(typed), use_radius: false).max.x
-  some = DomainSize(typed, component: INSTANCES).instance_count > 0
-  x = Switch(switch: some, false_: line.min.x, true_: end + 0.08)
+  some = DomainSize[INSTANCES](typed).instance_count > 0
+  x = some ? end + 0.08 : line.min.x
   shown = progress > 0.0 and (progress < 1.0 or blink)
   cursor = Grid(size_x: 0.035, size_y: 0.34, vertices_x: 2, vertices_y: 2)
     |> TransformGeometry(translation: CombineXYZ(x: x, y: (line.min.y + line.max.y) * 0.5))
-  return text_mesh(typed) + Switch(switch: shown, true_: cursor, input_type: GEOMETRY)
+  return text_mesh(typed) + Switch[GEOMETRY](switch: shown, true_: cursor)
     |> SetMaterial(material: Tagline)
     |> TransformGeometry(translation: (0.0, -1.05, 0.0))
 }
 
 geometry graph sparks(letters: Geometry) -> Geometry {
   "Sparks born on the outline of the letters once they are more than half shown, thrown up, lifted, slowed and stirred; drawn as discs stretched along their speed, fading out"
-  landed = DeleteGeometry(
+  landed = DeleteGeometry[INSTANCE](
     letters,
-    selection: NamedAttribute(name: "opacity").attribute < 0.5,
-    domain: INSTANCE)
+    selection: NamedAttribute(name: "opacity").attribute < 0.5)
   return shape_emitter(landed)
     |> particles_2d(
       rate: 300.0,
@@ -1397,10 +1464,15 @@ geometry graph sparks(letters: Geometry) -> Geometry {
 
 geometry graph comet(progress: Float(subtype: FACTOR)) -> Geometry {
   "A bright disc that sweeps in from the left, under the title, and out at the top right as progress goes from 0 to 1, easing in and out; its echoes over the frames before, and a trail that thins to its tail"
-  path = BezierSegment(64, (-7.5, -2.4, 0.0), (-1.5, -3.9, 0.0), (4.5, -2.6, 0.0), (6.8, 4.8, 0.0))
+  path = BezierSegment(
+    resolution: 64,
+    start: (-7.5, -2.4, 0.0),
+    start_handle: (-1.5, -3.9, 0.0),
+    end_handle: (4.5, -2.6, 0.0),
+    end: (6.8, 4.8, 0.0))
   eased = progress * progress * (3.0 - 2.0 * progress)
   at = SampleCurve(path, factor: eased).position
-  head = MeshCircle(vertices: 24, radius: 0.13, fill_type: NGON)
+  head = MeshCircle[NGON](vertices: 24, radius: 0.13)
     |> TransformGeometry(translation: at)
   echoed = head
     |> echoes(count: 6, every: 2, decay: 0.7, tint: (0.2, 0.75, 1.0, 1.0))
@@ -1425,7 +1497,7 @@ geometry graph title_sequence() -> Geometry {
 </script></bn-file>
     </div>
     <p class="muted">
-      The files, with the script that renders this page's animations, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/title_sequence"><code>examples/tutorials/title_sequence/</code></a>.
+      The files, with the script that renders this page's animations, are in <a href="https://github.com/marcgardent/base-node-for-blender/tree/main/examples/tutorials/title_sequence"><code>examples/tutorials/title_sequence/</code></a>.
     </p>
 </div>
 </main>

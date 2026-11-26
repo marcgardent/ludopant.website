@@ -16,8 +16,8 @@
 <link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../packs.css">
-<script type="module" src="https://basenode.ludopant.com/view/bn-view.js"></script>
-<script type="module" src="https://basenode.ludopant.com/view/bn-file.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-view.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-file.js"></script>
 </head>
 <body>
 <!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
@@ -53,12 +53,12 @@
       <li><strong>The language.</strong> A long pipe of <code>|&gt;</code> lines, one pass of the terrain each; <code>use</code> to bring in a module; a field stored once on the mesh and read back twice, by the material and by the scattering. Each file is the one before plus a few lines: compare two steps to see what changed.</li>
     </ul>
     <p>
-      This page goes faster on the basics than <a href="https://basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>, which starts from a flat square: a noise, <code>SetPosition</code>, a material. Read it first if those are new to you.
+      This page goes faster on the basics than <a href="https://blender.basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>, which starts from a flat square: a noise, <code>SetPosition</code>, a material. Read it first if those are new to you.
     </p>
 
     <h2 id="before">Before you start</h2>
     <p>
-      You need Blender 5, the <a href="https://basenode.ludopant.com/#blender">Base Node add-on</a>, and the <a href="../procedural/">Procedural Toolkit</a> pack, version 0.13.1 or later: it carries the three modules this tutorial assembles.
+      You need Blender 5, the <a href="https://blender.basenode.ludopant.com/#blender">Base Node add-on</a>, and the <a href="https://ludopant.com/basenode-packs/#pack-procedural">Procedural Toolkit</a> pack, version 0.13.1 or later: it carries the three modules this tutorial assembles.
       The step files below are free to read, copy and change; the modules they <code>use</code> come with the pack, which is paid.
     </p>
     <table>
@@ -75,7 +75,7 @@
       <li><strong>Paste it.</strong> Press the copy button of its block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>, on any mesh object: the graph makes its own grid and ignores the mesh it is given.</li>
     </ul>
     <p>
-      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/valley/render.py"><code>render.py</code></a>, with the same camera, sun and sky, except where a caption says otherwise.
+      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-for-blender/blob/main/examples/tutorials/valley/render.py"><code>render.py</code></a>, with the same camera, sun and sky, except where a caption says otherwise.
     </p>
 
     <h2 id="step-1"><span class="n">1.</span> A valley on a grid</h2>
@@ -319,10 +319,10 @@ shader graph valley_ground(
     mud: Color = (0.05, 0.06, 0.04)
 ) -> Shader {
   "Grass, sand where the water laid its sediment, dark where it stayed"
-  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
-  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
-  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
-  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
+  laid = MapRange(value: Attribute[attribute_name: "terrain_change"]().factor, from_max: 0.04)
+  wet = MapRange(value: Attribute[attribute_name: "terrain_wetness"]().factor, from_max: 0.02)
+  sandy = Mix[RGBA](factor: laid, a: grass, b: sand)
+  damp = Mix[RGBA](factor: wet * 0.7, a: sandy, b: mud)
   return PrincipledBSDF(base_color: damp, roughness: 0.9 - wet * 0.4)
 }
 
@@ -404,14 +404,14 @@ shader graph valley_ground(
     mud: Color = (0.05, 0.06, 0.04)
 ) -> Shader {
   "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
-  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
-  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
-  cliff = Attribute(attribute_name: "valley_cliff").factor
+  laid = MapRange(value: Attribute[attribute_name: "terrain_change"]().factor, from_max: 0.04)
+  wet = MapRange(value: Attribute[attribute_name: "terrain_wetness"]().factor, from_max: 0.02)
+  cliff = Attribute[attribute_name: "valley_cliff"]().factor
   grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
-  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
-  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
-  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
-  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  sandy = Mix[RGBA](factor: laid, a: grass, b: sand)
+  damp = Mix[RGBA](factor: wet * 0.7, a: sandy, b: mud)
+  stone = Mix[RGBA](factor: grain, a: rock * 0.6, b: rock)
+  color = Mix[RGBA](factor: cliff, a: damp, b: stone)
   return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
 }
 
@@ -480,14 +480,14 @@ shader graph valley_ground(
     mud: Color = (0.05, 0.06, 0.04)
 ) -> Shader {
   "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
-  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
-  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
-  cliff = Attribute(attribute_name: "valley_cliff").factor
+  laid = MapRange(value: Attribute[attribute_name: "terrain_change"]().factor, from_max: 0.04)
+  wet = MapRange(value: Attribute[attribute_name: "terrain_wetness"]().factor, from_max: 0.02)
+  cliff = Attribute[attribute_name: "valley_cliff"]().factor
   grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
-  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
-  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
-  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
-  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  sandy = Mix[RGBA](factor: laid, a: grass, b: sand)
+  damp = Mix[RGBA](factor: wet * 0.7, a: sandy, b: mud)
+  stone = Mix[RGBA](factor: grain, a: rock * 0.6, b: rock)
+  color = Mix[RGBA](factor: cliff, a: damp, b: stone)
   return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
 }
 
@@ -497,8 +497,8 @@ shader(material: true) graph Ground() -> (surface: Shader) {
 
 shader(material: true) graph Stone() -> (surface: Shader) {
   "Weathered outside, lighter where the stone broke"
-  inside = Attribute(attribute_name: "fracture_inside").factor
-  color = Mix(factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45), data_type: RGBA)
+  inside = Attribute[attribute_name: "fracture_inside"]().factor
+  color = Mix[RGBA](factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45))
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8))
 }
 
@@ -593,14 +593,14 @@ shader graph valley_ground(
     mud: Color = (0.05, 0.06, 0.04)
 ) -> Shader {
   "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
-  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
-  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
-  cliff = Attribute(attribute_name: "valley_cliff").factor
+  laid = MapRange(value: Attribute[attribute_name: "terrain_change"]().factor, from_max: 0.04)
+  wet = MapRange(value: Attribute[attribute_name: "terrain_wetness"]().factor, from_max: 0.02)
+  cliff = Attribute[attribute_name: "valley_cliff"]().factor
   grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
-  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
-  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
-  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
-  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  sandy = Mix[RGBA](factor: laid, a: grass, b: sand)
+  damp = Mix[RGBA](factor: wet * 0.7, a: sandy, b: mud)
+  stone = Mix[RGBA](factor: grain, a: rock * 0.6, b: rock)
+  color = Mix[RGBA](factor: cliff, a: damp, b: stone)
   return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
 }
 
@@ -610,8 +610,8 @@ shader(material: true) graph Ground() -> (surface: Shader) {
 
 shader(material: true) graph Stone() -> (surface: Shader) {
   "Weathered outside, lighter where the stone broke"
-  inside = Attribute(attribute_name: "fracture_inside").factor
-  color = Mix(factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45), data_type: RGBA)
+  inside = Attribute[attribute_name: "fracture_inside"]().factor
+  color = Mix[RGBA](factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45))
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8))
 }
 
@@ -762,14 +762,14 @@ shader graph valley_ground(
     mud: Color = (0.05, 0.06, 0.04)
 ) -> Shader {
   "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
-  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
-  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
-  cliff = Attribute(attribute_name: "valley_cliff").factor
+  laid = MapRange(value: Attribute[attribute_name: "terrain_change"]().factor, from_max: 0.04)
+  wet = MapRange(value: Attribute[attribute_name: "terrain_wetness"]().factor, from_max: 0.02)
+  cliff = Attribute[attribute_name: "valley_cliff"]().factor
   grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
-  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
-  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
-  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
-  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  sandy = Mix[RGBA](factor: laid, a: grass, b: sand)
+  damp = Mix[RGBA](factor: wet * 0.7, a: sandy, b: mud)
+  stone = Mix[RGBA](factor: grain, a: rock * 0.6, b: rock)
+  color = Mix[RGBA](factor: cliff, a: damp, b: stone)
   return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
 }
 
@@ -779,8 +779,8 @@ shader(material: true) graph Ground() -> (surface: Shader) {
 
 shader(material: true) graph Stone() -> (surface: Shader) {
   "Weathered outside, lighter where the stone broke"
-  inside = Attribute(attribute_name: "fracture_inside").factor
-  color = Mix(factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45), data_type: RGBA)
+  inside = Attribute[attribute_name: "fracture_inside"]().factor
+  color = Mix[RGBA](factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45))
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8))
 }
 
@@ -1045,10 +1045,10 @@ shader graph valley_ground(
     mud: Color = (0.05, 0.06, 0.04)
 ) -> Shader {
   "Grass, sand where the water laid its sediment, dark where it stayed"
-  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
-  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
-  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
-  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
+  laid = MapRange(value: Attribute[attribute_name: "terrain_change"]().factor, from_max: 0.04)
+  wet = MapRange(value: Attribute[attribute_name: "terrain_wetness"]().factor, from_max: 0.02)
+  sandy = Mix[RGBA](factor: laid, a: grass, b: sand)
+  damp = Mix[RGBA](factor: wet * 0.7, a: sandy, b: mud)
   return PrincipledBSDF(base_color: damp, roughness: 0.9 - wet * 0.4)
 }
 
@@ -1097,14 +1097,14 @@ shader graph valley_ground(
     mud: Color = (0.05, 0.06, 0.04)
 ) -> Shader {
   "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
-  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
-  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
-  cliff = Attribute(attribute_name: "valley_cliff").factor
+  laid = MapRange(value: Attribute[attribute_name: "terrain_change"]().factor, from_max: 0.04)
+  wet = MapRange(value: Attribute[attribute_name: "terrain_wetness"]().factor, from_max: 0.02)
+  cliff = Attribute[attribute_name: "valley_cliff"]().factor
   grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
-  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
-  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
-  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
-  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  sandy = Mix[RGBA](factor: laid, a: grass, b: sand)
+  damp = Mix[RGBA](factor: wet * 0.7, a: sandy, b: mud)
+  stone = Mix[RGBA](factor: grain, a: rock * 0.6, b: rock)
+  color = Mix[RGBA](factor: cliff, a: damp, b: stone)
   return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
 }
 
@@ -1158,14 +1158,14 @@ shader graph valley_ground(
     mud: Color = (0.05, 0.06, 0.04)
 ) -> Shader {
   "Grass, sand where the water laid its sediment, dark where it stayed, rock on the cliffs"
-  laid = MapRange(value: Attribute(attribute_name: "terrain_change").factor, from_max: 0.04)
-  wet = MapRange(value: Attribute(attribute_name: "terrain_wetness").factor, from_max: 0.02)
-  cliff = Attribute(attribute_name: "valley_cliff").factor
+  laid = MapRange(value: Attribute[attribute_name: "terrain_change"]().factor, from_max: 0.04)
+  wet = MapRange(value: Attribute[attribute_name: "terrain_wetness"]().factor, from_max: 0.02)
+  cliff = Attribute[attribute_name: "valley_cliff"]().factor
   grain = NoiseTexture(vector: TextureCoordinate().object, scale: 8.0, detail: 6.0).factor
-  sandy = Mix(factor: laid, a: grass, b: sand, data_type: RGBA)
-  damp = Mix(factor: wet * 0.7, a: sandy, b: mud, data_type: RGBA)
-  stone = Mix(factor: grain, a: rock * 0.6, b: rock, data_type: RGBA)
-  color = Mix(factor: cliff, a: damp, b: stone, data_type: RGBA)
+  sandy = Mix[RGBA](factor: laid, a: grass, b: sand)
+  damp = Mix[RGBA](factor: wet * 0.7, a: sandy, b: mud)
+  stone = Mix[RGBA](factor: grain, a: rock * 0.6, b: rock)
+  color = Mix[RGBA](factor: cliff, a: damp, b: stone)
   return PrincipledBSDF(base_color: color, roughness: 0.9 - wet * 0.4)
 }
 
@@ -1175,8 +1175,8 @@ shader(material: true) graph Ground() -> (surface: Shader) {
 
 shader(material: true) graph Stone() -> (surface: Shader) {
   "Weathered outside, lighter where the stone broke"
-  inside = Attribute(attribute_name: "fracture_inside").factor
-  color = Mix(factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45), data_type: RGBA)
+  inside = Attribute[attribute_name: "fracture_inside"]().factor
+  color = Mix[RGBA](factor: inside, a: (0.16, 0.14, 0.12), b: (0.62, 0.55, 0.45))
   return (surface: PrincipledBSDF(base_color: color, roughness: 0.8))
 }
 
@@ -1234,7 +1234,7 @@ geometry graph valley(seed: Int = 3) -> Geometry {
 </script></bn-file>
     </div>
     <p class="muted">
-      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/valley"><code>examples/tutorials/valley/</code></a>.
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-for-blender/tree/main/examples/tutorials/valley"><code>examples/tutorials/valley/</code></a>.
     </p>
 </div>
 </main>

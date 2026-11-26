@@ -16,8 +16,8 @@
 <link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../packs.css">
-<script type="module" src="https://basenode.ludopant.com/view/bn-view.js"></script>
-<script type="module" src="https://basenode.ludopant.com/view/bn-file.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-view.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-file.js"></script>
 </head>
 <body>
 <!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
@@ -55,13 +55,13 @@
 
     <h2 id="prereq">Prerequisites</h2>
     <p>
-      If <code>.bn</code> is new to you, start with <a href="https://basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>: it shows the language one line at a time.
+      If <code>.bn</code> is new to you, start with <a href="https://blender.basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>: it shows the language one line at a time.
       If the compositor is, <a href="final-shot.html">The final shot</a> finishes a render there step by step; this page goes faster on the basics it explains, pipes and <code>keymix</code> among them.
     </p>
 
     <h2 id="before">Before you start</h2>
     <p>
-      You need Blender 5, the <a href="https://basenode.ludopant.com/#blender">Base Node add-on</a>, version 0.13.1 or later, and the <a href="../motion-compositing/">Motion Compositing</a> pack.
+      You need Blender 5, the <a href="https://blender.basenode.ludopant.com/#blender">Base Node add-on</a>, version 0.13.1 or later, and the <a href="https://ludopant.com/basenode-packs/#pack-motion-compositing">Motion Compositing</a> pack.
       The pack is sold by the author of Base Node, apart from the open source project. The steps are free to read and to copy; the two modules they call are not.
     </p>
     <table>
@@ -88,7 +88,7 @@
       </figure>
     </div>
     <p>
-      In Blender, open the three in an Image Editor (<em>Image › Open</em>): the graphs read them by their names, <code>Image(image: "promo-cut-plate-a.png")</code>. A name Blender does not have stops the step with an error that says so.
+      In Blender, open the three in an Image Editor (<em>Image › Open</em>): the graphs read them by their names, <code>Image[image: "promo-cut-plate-a.png"]()</code>. A name Blender does not have stops the step with an error that says so.
       For your own shots, change those names. Set the scene's resolution to 640 × 427, its frame range from 1 to the length of the step, and in <em>Color Management</em> its <em>View Transform</em> to <em>Standard</em>: the plates are pictures already viewed, and the default AgX would view them a second time.
     </p>
     <p>
@@ -99,7 +99,7 @@
       <li><strong>Paste it.</strong> Press the copy button of its block, open the Compositor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>.</li>
     </ul>
     <p>
-      Render the animation with <kbd>Ctrl</kbd>+<kbd>F12</kbd>, or scrub the timeline with the compositor's backdrop on. The animations are made from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/promo_cut/render.py"><code>render.py</code></a>:
+      Render the animation with <kbd>Ctrl</kbd>+<kbd>F12</kbd>, or scrub the timeline with the compositor's backdrop on. The animations are made from these exact files by <a href="https://github.com/marcgardent/base-node-for-blender/blob/main/examples/tutorials/promo_cut/render.py"><code>render.py</code></a>:
       it renders the three plates once, then the compositor of each step frame by frame, in a scene with nothing to render.
     </p>
 
@@ -122,21 +122,21 @@
 // @title The promo cut, step 1: a linear wipe
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use transitions (linear_wipe)
 
 compositor graph wipe_at(progress: Float(subtype: FACTOR) = 0.5 in 0.0..1.0) -> Color {
   "The podium wiped away by the hills, along 30°, a soft edge; progress 0 shows the podium, 1 the hills"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
-  return linear_wipe(a, b, progress, angle: 0.5235988, softness: 0.04).image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
+  return linear_wipe(a, b: b, progress: progress, angle: 0.5235988, softness: 0.04).image
 }
 
 compositor graph promo_cut() -> Color {
   "The cut, halfway through the wipe"
-  return wipe_at(0.5)
+  return wipe_at(progress: 0.5)
 }
 </script></bn-view>
     <ul>
@@ -159,17 +159,17 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 2: a wipe on the timeline
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use transitions (frame_progress, linear_wipe)
 
 compositor graph promo_cut() -> Color {
   "The podium wiped away by the hills from frame 13 to frame 37, eased in and out"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
   t = frame_progress(start: 13.0, length: 24.0, ease: true)
-  return linear_wipe(a, b, t, angle: 0.5235988, softness: 0.04).image
+  return linear_wipe(a, b: b, progress: t, angle: 0.5235988, softness: 0.04).image
 }
 </script></bn-view>
     <ul>
@@ -191,7 +191,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 3: clock, iris and radial wipes
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use mask2d (circle_mask)
@@ -200,19 +200,32 @@ use transitions
 
 compositor graph title_card() -> Color {
   "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
-  title = Image(image: "promo-cut-plate-c.png").image
-  heart = circle_mask(title, 0.1, 1.1).mask
-  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+  title = Image[image: "promo-cut-plate-c.png"]().image
+  heart = circle_mask(title, radius: 0.1, feather: 1.1).mask
+  return over(title, b: keymix(a: (0.35, 0.02, 0.25, 1.0), b: (0.01, 0.01, 0.06, 1.0), mask: heart))
 }
 
 compositor graph promo_cut() -> Color {
   "The podium to the hills by a clock wipe, to the title by an iris, back to the podium by a radial wipe both ways: a cut every 24 frames"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
   c = title_card()
-  ab = clock_wipe(a, b, frame_progress(7.0, 16.0, true), softness: 0.02).image
-  bc = iris_wipe(ab, c, frame_progress(31.0, 16.0, true), softness: 0.03).image
-  return radial_wipe(bc, a, frame_progress(55.0, 16.0, true), direction: Both, softness: 0.02).image
+  ab = clock_wipe(
+    a,
+    b: b,
+    progress: frame_progress(start: 7.0, length: 16.0, ease: true),
+    softness: 0.02).image
+  bc = iris_wipe(
+    ab,
+    b: c,
+    progress: frame_progress(start: 31.0, length: 16.0, ease: true),
+    softness: 0.03).image
+  return radial_wipe(
+    bc,
+    b: a,
+    progress: frame_progress(start: 55.0, length: 16.0, ease: true),
+    direction: Both,
+    softness: 0.02).image
 }
 </script></bn-view>
     <ul>
@@ -235,7 +248,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 4: dissolves
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use mask2d (circle_mask)
@@ -244,25 +257,29 @@ use transitions
 
 compositor graph title_card() -> Color {
   "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
-  title = Image(image: "promo-cut-plate-c.png").image
-  heart = circle_mask(title, 0.1, 1.1).mask
-  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+  title = Image[image: "promo-cut-plate-c.png"]().image
+  heart = circle_mask(title, radius: 0.1, feather: 1.1).mask
+  return over(title, b: keymix(a: (0.35, 0.02, 0.25, 1.0), b: (0.01, 0.01, 0.06, 1.0), mask: heart))
 }
 
 compositor graph promo_cut() -> Color {
   "The podium to the hills by a dissolve in cells of noise, to the title through orange, back to the podium by a cross dissolve"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
   c = title_card()
   ab = noise_dissolve(
     a,
-    b,
-    frame_progress(7.0, 16.0, true),
+    b: b,
+    progress: frame_progress(start: 7.0, length: 16.0, ease: true),
     size: 12.0,
     softness: 0.1,
     seed: 3.0).image
-  bc = dip_to_color(ab, c, frame_progress(31.0, 16.0), color: (1.0, 0.3, 0.02, 1.0)).image
-  return dissolve(bc, a, frame_progress(55.0, 16.0, true)).image
+  bc = dip_to_color(
+    ab,
+    b: c,
+    progress: frame_progress(start: 31.0, length: 16.0),
+    color: (1.0, 0.3, 0.02, 1.0)).image
+  return dissolve(bc, b: a, progress: frame_progress(start: 55.0, length: 16.0, ease: true)).image
 }
 </script></bn-view>
     <ul>
@@ -285,7 +302,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 5: push
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use mask2d (circle_mask)
@@ -294,19 +311,31 @@ use transitions
 
 compositor graph title_card() -> Color {
   "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
-  title = Image(image: "promo-cut-plate-c.png").image
-  heart = circle_mask(title, 0.1, 1.1).mask
-  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+  title = Image[image: "promo-cut-plate-c.png"]().image
+  heart = circle_mask(title, radius: 0.1, feather: 1.1).mask
+  return over(title, b: keymix(a: (0.35, 0.02, 0.25, 1.0), b: (0.01, 0.01, 0.06, 1.0), mask: heart))
 }
 
 compositor graph promo_cut() -> Color {
   "The hills push the podium out to the left, the title pushes the hills up, the podium pushes the title out to the right: 12 frames each"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
   c = title_card()
-  ab = push(a, b, frame_progress(11.0, 12.0, true), direction: Left).image
-  bc = push(ab, c, frame_progress(35.0, 12.0, true), direction: Up).image
-  return push(bc, a, frame_progress(59.0, 12.0, true), direction: Right).image
+  ab = push(
+    a,
+    b: b,
+    progress: frame_progress(start: 11.0, length: 12.0, ease: true),
+    direction: Left).image
+  bc = push(
+    ab,
+    b: c,
+    progress: frame_progress(start: 35.0, length: 12.0, ease: true),
+    direction: Up).image
+  return push(
+    bc,
+    b: a,
+    progress: frame_progress(start: 59.0, length: 12.0, ease: true),
+    direction: Right).image
 }
 </script></bn-view>
     <ul>
@@ -328,7 +357,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 6: posterize and halftone
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use grade (exposure_stops, grade)
@@ -341,28 +370,32 @@ compositor graph comic(image: Color) -> Color {
   ink = (0.03, 0.01, 0.06, 1.0)
   seen = grade(image, gamma: (2.2, 2.2, 2.2))
   flat = seen
-    |> posterize(4)
+    |> posterize(levels: 4)
     |> grade(gamma: (0.4545, 0.4545, 0.4545))
-  dots = halftone(exposure_stops(seen, 1.0), cell: 7.0, ink: ink).mask
-  return keymix(ink, flat, dots * 0.85)
+  dots = halftone(exposure_stops(seen, stops: 1.0), cell: 7.0, ink: ink).mask
+  return keymix(ink, b: flat, mask: dots * 0.85)
 }
 
 compositor graph promo_cut() -> Color {
   "The hills printed as a comic, developed by a wipe from the left from frame 13 to frame 37"
-  b = Image(image: "promo-cut-plate-b.png").image
-  return linear_wipe(comic(b), b, frame_progress(13.0, 24.0, true), softness: 0.05).image
+  b = Image[image: "promo-cut-plate-b.png"]().image
+  return linear_wipe(
+    comic(b),
+    b: b,
+    progress: frame_progress(start: 13.0, length: 24.0, ease: true),
+    softness: 0.05).image
 }
 </script></bn-view>
     <ul>
       <li><strong>As the eye sees it.</strong> The compositor works on linear light, where most of a picture sits low: cut in four even levels there, the hills would be black. <code>grade</code> with a <code>gamma</code> of 2.2 lifts the image to about what a screen shows, <code>seen</code>; the levels are cut there, and a gamma of 1 / 2.2 brings the result back.</li>
       <li><strong><code>posterize</code></strong> cuts each channel into 4 even levels: flat areas of colour, as an offset print with few inks.</li>
-      <li><strong><code>halftone</code></strong> draws a dot of ink in each cell of 7 pixels, its share of the cell 1 − the luma there: big dots in the dark, none in the light. Its <code>.mask</code> is the dots alone; <code>keymix</code> lays the ink through them, at 85 %, on the flat colours. The dots are measured on <code>seen</code> one stop brighter, <code>exposure_stops(seen, 1.0)</code>, so they stay in the shadows and the sky stays clean, as in a comic.</li>
+      <li><strong><code>halftone</code></strong> draws a dot of ink in each cell of 7 pixels, its share of the cell 1 − the luma there: big dots in the dark, none in the light. Its <code>.mask</code> is the dots alone; <code>keymix</code> lays the ink through them, at 85 %, on the flat colours. The dots are measured on <code>seen</code> one stop brighter, <code>exposure_stops(seen, stops: 1.0)</code>, so they stay in the shadows and the sky stays clean, as in a comic.</li>
     </ul>
     <figure>
       <img src="img/promo-cut-step6.webp" width="640" height="427" loading="lazy" alt="The hills as a comic print, flat colours and dots of ink in the shadows, developed into the render by a soft wipe from the left">
       <figcaption>Step 6. Printed, then developed: a wipe from one look of the plate to another.</figcaption>
     </figure>
-    <p class="try"><strong>Try:</strong> <code>color_halftone(image, 6.0)</code> in place of <code>comic(b)</code>: three screens of red, green and blue dots, turned so that they do not beat.</p>
+    <p class="try"><strong>Try:</strong> <code>color_halftone(image, cell: 6.0)</code> in place of <code>comic(b)</code>: three screens of red, green and blue dots, turned so that they do not beat.</p>
 
     <h2 id="step-7"><span class="n">7.</span> Tape and glitch</h2>
     <p>
@@ -374,7 +407,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 7: tape and glitch
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use stylize (glitch_blocks, scanlines, vhs)
@@ -387,15 +420,19 @@ compositor graph burst(at: Float, width: Float = 6.0 in 1.0..) -> Float {
 
 compositor graph promo_cut() -> Color {
   "A hard push from the podium to the hills at frame 25, on a video tape, torn by glitch blocks around the cut"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
-  cut = push(a, b, frame_progress(21.0, 8.0, true), direction: Left).image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
+  cut = push(
+    a,
+    b: b,
+    progress: frame_progress(start: 21.0, length: 8.0, ease: true),
+    direction: Left).image
   return cut
     |> vhs(shift: 2.0, jitter: 1.0, noise: 0.02, lines: 0.0, seed: 1.0)
     |> scanlines(spacing: 3.0, thickness: 0.4, darkness: 0.3, roll: 0.25).image
     |> glitch_blocks(
       block: (64.0, 10.0),
-      amount: 0.6 * burst(25.0),
+      amount: 0.6 * burst(at: 25.0),
       shift: 48.0,
       split: 6.0,
       seed: 5.0,
@@ -422,7 +459,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 8: the reel
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use grade (exposure_stops, grade)
@@ -433,9 +470,9 @@ use transitions
 
 compositor graph title_card() -> Color {
   "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
-  title = Image(image: "promo-cut-plate-c.png").image
-  heart = circle_mask(title, 0.1, 1.1).mask
-  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+  title = Image[image: "promo-cut-plate-c.png"]().image
+  heart = circle_mask(title, radius: 0.1, feather: 1.1).mask
+  return over(title, b: keymix(a: (0.35, 0.02, 0.25, 1.0), b: (0.01, 0.01, 0.06, 1.0), mask: heart))
 }
 
 compositor graph comic(image: Color) -> Color {
@@ -443,10 +480,10 @@ compositor graph comic(image: Color) -> Color {
   ink = (0.03, 0.01, 0.06, 1.0)
   seen = grade(image, gamma: (2.2, 2.2, 2.2))
   flat = seen
-    |> posterize(4)
+    |> posterize(levels: 4)
     |> grade(gamma: (0.4545, 0.4545, 0.4545))
-  dots = halftone(exposure_stops(seen, 1.0), cell: 7.0, ink: ink).mask
-  return keymix(ink, flat, dots * 0.85)
+  dots = halftone(exposure_stops(seen, stops: 1.0), cell: 7.0, ink: ink).mask
+  return keymix(ink, b: flat, mask: dots * 0.85)
 }
 
 compositor graph burst(at: Float, width: Float = 6.0 in 1.0..) -> Float {
@@ -456,14 +493,18 @@ compositor graph burst(at: Float, width: Float = 6.0 in 1.0..) -> Float {
 
 compositor graph promo_cut() -> Color {
   "A loop of 96 frames: the podium pushed out by the hills in print, developed; an iris to the title, whose neon flickers on; a dip through magenta back to the podium; glitches at the cuts, scanlines, a lens"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
-  title = Image(image: "promo-cut-plate-c.png").image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
+  title = Image[image: "promo-cut-plate-c.png"]().image
   // The hills come in printed, and a wipe develops them
-  hills = linear_wipe(comic(b), b, frame_progress(31.0, 14.0, true), softness: 0.05).image
+  hills = linear_wipe(
+    comic(b),
+    b: b,
+    progress: frame_progress(start: 31.0, length: 14.0, ease: true),
+    softness: 0.05).image
   // The title in a tube of light that comes on, flickers off and on again
   f = SceneTime().frame
-  on = frame_progress(57.0, 3.0) * (1.0 - 0.9 * (f > 61.0) * (f < 64.0))
+  on = frame_progress(start: 57.0, length: 3.0) * (1.0 - 0.9 * (f > 61.0) * (f < 64.0))
   card = neon_outline(
     title_card(),
     matte: alpha_of(title),
@@ -472,11 +513,23 @@ compositor graph promo_cut() -> Color {
     glow: 16.0,
     intensity: 1.6 * on).image
   // The cut
-  ab = push(a, hills, frame_progress(19.0, 8.0, true), direction: Left).image
-  bc = iris_wipe(ab, card, frame_progress(47.0, 10.0, true), softness: 0.03).image
-  ca = dip_to_color(bc, a, frame_progress(79.0, 14.0), color: (0.6, 0.02, 0.3, 1.0)).image
+  ab = push(
+    a,
+    b: hills,
+    progress: frame_progress(start: 19.0, length: 8.0, ease: true),
+    direction: Left).image
+  bc = iris_wipe(
+    ab,
+    b: card,
+    progress: frame_progress(start: 47.0, length: 10.0, ease: true),
+    softness: 0.03).image
+  ca = dip_to_color(
+    bc,
+    b: a,
+    progress: frame_progress(start: 79.0, length: 14.0),
+    color: (0.6, 0.02, 0.3, 1.0)).image
   // Torn at the cuts, on a screen, through a lens
-  g = burst(23.0) + burst(52.0, 4.0)
+  g = burst(at: 23.0) + burst(at: 52.0, width: 4.0)
   return ca
     |> glitch_blocks(
       block: (64.0, 10.0),
@@ -528,7 +581,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 8: the reel
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use grade (exposure_stops, grade)
@@ -539,9 +592,9 @@ use transitions
 
 compositor graph title_card() -> Color {
   "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
-  title = Image(image: "promo-cut-plate-c.png").image
-  heart = circle_mask(title, 0.1, 1.1).mask
-  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+  title = Image[image: "promo-cut-plate-c.png"]().image
+  heart = circle_mask(title, radius: 0.1, feather: 1.1).mask
+  return over(title, b: keymix(a: (0.35, 0.02, 0.25, 1.0), b: (0.01, 0.01, 0.06, 1.0), mask: heart))
 }
 
 compositor graph comic(image: Color) -> Color {
@@ -549,10 +602,10 @@ compositor graph comic(image: Color) -> Color {
   ink = (0.03, 0.01, 0.06, 1.0)
   seen = grade(image, gamma: (2.2, 2.2, 2.2))
   flat = seen
-    |> posterize(4)
+    |> posterize(levels: 4)
     |> grade(gamma: (0.4545, 0.4545, 0.4545))
-  dots = halftone(exposure_stops(seen, 1.0), cell: 7.0, ink: ink).mask
-  return keymix(ink, flat, dots * 0.85)
+  dots = halftone(exposure_stops(seen, stops: 1.0), cell: 7.0, ink: ink).mask
+  return keymix(ink, b: flat, mask: dots * 0.85)
 }
 
 compositor graph burst(at: Float, width: Float = 6.0 in 1.0..) -> Float {
@@ -562,14 +615,18 @@ compositor graph burst(at: Float, width: Float = 6.0 in 1.0..) -> Float {
 
 compositor graph promo_cut() -> Color {
   "A loop of 96 frames: the podium pushed out by the hills in print, developed; an iris to the title, whose neon flickers on; a dip through magenta back to the podium; glitches at the cuts, scanlines, a lens"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
-  title = Image(image: "promo-cut-plate-c.png").image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
+  title = Image[image: "promo-cut-plate-c.png"]().image
   // The hills come in printed, and a wipe develops them
-  hills = linear_wipe(comic(b), b, frame_progress(31.0, 14.0, true), softness: 0.05).image
+  hills = linear_wipe(
+    comic(b),
+    b: b,
+    progress: frame_progress(start: 31.0, length: 14.0, ease: true),
+    softness: 0.05).image
   // The title in a tube of light that comes on, flickers off and on again
   f = SceneTime().frame
-  on = frame_progress(57.0, 3.0) * (1.0 - 0.9 * (f > 61.0) * (f < 64.0))
+  on = frame_progress(start: 57.0, length: 3.0) * (1.0 - 0.9 * (f > 61.0) * (f < 64.0))
   card = neon_outline(
     title_card(),
     matte: alpha_of(title),
@@ -578,11 +635,23 @@ compositor graph promo_cut() -> Color {
     glow: 16.0,
     intensity: 1.6 * on).image
   // The cut
-  ab = push(a, hills, frame_progress(19.0, 8.0, true), direction: Left).image
-  bc = iris_wipe(ab, card, frame_progress(47.0, 10.0, true), softness: 0.03).image
-  ca = dip_to_color(bc, a, frame_progress(79.0, 14.0), color: (0.6, 0.02, 0.3, 1.0)).image
+  ab = push(
+    a,
+    b: hills,
+    progress: frame_progress(start: 19.0, length: 8.0, ease: true),
+    direction: Left).image
+  bc = iris_wipe(
+    ab,
+    b: card,
+    progress: frame_progress(start: 47.0, length: 10.0, ease: true),
+    softness: 0.03).image
+  ca = dip_to_color(
+    bc,
+    b: a,
+    progress: frame_progress(start: 79.0, length: 14.0),
+    color: (0.6, 0.02, 0.3, 1.0)).image
   // Torn at the cuts, on a screen, through a lens
-  g = burst(23.0) + burst(52.0, 4.0)
+  g = burst(at: 23.0) + burst(at: 52.0, width: 4.0)
   return ca
     |> glitch_blocks(
       block: (64.0, 10.0),
@@ -603,21 +672,21 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 1: a linear wipe
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use transitions (linear_wipe)
 
 compositor graph wipe_at(progress: Float(subtype: FACTOR) = 0.5 in 0.0..1.0) -> Color {
   "The podium wiped away by the hills, along 30°, a soft edge; progress 0 shows the podium, 1 the hills"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
-  return linear_wipe(a, b, progress, angle: 0.5235988, softness: 0.04).image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
+  return linear_wipe(a, b: b, progress: progress, angle: 0.5235988, softness: 0.04).image
 }
 
 compositor graph promo_cut() -> Color {
   "The cut, halfway through the wipe"
-  return wipe_at(0.5)
+  return wipe_at(progress: 0.5)
 }
 </script></bn-file>
       <bn-file><script type="text/bn">
@@ -625,17 +694,17 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 2: a wipe on the timeline
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use transitions (frame_progress, linear_wipe)
 
 compositor graph promo_cut() -> Color {
   "The podium wiped away by the hills from frame 13 to frame 37, eased in and out"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
   t = frame_progress(start: 13.0, length: 24.0, ease: true)
-  return linear_wipe(a, b, t, angle: 0.5235988, softness: 0.04).image
+  return linear_wipe(a, b: b, progress: t, angle: 0.5235988, softness: 0.04).image
 }
 </script></bn-file>
       <bn-file><script type="text/bn">
@@ -643,7 +712,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 3: clock, iris and radial wipes
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use mask2d (circle_mask)
@@ -652,19 +721,32 @@ use transitions
 
 compositor graph title_card() -> Color {
   "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
-  title = Image(image: "promo-cut-plate-c.png").image
-  heart = circle_mask(title, 0.1, 1.1).mask
-  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+  title = Image[image: "promo-cut-plate-c.png"]().image
+  heart = circle_mask(title, radius: 0.1, feather: 1.1).mask
+  return over(title, b: keymix(a: (0.35, 0.02, 0.25, 1.0), b: (0.01, 0.01, 0.06, 1.0), mask: heart))
 }
 
 compositor graph promo_cut() -> Color {
   "The podium to the hills by a clock wipe, to the title by an iris, back to the podium by a radial wipe both ways: a cut every 24 frames"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
   c = title_card()
-  ab = clock_wipe(a, b, frame_progress(7.0, 16.0, true), softness: 0.02).image
-  bc = iris_wipe(ab, c, frame_progress(31.0, 16.0, true), softness: 0.03).image
-  return radial_wipe(bc, a, frame_progress(55.0, 16.0, true), direction: Both, softness: 0.02).image
+  ab = clock_wipe(
+    a,
+    b: b,
+    progress: frame_progress(start: 7.0, length: 16.0, ease: true),
+    softness: 0.02).image
+  bc = iris_wipe(
+    ab,
+    b: c,
+    progress: frame_progress(start: 31.0, length: 16.0, ease: true),
+    softness: 0.03).image
+  return radial_wipe(
+    bc,
+    b: a,
+    progress: frame_progress(start: 55.0, length: 16.0, ease: true),
+    direction: Both,
+    softness: 0.02).image
 }
 </script></bn-file>
       <bn-file><script type="text/bn">
@@ -672,7 +754,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 4: dissolves
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use mask2d (circle_mask)
@@ -681,25 +763,29 @@ use transitions
 
 compositor graph title_card() -> Color {
   "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
-  title = Image(image: "promo-cut-plate-c.png").image
-  heart = circle_mask(title, 0.1, 1.1).mask
-  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+  title = Image[image: "promo-cut-plate-c.png"]().image
+  heart = circle_mask(title, radius: 0.1, feather: 1.1).mask
+  return over(title, b: keymix(a: (0.35, 0.02, 0.25, 1.0), b: (0.01, 0.01, 0.06, 1.0), mask: heart))
 }
 
 compositor graph promo_cut() -> Color {
   "The podium to the hills by a dissolve in cells of noise, to the title through orange, back to the podium by a cross dissolve"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
   c = title_card()
   ab = noise_dissolve(
     a,
-    b,
-    frame_progress(7.0, 16.0, true),
+    b: b,
+    progress: frame_progress(start: 7.0, length: 16.0, ease: true),
     size: 12.0,
     softness: 0.1,
     seed: 3.0).image
-  bc = dip_to_color(ab, c, frame_progress(31.0, 16.0), color: (1.0, 0.3, 0.02, 1.0)).image
-  return dissolve(bc, a, frame_progress(55.0, 16.0, true)).image
+  bc = dip_to_color(
+    ab,
+    b: c,
+    progress: frame_progress(start: 31.0, length: 16.0),
+    color: (1.0, 0.3, 0.02, 1.0)).image
+  return dissolve(bc, b: a, progress: frame_progress(start: 55.0, length: 16.0, ease: true)).image
 }
 </script></bn-file>
       <bn-file><script type="text/bn">
@@ -707,7 +793,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 5: push
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use mask2d (circle_mask)
@@ -716,19 +802,31 @@ use transitions
 
 compositor graph title_card() -> Color {
   "The title over a backdrop in the colours of the podium: magenta at its heart, a deep blue at its edges"
-  title = Image(image: "promo-cut-plate-c.png").image
-  heart = circle_mask(title, 0.1, 1.1).mask
-  return over(title, keymix((0.35, 0.02, 0.25, 1.0), (0.01, 0.01, 0.06, 1.0), heart))
+  title = Image[image: "promo-cut-plate-c.png"]().image
+  heart = circle_mask(title, radius: 0.1, feather: 1.1).mask
+  return over(title, b: keymix(a: (0.35, 0.02, 0.25, 1.0), b: (0.01, 0.01, 0.06, 1.0), mask: heart))
 }
 
 compositor graph promo_cut() -> Color {
   "The hills push the podium out to the left, the title pushes the hills up, the podium pushes the title out to the right: 12 frames each"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
   c = title_card()
-  ab = push(a, b, frame_progress(11.0, 12.0, true), direction: Left).image
-  bc = push(ab, c, frame_progress(35.0, 12.0, true), direction: Up).image
-  return push(bc, a, frame_progress(59.0, 12.0, true), direction: Right).image
+  ab = push(
+    a,
+    b: b,
+    progress: frame_progress(start: 11.0, length: 12.0, ease: true),
+    direction: Left).image
+  bc = push(
+    ab,
+    b: c,
+    progress: frame_progress(start: 35.0, length: 12.0, ease: true),
+    direction: Up).image
+  return push(
+    bc,
+    b: a,
+    progress: frame_progress(start: 59.0, length: 12.0, ease: true),
+    direction: Right).image
 }
 </script></bn-file>
       <bn-file><script type="text/bn">
@@ -736,7 +834,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 6: posterize and halftone
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use grade (exposure_stops, grade)
@@ -749,16 +847,20 @@ compositor graph comic(image: Color) -> Color {
   ink = (0.03, 0.01, 0.06, 1.0)
   seen = grade(image, gamma: (2.2, 2.2, 2.2))
   flat = seen
-    |> posterize(4)
+    |> posterize(levels: 4)
     |> grade(gamma: (0.4545, 0.4545, 0.4545))
-  dots = halftone(exposure_stops(seen, 1.0), cell: 7.0, ink: ink).mask
-  return keymix(ink, flat, dots * 0.85)
+  dots = halftone(exposure_stops(seen, stops: 1.0), cell: 7.0, ink: ink).mask
+  return keymix(ink, b: flat, mask: dots * 0.85)
 }
 
 compositor graph promo_cut() -> Color {
   "The hills printed as a comic, developed by a wipe from the left from frame 13 to frame 37"
-  b = Image(image: "promo-cut-plate-b.png").image
-  return linear_wipe(comic(b), b, frame_progress(13.0, 24.0, true), softness: 0.05).image
+  b = Image[image: "promo-cut-plate-b.png"]().image
+  return linear_wipe(
+    comic(b),
+    b: b,
+    progress: frame_progress(start: 13.0, length: 24.0, ease: true),
+    softness: 0.05).image
 }
 </script></bn-file>
       <bn-file><script type="text/bn">
@@ -766,7 +868,7 @@ compositor graph promo_cut() -> Color {
 // @title The promo cut, step 7: tape and glitch
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use stylize (glitch_blocks, scanlines, vhs)
@@ -779,15 +881,19 @@ compositor graph burst(at: Float, width: Float = 6.0 in 1.0..) -> Float {
 
 compositor graph promo_cut() -> Color {
   "A hard push from the podium to the hills at frame 25, on a video tape, torn by glitch blocks around the cut"
-  a = Image(image: "promo-cut-plate-a.png").image
-  b = Image(image: "promo-cut-plate-b.png").image
-  cut = push(a, b, frame_progress(21.0, 8.0, true), direction: Left).image
+  a = Image[image: "promo-cut-plate-a.png"]().image
+  b = Image[image: "promo-cut-plate-b.png"]().image
+  cut = push(
+    a,
+    b: b,
+    progress: frame_progress(start: 21.0, length: 8.0, ease: true),
+    direction: Left).image
   return cut
     |> vhs(shift: 2.0, jitter: 1.0, noise: 0.02, lines: 0.0, seed: 1.0)
     |> scanlines(spacing: 3.0, thickness: 0.4, darkness: 0.3, roll: 0.25).image
     |> glitch_blocks(
       block: (64.0, 10.0),
-      amount: 0.6 * burst(25.0),
+      amount: 0.6 * burst(at: 25.0),
       shift: 48.0,
       split: 6.0,
       seed: 5.0,
@@ -796,7 +902,7 @@ compositor graph promo_cut() -> Color {
 </script></bn-file>
     </div>
     <p class="muted">
-      The files, with the script that renders this page's plates and animations, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/promo_cut"><code>examples/tutorials/promo_cut/</code></a>.
+      The files, with the script that renders this page's plates and animations, are in <a href="https://github.com/marcgardent/base-node-for-blender/tree/main/examples/tutorials/promo_cut"><code>examples/tutorials/promo_cut/</code></a>.
     </p>
 </div>
 </main>

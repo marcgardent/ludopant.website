@@ -16,8 +16,8 @@
 <link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../packs.css">
-<script type="module" src="https://basenode.ludopant.com/view/bn-view.js"></script>
-<script type="module" src="https://basenode.ludopant.com/view/bn-file.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-view.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-file.js"></script>
 </head>
 <body>
 <!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
@@ -53,12 +53,12 @@
       <li><strong>The language.</strong> <code>use</code> to bring in a module, a module's graph called with only the inputs that matter (the others keep their defaults), its tuple of outputs read by name (<code>t.points</code>, <code>t.instances</code>), frames to group a long graph, and an <code>Object</code> input that the modifier fills in.</li>
     </ul>
     <p>
-      This page goes faster on the basics than <a href="https://basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>, which starts from a flat square: a noise, <code>SetPosition</code>, a material. Read it first if those are new to you.
+      This page goes faster on the basics than <a href="https://blender.basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>, which starts from a flat square: a noise, <code>SetPosition</code>, a material. Read it first if those are new to you.
     </p>
 
     <h2 id="before">Before you start</h2>
     <p>
-      You need Blender 5, the <a href="https://basenode.ludopant.com/#blender">Base Node add-on</a>, and the <a href="../scatter/">Scatter &amp; Biomes</a> pack, version 0.13.1 or later. The pack is sold by the author of Base Node, apart from the open source project: the steps below are free to read, copy and change; the modules they <code>use</code> are not.
+      You need Blender 5, the <a href="https://blender.basenode.ludopant.com/#blender">Base Node add-on</a>, and the <a href="https://ludopant.com/basenode-packs/#pack-scatter">Scatter &amp; Biomes</a> pack, version 0.13.1 or later. The pack is sold by the author of Base Node, apart from the open source project: the steps below are free to read, copy and change; the modules they <code>use</code> are not.
       The hillside, the path and the trees, bushes, rocks and grass are made with plain nodes, in the step files themselves.
     </p>
     <table>
@@ -74,7 +74,7 @@
       <li><strong>Paste it.</strong> Press the copy button of its block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>, on any mesh object: the graph makes its own hillside and ignores the mesh it is given.</li>
     </ul>
     <p>
-      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/forest_edge/render.py"><code>render.py</code></a>, with the same camera, sun and sky, except where a caption says otherwise. The hillside is 180 m wide; the camera stands at its foot, 11 m up.
+      The pictures are rendered from these exact files by <a href="https://github.com/marcgardent/base-node-for-blender/blob/main/examples/tutorials/forest_edge/render.py"><code>render.py</code></a>, with the same camera, sun and sky, except where a caption says otherwise. The hillside is 180 m wide; the camera stands at its foot, 11 m up.
     </p>
 
     <h2 id="step-1"><span class="n">1.</span> A hillside and a path</h2>
@@ -98,12 +98,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -121,7 +119,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -134,7 +132,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph forest_edge() -> Geometry {
@@ -153,7 +151,7 @@ geometry graph forest_edge() -> Geometry {
 </script></bn-view>
     <ul>
       <li><code>hill_height</code> adds three things: a hill whose crest is 40 m away, a bank that rises 5 m in 6 m across it, and hummocks of noise. The bank is there for the rules of step 3: it is too steep for trees.</li>
-      <li><code>hill_path</code> is a curve, not a mesh: the scatter keeps away from curves (step 4). Its points take their height from <code>hill_height(xy)</code>, the same graph as the ground, so it lies on it. <code>CurveToMesh</code> only gives it a body to render.</li>
+      <li><code>hill_path</code> is a curve, not a mesh: the scatter keeps away from curves (step 4). Its points take their height from <code>hill_height(p: xy)</code>, the same graph as the ground, so it lies on it. <code>CurveToMesh</code> only gives it a body to render.</li>
       <li>The material shows bare earth where the ground is steeper than about 32°: the bank.</li>
     </ul>
     <figure>
@@ -184,12 +182,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -202,11 +198,7 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
@@ -221,7 +213,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -234,7 +226,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -305,12 +297,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -323,11 +313,7 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
@@ -342,7 +328,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -355,7 +341,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -436,12 +422,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -454,11 +438,7 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
@@ -473,7 +453,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -486,7 +466,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -575,12 +555,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -593,21 +571,13 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
 shader(material: true) graph Leaves() -> (surface: Shader) {
   "Fresh green, from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.06, 0.15, 0.03),
-    b: (0.17, 0.24, 0.05),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.06, 0.15, 0.03), b: (0.17, 0.24, 0.05))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
 }
 
@@ -622,7 +592,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -635,7 +605,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -747,12 +717,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -765,48 +733,28 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
 shader(material: true) graph Leaves() -> (surface: Shader) {
   "Fresh green, from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.06, 0.15, 0.03),
-    b: (0.17, 0.24, 0.05),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.06, 0.15, 0.03), b: (0.17, 0.24, 0.05))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
 }
 
 shader(material: true) graph Shrub() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.05, 0.11, 0.025),
-    b: (0.12, 0.17, 0.04),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.05, 0.11, 0.025), b: (0.12, 0.17, 0.04))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.75))
 }
 
 shader(material: true) graph Stone() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.13, 0.12, 0.11),
-    b: (0.24, 0.22, 0.19),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.13, 0.12, 0.11), b: (0.24, 0.22, 0.19))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.85))
 }
 
-shader(material: true) graph Blades() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.08, 0.18, 0.03),
-    b: (0.24, 0.26, 0.08),
-    data_type: RGBA)
+shader(material: true) graph Stalks() -> (surface: Shader) {
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.08, 0.18, 0.03), b: (0.24, 0.26, 0.08))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.6))
 }
 
@@ -821,7 +769,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -834,7 +782,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -885,30 +833,25 @@ geometry graph rock() -> Geometry {
     |> SetMaterial(material: Stone)
 }
 
-geometry graph blade(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
-  "A blade of grass, leant away from the middle of its tuft"
+geometry graph stalk(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
+  "A stalk of grass, leant away from the middle of its tuft"
   return Cone(vertices: 3, radius_bottom: 0.035, depth: height).mesh
     |> TransformGeometry(rotation: CombineXYZ(x: lean, z: turn))
 }
 
 geometry graph tuft() -> Geometry {
-  "Five blades of grass"
-  blades = blade(turn: 0.0, lean: 0.1, height: 0.7)
-    + blade(turn: 1.3)
-    + blade(turn: 2.5, lean: 0.4, height: 0.5)
-    + blade(turn: 3.8, height: 0.65)
-    + blade(turn: 5.0, lean: 0.45, height: 0.45)
-  return SetMaterial(blades, material: Blades)
+  "Five stalks of grass"
+  stalks = stalk(turn: 0.0, lean: 0.1, height: 0.7)
+    + stalk(turn: 1.3)
+    + stalk(turn: 2.5, lean: 0.4, height: 0.5)
+    + stalk(turn: 3.8, height: 0.65)
+    + stalk(turn: 5.0, lean: 0.45, height: 0.45)
+  return SetMaterial(stalks, material: Stalks)
 }
 
 geometry graph tag(instances: Geometry, layer: Int) -> Geometry {
   "Each instance stores the layer it belongs to as biome_layer, to count them"
-  return StoreNamedAttribute(
-    instances,
-    name: "biome_layer",
-    value: layer,
-    data_type: INT,
-    domain: INSTANCE)
+  return StoreNamedAttribute[INT, INSTANCE](instances, name: "biome_layer", value: layer)
 }
 
 geometry graph forest_edge(seed: Int, tree_line: Float(subtype: DISTANCE) = 17.0) -> Geometry {
@@ -1044,12 +987,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -1062,48 +1003,28 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
 shader(material: true) graph Leaves() -> (surface: Shader) {
   "Fresh green, from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.06, 0.15, 0.03),
-    b: (0.17, 0.24, 0.05),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.06, 0.15, 0.03), b: (0.17, 0.24, 0.05))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
 }
 
 shader(material: true) graph Shrub() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.05, 0.11, 0.025),
-    b: (0.12, 0.17, 0.04),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.05, 0.11, 0.025), b: (0.12, 0.17, 0.04))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.75))
 }
 
 shader(material: true) graph Stone() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.13, 0.12, 0.11),
-    b: (0.24, 0.22, 0.19),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.13, 0.12, 0.11), b: (0.24, 0.22, 0.19))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.85))
 }
 
-shader(material: true) graph Blades() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.08, 0.18, 0.03),
-    b: (0.24, 0.26, 0.08),
-    data_type: RGBA)
+shader(material: true) graph Stalks() -> (surface: Shader) {
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.08, 0.18, 0.03), b: (0.24, 0.26, 0.08))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.6))
 }
 
@@ -1118,7 +1039,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -1131,7 +1052,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -1199,30 +1120,25 @@ geometry graph rock() -> Geometry {
     |> SetMaterial(material: Stone)
 }
 
-geometry graph blade(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
-  "A blade of grass, leant away from the middle of its tuft"
+geometry graph stalk(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
+  "A stalk of grass, leant away from the middle of its tuft"
   return Cone(vertices: 3, radius_bottom: 0.035, depth: height).mesh
     |> TransformGeometry(rotation: CombineXYZ(x: lean, z: turn))
 }
 
 geometry graph tuft() -> Geometry {
-  "Five blades of grass"
-  blades = blade(turn: 0.0, lean: 0.1, height: 0.7)
-    + blade(turn: 1.3)
-    + blade(turn: 2.5, lean: 0.4, height: 0.5)
-    + blade(turn: 3.8, height: 0.65)
-    + blade(turn: 5.0, lean: 0.45, height: 0.45)
-  return SetMaterial(blades, material: Blades)
+  "Five stalks of grass"
+  stalks = stalk(turn: 0.0, lean: 0.1, height: 0.7)
+    + stalk(turn: 1.3)
+    + stalk(turn: 2.5, lean: 0.4, height: 0.5)
+    + stalk(turn: 3.8, height: 0.65)
+    + stalk(turn: 5.0, lean: 0.45, height: 0.45)
+  return SetMaterial(stalks, material: Stalks)
 }
 
 geometry graph tag(instances: Geometry, layer: Int) -> Geometry {
   "Each instance stores the layer it belongs to as biome_layer, to count them"
-  return StoreNamedAttribute(
-    instances,
-    name: "biome_layer",
-    value: layer,
-    data_type: INT,
-    domain: INSTANCE)
+  return StoreNamedAttribute[INT, INSTANCE](instances, name: "biome_layer", value: layer)
 }
 
 geometry graph forest_edge(
@@ -1438,12 +1354,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -1456,48 +1370,28 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
 shader(material: true) graph Leaves() -> (surface: Shader) {
   "Fresh green, from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.06, 0.15, 0.03),
-    b: (0.17, 0.24, 0.05),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.06, 0.15, 0.03), b: (0.17, 0.24, 0.05))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
 }
 
 shader(material: true) graph Shrub() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.05, 0.11, 0.025),
-    b: (0.12, 0.17, 0.04),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.05, 0.11, 0.025), b: (0.12, 0.17, 0.04))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.75))
 }
 
 shader(material: true) graph Stone() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.13, 0.12, 0.11),
-    b: (0.24, 0.22, 0.19),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.13, 0.12, 0.11), b: (0.24, 0.22, 0.19))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.85))
 }
 
-shader(material: true) graph Blades() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.08, 0.18, 0.03),
-    b: (0.24, 0.26, 0.08),
-    data_type: RGBA)
+shader(material: true) graph Stalks() -> (surface: Shader) {
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.08, 0.18, 0.03), b: (0.24, 0.26, 0.08))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.6))
 }
 
@@ -1512,7 +1406,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -1525,7 +1419,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -1593,30 +1487,25 @@ geometry graph rock() -> Geometry {
     |> SetMaterial(material: Stone)
 }
 
-geometry graph blade(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
-  "A blade of grass, leant away from the middle of its tuft"
+geometry graph stalk(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
+  "A stalk of grass, leant away from the middle of its tuft"
   return Cone(vertices: 3, radius_bottom: 0.035, depth: height).mesh
     |> TransformGeometry(rotation: CombineXYZ(x: lean, z: turn))
 }
 
 geometry graph tuft() -> Geometry {
-  "Five blades of grass"
-  blades = blade(turn: 0.0, lean: 0.1, height: 0.7)
-    + blade(turn: 1.3)
-    + blade(turn: 2.5, lean: 0.4, height: 0.5)
-    + blade(turn: 3.8, height: 0.65)
-    + blade(turn: 5.0, lean: 0.45, height: 0.45)
-  return SetMaterial(blades, material: Blades)
+  "Five stalks of grass"
+  stalks = stalk(turn: 0.0, lean: 0.1, height: 0.7)
+    + stalk(turn: 1.3)
+    + stalk(turn: 2.5, lean: 0.4, height: 0.5)
+    + stalk(turn: 3.8, height: 0.65)
+    + stalk(turn: 5.0, lean: 0.45, height: 0.45)
+  return SetMaterial(stalks, material: Stalks)
 }
 
 geometry graph tag(instances: Geometry, layer: Int) -> Geometry {
   "Each instance stores the layer it belongs to as biome_layer, to count them"
-  return StoreNamedAttribute(
-    instances,
-    name: "biome_layer",
-    value: layer,
-    data_type: INT,
-    domain: INSTANCE)
+  return StoreNamedAttribute[INT, INSTANCE](instances, name: "biome_layer", value: layer)
 }
 
 geometry graph forest_edge(
@@ -1779,12 +1668,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -1802,7 +1689,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -1815,7 +1702,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph forest_edge() -> Geometry {
@@ -1850,12 +1737,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -1868,11 +1753,7 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
@@ -1887,7 +1768,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -1900,7 +1781,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -1956,12 +1837,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -1974,11 +1853,7 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
@@ -1993,7 +1868,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -2006,7 +1881,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -2072,12 +1947,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -2090,11 +1963,7 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
@@ -2109,7 +1978,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -2122,7 +1991,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -2196,12 +2065,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -2214,21 +2081,13 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
 shader(material: true) graph Leaves() -> (surface: Shader) {
   "Fresh green, from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.06, 0.15, 0.03),
-    b: (0.17, 0.24, 0.05),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.06, 0.15, 0.03), b: (0.17, 0.24, 0.05))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
 }
 
@@ -2243,7 +2102,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -2256,7 +2115,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -2352,12 +2211,10 @@ shader graph meadow(
   "Grass, drier in patches, bare rock where the ground is steep"
   g = Geometry()
   patches = NoiseTexture(vector: g.position, scale: 0.06, detail: 4.0).factor
-  green = Mix(factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry, data_type: RGBA)
+  green = Mix[RGBA](factor: Clamp(value: (patches - 0.45) * 4.0), a: grass, b: dry)
   // The normal of flat ground is straight up: past 32 degrees the rock shows
   steep = MapRange(value: g.normal.z, from_min: 0.85, from_max: 0.8)
-  return PrincipledBSDF(
-    base_color: Mix(factor: steep, a: green, b: rock, data_type: RGBA),
-    roughness: 0.9)
+  return PrincipledBSDF(base_color: Mix[RGBA](factor: steep, a: green, b: rock), roughness: 0.9)
 }
 
 shader(material: true) graph Meadow() -> (surface: Shader) {
@@ -2370,48 +2227,28 @@ shader(material: true) graph Dirt() -> (surface: Shader) {
 
 shader(material: true) graph Needles() -> (surface: Shader) {
   "Dark green, a little lighter or darker from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.025, 0.07, 0.025),
-    b: (0.06, 0.13, 0.035),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.025, 0.07, 0.025), b: (0.06, 0.13, 0.035))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.8))
 }
 
 shader(material: true) graph Leaves() -> (surface: Shader) {
   "Fresh green, from one tree to the next"
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.06, 0.15, 0.03),
-    b: (0.17, 0.24, 0.05),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.06, 0.15, 0.03), b: (0.17, 0.24, 0.05))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.7))
 }
 
 shader(material: true) graph Shrub() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.05, 0.11, 0.025),
-    b: (0.12, 0.17, 0.04),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.05, 0.11, 0.025), b: (0.12, 0.17, 0.04))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.75))
 }
 
 shader(material: true) graph Stone() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.13, 0.12, 0.11),
-    b: (0.24, 0.22, 0.19),
-    data_type: RGBA)
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.13, 0.12, 0.11), b: (0.24, 0.22, 0.19))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.85))
 }
 
-shader(material: true) graph Blades() -> (surface: Shader) {
-  tint = Mix(
-    factor: ObjectInfo().random,
-    a: (0.08, 0.18, 0.03),
-    b: (0.24, 0.26, 0.08),
-    data_type: RGBA)
+shader(material: true) graph Stalks() -> (surface: Shader) {
+  tint = Mix[RGBA](factor: ObjectInfo().random, a: (0.08, 0.18, 0.03), b: (0.24, 0.26, 0.08))
   return (surface: PrincipledBSDF(base_color: tint, roughness: 0.6))
 }
 
@@ -2426,7 +2263,7 @@ geometry graph hill_height(p: Vector = Position()) -> Float {
   hill = 24.0 * exp(0.0 - d * d)
   // The bank: 5 m higher over 6 m, steeper on the right of the hill than on the left
   foot = -12.0 + sin(p.x * 0.05 + 1.0) * 6.0
-  bank = MapRange(value: p.y, from_min: foot, from_max: foot + 6.0, interpolation_type: SMOOTHSTEP)
+  bank = MapRange[SMOOTHSTEP](value: p.y, from_min: foot, from_max: foot + 6.0)
     * Clamp(value: 0.6 + p.x / 50.0)
     * 5.0
   hummocks = (NoiseTexture(vector: p * 0.02, scale: 1.0, detail: 4.0).factor - 0.5) * 8.0
@@ -2439,7 +2276,7 @@ geometry graph hill_path() -> Geometry {
     |> ResampleCurve(count: 300)
   p = Position()
   xy = CombineXYZ(x: p.x + sin(p.y * 0.06) * 9.0, y: p.y)
-  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(xy)))
+  return SetPosition(line, position: xy + CombineXYZ(z: hill_height(p: xy)))
 }
 
 geometry graph trunk(height: Float = 3.0, radius: Float = 0.25) -> Geometry {
@@ -2490,30 +2327,25 @@ geometry graph rock() -> Geometry {
     |> SetMaterial(material: Stone)
 }
 
-geometry graph blade(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
-  "A blade of grass, leant away from the middle of its tuft"
+geometry graph stalk(turn: Float, lean: Float = 0.3, height: Float = 0.6) -> Geometry {
+  "A stalk of grass, leant away from the middle of its tuft"
   return Cone(vertices: 3, radius_bottom: 0.035, depth: height).mesh
     |> TransformGeometry(rotation: CombineXYZ(x: lean, z: turn))
 }
 
 geometry graph tuft() -> Geometry {
-  "Five blades of grass"
-  blades = blade(turn: 0.0, lean: 0.1, height: 0.7)
-    + blade(turn: 1.3)
-    + blade(turn: 2.5, lean: 0.4, height: 0.5)
-    + blade(turn: 3.8, height: 0.65)
-    + blade(turn: 5.0, lean: 0.45, height: 0.45)
-  return SetMaterial(blades, material: Blades)
+  "Five stalks of grass"
+  stalks = stalk(turn: 0.0, lean: 0.1, height: 0.7)
+    + stalk(turn: 1.3)
+    + stalk(turn: 2.5, lean: 0.4, height: 0.5)
+    + stalk(turn: 3.8, height: 0.65)
+    + stalk(turn: 5.0, lean: 0.45, height: 0.45)
+  return SetMaterial(stalks, material: Stalks)
 }
 
 geometry graph tag(instances: Geometry, layer: Int) -> Geometry {
   "Each instance stores the layer it belongs to as biome_layer, to count them"
-  return StoreNamedAttribute(
-    instances,
-    name: "biome_layer",
-    value: layer,
-    data_type: INT,
-    domain: INSTANCE)
+  return StoreNamedAttribute[INT, INSTANCE](instances, name: "biome_layer", value: layer)
 }
 
 geometry graph forest_edge(seed: Int, tree_line: Float(subtype: DISTANCE) = 17.0) -> Geometry {
@@ -2616,7 +2448,7 @@ geometry graph forest_edge(seed: Int, tree_line: Float(subtype: DISTANCE) = 17.0
 </script></bn-file>
     </div>
     <p class="muted">
-      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/forest_edge"><code>examples/tutorials/forest_edge/</code></a>.
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-for-blender/tree/main/examples/tutorials/forest_edge"><code>examples/tutorials/forest_edge/</code></a>.
     </p>
 </div>
 </main>

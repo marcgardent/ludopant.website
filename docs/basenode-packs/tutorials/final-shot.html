@@ -16,8 +16,8 @@
 <link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../packs.css">
-<script type="module" src="https://basenode.ludopant.com/view/bn-view.js"></script>
-<script type="module" src="https://basenode.ludopant.com/view/bn-file.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-view.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-file.js"></script>
 </head>
 <body>
 <!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
@@ -55,9 +55,9 @@
 
     <h2 id="before">Before you start</h2>
     <p>
-      You need Blender 5, the <a href="https://basenode.ludopant.com/#blender">Base Node add-on</a>, version 0.13.1 or later, and the <a href="../compositing-pro/">Compositing Pro</a> pack, which carries three of the modules this tutorial uses.
+      You need Blender 5, the <a href="https://blender.basenode.ludopant.com/#blender">Base Node add-on</a>, version 0.13.1 or later, and the <a href="https://ludopant.com/basenode-packs/#pack-compositing-pro">Compositing Pro</a> pack, which carries three of the modules this tutorial uses.
       The steps are free to read and to copy; the modules they call are not.
-      If <code>.bn</code> is new to you, start with <a href="https://basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>: it shows the language one line at a time.
+      If <code>.bn</code> is new to you, start with <a href="https://blender.basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>: it shows the language one line at a time.
     </p>
     <table>
       <tr><th>Module</th><th>Comes with</th><th>What it gives</th></tr>
@@ -79,7 +79,7 @@
       <li><strong>Paste it.</strong> Press the copy button of its block, open the Compositor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>.</li>
     </ul>
     <p>
-      Render with <kbd>F12</kbd> to see it. The pictures are made from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/final_shot/render.py"><code>render.py</code></a>:
+      Render with <kbd>F12</kbd> to see it. The pictures are made from these exact files by <a href="https://github.com/marcgardent/base-node-for-blender/blob/main/examples/tutorials/final_shot/render.py"><code>render.py</code></a>:
       it builds the scene, renders it once with its passes to a multilayer EXR, then runs each step on that file. Cycles denoises the Combined pass only; <code>render.py</code> denoises the light passes too, one Denoise node each, before it writes them. Do the same, or render with more samples, or the rebuilt beauty will be noisier than the render.
     </p>
 
@@ -106,7 +106,7 @@
 // @title The final shot, step 1: the render as it is
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 compositor graph final_shot() -> Color {
@@ -133,7 +133,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 2: the beauty rebuilt from its passes
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use merge (keymix)
@@ -143,8 +143,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its light passes, the sphere painted blue on the way"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   return rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -181,7 +181,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 3: a light added after the render
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use merge (keymix)
@@ -191,8 +191,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its passes, the sphere painted blue, a warm light added at the lamp post"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   beauty = rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -209,9 +209,9 @@ compositor graph final_shot() -> Color {
   // A point light at the bulb of the lamp post, on the colours of the diffuse surfaces
   return beauty
     |> relight(
-      paint,
-      l.normal,
-      l.position,
+      albedo: paint,
+      normal: l.normal,
+      position: l.position,
       light_position: (1.7, 1.2, 3.05),
       light_color: (1.0, 0.6, 0.3, 1.0),
       intensity: 12.0)
@@ -237,7 +237,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 4: a haze from the depth
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use merge (keymix)
@@ -247,8 +247,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its passes, the sphere painted blue, a warm light added, a haze from the Depth pass"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   beauty = rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -265,18 +265,23 @@ compositor graph final_shot() -> Color {
   // A point light at the bulb of the lamp post, on the colours of the diffuse surfaces
   lit = beauty
     |> relight(
-      paint,
-      l.normal,
-      l.position,
+      albedo: paint,
+      normal: l.normal,
+      position: l.position,
       light_position: (1.7, 1.2, 3.05),
       light_color: (1.0, 0.6, 0.3, 1.0),
       intensity: 12.0)
   // A haze, thicker with the distance; the sky has no depth, and a matte of the first
   // kilometre keeps the haze off it
-  solid = depth_slice(l.depth, 0.0, 1000.0, 1.0).matte
+  solid = depth_slice(depth: l.depth, near: 0.0, far: 1000.0, softness: 1.0).matte
   hazy = lit
-    |> depth_fog(l.depth, (0.09, 0.06, 0.06, 1.0), near: 5.0, far: 1000.0, density: 0.005)
-  return keymix(hazy, lit, solid)
+    |> depth_fog(
+      depth: l.depth,
+      color: (0.09, 0.06, 0.06, 1.0),
+      near: 5.0,
+      far: 1000.0,
+      density: 0.005)
+  return keymix(hazy, b: lit, mask: solid)
 }
 </script></bn-view>
     <ul>
@@ -299,7 +304,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 5: glow and light wrap
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use light
@@ -310,8 +315,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its passes, the sphere painted blue, a warm light added, a haze, the light spilling over the edges"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   beauty = rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -328,29 +333,34 @@ compositor graph final_shot() -> Color {
   // A point light at the bulb of the lamp post, on the colours of the diffuse surfaces
   lit = beauty
     |> relight(
-      paint,
-      l.normal,
-      l.position,
+      albedo: paint,
+      normal: l.normal,
+      position: l.position,
       light_position: (1.7, 1.2, 3.05),
       light_color: (1.0, 0.6, 0.3, 1.0),
       intensity: 12.0)
   // A haze, thicker with the distance; the sky has no depth, and a matte of the first
   // kilometre keeps the haze off it
-  solid = depth_slice(l.depth, 0.0, 1000.0, 1.0).matte
+  solid = depth_slice(depth: l.depth, near: 0.0, far: 1000.0, softness: 1.0).matte
   hazy = lit
-    |> depth_fog(l.depth, (0.09, 0.06, 0.06, 1.0), near: 5.0, far: 1000.0, density: 0.005)
-  shot = keymix(hazy, lit, solid)
+    |> depth_fog(
+      depth: l.depth,
+      color: (0.09, 0.06, 0.06, 1.0),
+      near: 5.0,
+      far: 1000.0,
+      density: 0.005)
+  shot = keymix(hazy, b: lit, mask: solid)
   // The sky bleeds over the edges of what stands in front of it: the solid things cut out by
   // their matte, the sky alone from the Environment pass
-  front = with_alpha(shot * solid, solid)
-  wrapped = over(light_wrap(front, l.environment, 15.0, 2.0), shot)
+  front = with_alpha(shot * solid, alpha: solid)
+  wrapped = over(light_wrap(front, bg: l.environment, diffuse: 15.0, intensity: 2.0), b: shot)
   // What is brighter than white blooms: the bulbs, the windows
   return wrapped
-    |> glow(1.0, 0.6, 0.9, 3.0)
+    |> glow(tolerance: 1.0, brightness: 0.6, saturation: 0.9, width: 3.0)
 }
 </script></bn-view>
     <ul>
-      <li><strong>Light wrap.</strong> <code>light_wrap</code> takes a foreground with its alpha, and a background. <code>with_alpha(shot * solid, solid)</code> makes the foreground: what stands in front of the sky, cut out by <code>solid</code>. The Environment pass is the sky alone. The sky, blurred over 15 pixels, is added on the foreground's edges, where its blurred alpha falls; <code>over</code> lays it back on the shot.</li>
+      <li><strong>Light wrap.</strong> <code>light_wrap</code> takes a foreground with its alpha, and a background. <code>with_alpha(shot * solid, alpha: solid)</code> makes the foreground: what stands in front of the sky, cut out by <code>solid</code>. The Environment pass is the sky alone. The sky, blurred over 15 pixels, is added on the foreground's edges, where its blurred alpha falls; <code>over</code> lays it back on the shot.</li>
       <li><strong>Glow.</strong> <code>glow</code> keeps what is brighter than white (<code>tolerance</code> 1.0, on its luma): the bulbs, the windows. It blurs that at five sizes, 3 to 48 pixels, averages them, and adds the result, times 0.6, to the image.</li>
       <li><strong>The order.</strong> The glow comes after the haze and the wrap: a lamp in fog glows over the fog, not under it.</li>
     </ul>
@@ -370,7 +380,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 6: film grain
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use grain
@@ -382,8 +392,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its passes, the sphere painted blue, a warm light added, a haze, the light spilling over the edges, film grain"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   beauty = rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -400,27 +410,32 @@ compositor graph final_shot() -> Color {
   // A point light at the bulb of the lamp post, on the colours of the diffuse surfaces
   lit = beauty
     |> relight(
-      paint,
-      l.normal,
-      l.position,
+      albedo: paint,
+      normal: l.normal,
+      position: l.position,
       light_position: (1.7, 1.2, 3.05),
       light_color: (1.0, 0.6, 0.3, 1.0),
       intensity: 12.0)
   // A haze, thicker with the distance; the sky has no depth, and a matte of the first
   // kilometre keeps the haze off it
-  solid = depth_slice(l.depth, 0.0, 1000.0, 1.0).matte
+  solid = depth_slice(depth: l.depth, near: 0.0, far: 1000.0, softness: 1.0).matte
   hazy = lit
-    |> depth_fog(l.depth, (0.09, 0.06, 0.06, 1.0), near: 5.0, far: 1000.0, density: 0.005)
-  shot = keymix(hazy, lit, solid)
+    |> depth_fog(
+      depth: l.depth,
+      color: (0.09, 0.06, 0.06, 1.0),
+      near: 5.0,
+      far: 1000.0,
+      density: 0.005)
+  shot = keymix(hazy, b: lit, mask: solid)
   // The sky bleeds over the edges of what stands in front of it: the solid things cut out by
   // their matte, the sky alone from the Environment pass
-  front = with_alpha(shot * solid, solid)
-  wrapped = over(light_wrap(front, l.environment, 15.0, 2.0), shot)
+  front = with_alpha(shot * solid, alpha: solid)
+  wrapped = over(light_wrap(front, bg: l.environment, diffuse: 15.0, intensity: 2.0), b: shot)
   // What is brighter than white blooms: the bulbs, the windows
   // Then the grain of a fast stock for low light, Kodak Vision 500T
   return wrapped
-    |> glow(1.0, 0.6, 0.9, 3.0)
-    |> grain_5279(1.5, 7.0)
+    |> glow(tolerance: 1.0, brightness: 0.6, saturation: 0.9, width: 3.0)
+    |> grain_5279(amount: 1.5, seed: 7.0)
 }
 </script></bn-view>
     <ul>
@@ -429,7 +444,7 @@ compositor graph final_shot() -> Color {
       <li><strong>The seed</strong> picks another grain; <code>animated: true</code> makes it change every frame, as film does.</li>
     </ul>
     <p>
-      To match the grain of a filmed plate rather than a stock, <code>regrain(clean, plate)</code> takes the grain from the plate itself: its fine detail, added to the clean image.
+      To match the grain of a filmed plate rather than a stock, <code>regrain(clean, grain_source: plate)</code> takes the grain from the plate itself: its fine detail, added to the clean image.
     </p>
     <figure>
       <img src="img/final-shot-step6.png" width="1000" height="750" loading="lazy" alt="The same shot with a fine film grain over the whole frame, most visible in the sky">
@@ -447,7 +462,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 7: the look
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use grade
@@ -461,8 +476,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its passes, the sphere painted blue, a warm light added, a haze, the light spilling over the edges, graded, film grain"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   beauty = rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -479,37 +494,42 @@ compositor graph final_shot() -> Color {
   // A point light at the bulb of the lamp post, on the colours of the diffuse surfaces
   lit = beauty
     |> relight(
-      paint,
-      l.normal,
-      l.position,
+      albedo: paint,
+      normal: l.normal,
+      position: l.position,
       light_position: (1.7, 1.2, 3.05),
       light_color: (1.0, 0.6, 0.3, 1.0),
       intensity: 12.0)
   // A haze, thicker with the distance; the sky has no depth, and a matte of the first
   // kilometre keeps the haze off it
-  solid = depth_slice(l.depth, 0.0, 1000.0, 1.0).matte
+  solid = depth_slice(depth: l.depth, near: 0.0, far: 1000.0, softness: 1.0).matte
   hazy = lit
-    |> depth_fog(l.depth, (0.09, 0.06, 0.06, 1.0), near: 5.0, far: 1000.0, density: 0.005)
-  shot = keymix(hazy, lit, solid)
+    |> depth_fog(
+      depth: l.depth,
+      color: (0.09, 0.06, 0.06, 1.0),
+      near: 5.0,
+      far: 1000.0,
+      density: 0.005)
+  shot = keymix(hazy, b: lit, mask: solid)
   // The sky bleeds over the edges of what stands in front of it: the solid things cut out by
   // their matte, the sky alone from the Environment pass
-  front = with_alpha(shot * solid, solid)
-  wrapped = over(light_wrap(front, l.environment, 15.0, 2.0), shot)
+  front = with_alpha(shot * solid, alpha: solid)
+  wrapped = over(light_wrap(front, bg: l.environment, diffuse: 15.0, intensity: 2.0), b: shot)
   // What is brighter than white blooms: the bulbs, the windows. Then the look: deeper blacks,
   // cool shadows, warm highlights, a little more colour, and darker corners
   look = wrapped
-    |> glow(1.0, 0.6, 0.9, 3.0)
+    |> glow(tolerance: 1.0, brightness: 0.6, saturation: 0.9, width: 3.0)
     |> grade(
       blackpoint: (0.008, 0.008, 0.008),
       lift: (0.0, 0.003, 0.01),
       gain: (1.1, 1.0, 0.88),
       gamma: (0.85, 0.85, 0.85))
-    |> saturation(1.15)
-  corners = 1.0 - circle_mask(look, 0.9, 0.9).mask
+    |> saturation(s: 1.15)
+  corners = 1.0 - circle_mask(look, radius: 0.9, feather: 0.9).mask
   // The grain comes last: it is on the film, under the light, not graded with it
   return look
-    |> exposure_stops(-1.0, mask: corners)
-    |> grain_5279(1.5, 7.0)
+    |> exposure_stops(stops: -1.0, mask: corners)
+    |> grain_5279(amount: 1.5, seed: 7.0)
 }
 </script></bn-view>
     <ol class="steps">
@@ -550,7 +570,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 7: the look
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use grade
@@ -564,8 +584,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its passes, the sphere painted blue, a warm light added, a haze, the light spilling over the edges, graded, film grain"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   beauty = rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -582,37 +602,42 @@ compositor graph final_shot() -> Color {
   // A point light at the bulb of the lamp post, on the colours of the diffuse surfaces
   lit = beauty
     |> relight(
-      paint,
-      l.normal,
-      l.position,
+      albedo: paint,
+      normal: l.normal,
+      position: l.position,
       light_position: (1.7, 1.2, 3.05),
       light_color: (1.0, 0.6, 0.3, 1.0),
       intensity: 12.0)
   // A haze, thicker with the distance; the sky has no depth, and a matte of the first
   // kilometre keeps the haze off it
-  solid = depth_slice(l.depth, 0.0, 1000.0, 1.0).matte
+  solid = depth_slice(depth: l.depth, near: 0.0, far: 1000.0, softness: 1.0).matte
   hazy = lit
-    |> depth_fog(l.depth, (0.09, 0.06, 0.06, 1.0), near: 5.0, far: 1000.0, density: 0.005)
-  shot = keymix(hazy, lit, solid)
+    |> depth_fog(
+      depth: l.depth,
+      color: (0.09, 0.06, 0.06, 1.0),
+      near: 5.0,
+      far: 1000.0,
+      density: 0.005)
+  shot = keymix(hazy, b: lit, mask: solid)
   // The sky bleeds over the edges of what stands in front of it: the solid things cut out by
   // their matte, the sky alone from the Environment pass
-  front = with_alpha(shot * solid, solid)
-  wrapped = over(light_wrap(front, l.environment, 15.0, 2.0), shot)
+  front = with_alpha(shot * solid, alpha: solid)
+  wrapped = over(light_wrap(front, bg: l.environment, diffuse: 15.0, intensity: 2.0), b: shot)
   // What is brighter than white blooms: the bulbs, the windows. Then the look: deeper blacks,
   // cool shadows, warm highlights, a little more colour, and darker corners
   look = wrapped
-    |> glow(1.0, 0.6, 0.9, 3.0)
+    |> glow(tolerance: 1.0, brightness: 0.6, saturation: 0.9, width: 3.0)
     |> grade(
       blackpoint: (0.008, 0.008, 0.008),
       lift: (0.0, 0.003, 0.01),
       gain: (1.1, 1.0, 0.88),
       gamma: (0.85, 0.85, 0.85))
-    |> saturation(1.15)
-  corners = 1.0 - circle_mask(look, 0.9, 0.9).mask
+    |> saturation(s: 1.15)
+  corners = 1.0 - circle_mask(look, radius: 0.9, feather: 0.9).mask
   // The grain comes last: it is on the film, under the light, not graded with it
   return look
-    |> exposure_stops(-1.0, mask: corners)
-    |> grain_5279(1.5, 7.0)
+    |> exposure_stops(stops: -1.0, mask: corners)
+    |> grain_5279(amount: 1.5, seed: 7.0)
 }
 </script></bn-file>
     <p>The steps before it, to start again from any of them:</p>
@@ -622,7 +647,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 1: the render as it is
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 compositor graph final_shot() -> Color {
@@ -635,7 +660,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 2: the beauty rebuilt from its passes
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use merge (keymix)
@@ -645,8 +670,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its light passes, the sphere painted blue on the way"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   return rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -667,7 +692,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 3: a light added after the render
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use merge (keymix)
@@ -677,8 +702,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its passes, the sphere painted blue, a warm light added at the lamp post"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   beauty = rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -695,9 +720,9 @@ compositor graph final_shot() -> Color {
   // A point light at the bulb of the lamp post, on the colours of the diffuse surfaces
   return beauty
     |> relight(
-      paint,
-      l.normal,
-      l.position,
+      albedo: paint,
+      normal: l.normal,
+      position: l.position,
       light_position: (1.7, 1.2, 3.05),
       light_color: (1.0, 0.6, 0.3, 1.0),
       intensity: 12.0)
@@ -708,7 +733,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 4: a haze from the depth
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use merge (keymix)
@@ -718,8 +743,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its passes, the sphere painted blue, a warm light added, a haze from the Depth pass"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   beauty = rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -736,18 +761,23 @@ compositor graph final_shot() -> Color {
   // A point light at the bulb of the lamp post, on the colours of the diffuse surfaces
   lit = beauty
     |> relight(
-      paint,
-      l.normal,
-      l.position,
+      albedo: paint,
+      normal: l.normal,
+      position: l.position,
       light_position: (1.7, 1.2, 3.05),
       light_color: (1.0, 0.6, 0.3, 1.0),
       intensity: 12.0)
   // A haze, thicker with the distance; the sky has no depth, and a matte of the first
   // kilometre keeps the haze off it
-  solid = depth_slice(l.depth, 0.0, 1000.0, 1.0).matte
+  solid = depth_slice(depth: l.depth, near: 0.0, far: 1000.0, softness: 1.0).matte
   hazy = lit
-    |> depth_fog(l.depth, (0.09, 0.06, 0.06, 1.0), near: 5.0, far: 1000.0, density: 0.005)
-  return keymix(hazy, lit, solid)
+    |> depth_fog(
+      depth: l.depth,
+      color: (0.09, 0.06, 0.06, 1.0),
+      near: 5.0,
+      far: 1000.0,
+      density: 0.005)
+  return keymix(hazy, b: lit, mask: solid)
 }
 </script></bn-file>
       <bn-file><script type="text/bn">
@@ -755,7 +785,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 5: glow and light wrap
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use light
@@ -766,8 +796,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its passes, the sphere painted blue, a warm light added, a haze, the light spilling over the edges"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   beauty = rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -784,25 +814,30 @@ compositor graph final_shot() -> Color {
   // A point light at the bulb of the lamp post, on the colours of the diffuse surfaces
   lit = beauty
     |> relight(
-      paint,
-      l.normal,
-      l.position,
+      albedo: paint,
+      normal: l.normal,
+      position: l.position,
       light_position: (1.7, 1.2, 3.05),
       light_color: (1.0, 0.6, 0.3, 1.0),
       intensity: 12.0)
   // A haze, thicker with the distance; the sky has no depth, and a matte of the first
   // kilometre keeps the haze off it
-  solid = depth_slice(l.depth, 0.0, 1000.0, 1.0).matte
+  solid = depth_slice(depth: l.depth, near: 0.0, far: 1000.0, softness: 1.0).matte
   hazy = lit
-    |> depth_fog(l.depth, (0.09, 0.06, 0.06, 1.0), near: 5.0, far: 1000.0, density: 0.005)
-  shot = keymix(hazy, lit, solid)
+    |> depth_fog(
+      depth: l.depth,
+      color: (0.09, 0.06, 0.06, 1.0),
+      near: 5.0,
+      far: 1000.0,
+      density: 0.005)
+  shot = keymix(hazy, b: lit, mask: solid)
   // The sky bleeds over the edges of what stands in front of it: the solid things cut out by
   // their matte, the sky alone from the Environment pass
-  front = with_alpha(shot * solid, solid)
-  wrapped = over(light_wrap(front, l.environment, 15.0, 2.0), shot)
+  front = with_alpha(shot * solid, alpha: solid)
+  wrapped = over(light_wrap(front, bg: l.environment, diffuse: 15.0, intensity: 2.0), b: shot)
   // What is brighter than white blooms: the bulbs, the windows
   return wrapped
-    |> glow(1.0, 0.6, 0.9, 3.0)
+    |> glow(tolerance: 1.0, brightness: 0.6, saturation: 0.9, width: 3.0)
 }
 </script></bn-file>
       <bn-file><script type="text/bn">
@@ -810,7 +845,7 @@ compositor graph final_shot() -> Color {
 // @title The final shot, step 6: film grain
 // @author Base Node tutorials
 // @license MIT OR Apache-2.0
-// @target blender-compositor
+// @target blender
 // @offer groups
 
 use grain
@@ -822,8 +857,8 @@ compositor graph final_shot() -> Color {
   "The render rebuilt from its passes, the sphere painted blue, a warm light added, a haze, the light spilling over the edges, film grain"
   l = RenderLayers()
   // The sphere, found in the world by the Position pass; its colour changed, its light kept
-  sphere = p_matte(l.position, (-1.2, 2.2, 0.9), 0.9, 0.05).matte
-  paint = keymix((0.04, 0.16, 0.45, 1.0), l.diffuse_color, sphere)
+  sphere = p_matte(position: l.position, center: (-1.2, 2.2, 0.9), radius: 0.9, falloff: 0.05).matte
+  paint = keymix(a: (0.04, 0.16, 0.45, 1.0), b: l.diffuse_color, mask: sphere)
   beauty = rebuild_beauty(
     diffuse_direct: l.diffuse_direct,
     diffuse_indirect: l.diffuse_indirect,
@@ -840,32 +875,37 @@ compositor graph final_shot() -> Color {
   // A point light at the bulb of the lamp post, on the colours of the diffuse surfaces
   lit = beauty
     |> relight(
-      paint,
-      l.normal,
-      l.position,
+      albedo: paint,
+      normal: l.normal,
+      position: l.position,
       light_position: (1.7, 1.2, 3.05),
       light_color: (1.0, 0.6, 0.3, 1.0),
       intensity: 12.0)
   // A haze, thicker with the distance; the sky has no depth, and a matte of the first
   // kilometre keeps the haze off it
-  solid = depth_slice(l.depth, 0.0, 1000.0, 1.0).matte
+  solid = depth_slice(depth: l.depth, near: 0.0, far: 1000.0, softness: 1.0).matte
   hazy = lit
-    |> depth_fog(l.depth, (0.09, 0.06, 0.06, 1.0), near: 5.0, far: 1000.0, density: 0.005)
-  shot = keymix(hazy, lit, solid)
+    |> depth_fog(
+      depth: l.depth,
+      color: (0.09, 0.06, 0.06, 1.0),
+      near: 5.0,
+      far: 1000.0,
+      density: 0.005)
+  shot = keymix(hazy, b: lit, mask: solid)
   // The sky bleeds over the edges of what stands in front of it: the solid things cut out by
   // their matte, the sky alone from the Environment pass
-  front = with_alpha(shot * solid, solid)
-  wrapped = over(light_wrap(front, l.environment, 15.0, 2.0), shot)
+  front = with_alpha(shot * solid, alpha: solid)
+  wrapped = over(light_wrap(front, bg: l.environment, diffuse: 15.0, intensity: 2.0), b: shot)
   // What is brighter than white blooms: the bulbs, the windows
   // Then the grain of a fast stock for low light, Kodak Vision 500T
   return wrapped
-    |> glow(1.0, 0.6, 0.9, 3.0)
-    |> grain_5279(1.5, 7.0)
+    |> glow(tolerance: 1.0, brightness: 0.6, saturation: 0.9, width: 3.0)
+    |> grain_5279(amount: 1.5, seed: 7.0)
 }
 </script></bn-file>
     </div>
     <p class="muted">
-      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/final_shot"><code>examples/tutorials/final_shot/</code></a>.
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-for-blender/tree/main/examples/tutorials/final_shot"><code>examples/tutorials/final_shot/</code></a>.
     </p>
 </div>
 </main>

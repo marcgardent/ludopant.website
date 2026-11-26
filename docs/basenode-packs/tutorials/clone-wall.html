@@ -16,8 +16,8 @@
 <link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../packs.css">
-<script type="module" src="https://basenode.ludopant.com/view/bn-view.js"></script>
-<script type="module" src="https://basenode.ludopant.com/view/bn-file.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-view.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-file.js"></script>
 </head>
 <body>
 <!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
@@ -53,12 +53,12 @@
       <li><strong>The language.</strong> A pipe of <code>|&gt;</code> lines, one effector each, in the order they act; a falloff is a value, <code>w = …</code>, handed to the effectors as their <code>weight</code>; <code>SceneTime()</code> to animate; a value stored on each clone and read back by the material.</li>
     </ul>
     <p>
-      This page goes fast on the basics. If <code>.bn</code> is new to you, start with <a href="https://basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>: it explains a graph, its nodes as calls, fields, and the way a step file is read.
+      This page goes fast on the basics. If <code>.bn</code> is new to you, start with <a href="https://blender.basenode.ludopant.com/tutorials/lunar-ground.html">Lunar ground</a>: it explains a graph, its nodes as calls, fields, and the way a step file is read.
     </p>
 
     <h2 id="before">Before you start</h2>
     <p>
-      You need Blender 5, the <a href="https://basenode.ludopant.com/#blender">Base Node add-on</a>, and the <a href="../motion-graphics/">Motion Graphics</a> pack, version 0.13.1 or later.
+      You need Blender 5, the <a href="https://blender.basenode.ludopant.com/#blender">Base Node add-on</a>, and the <a href="https://ludopant.com/basenode-packs/#pack-motion-graphics">Motion Graphics</a> pack, version 0.13.1 or later.
       The pack is sold by the author of Base Node, apart from the open source project: the steps below are free to read, copy and change; the modules they <code>use</code> come with the pack, and are not.
     </p>
     <table>
@@ -76,7 +76,7 @@
     </ul>
     <p>
       Press <kbd>Space</kbd> to play the steps that move. The springs of steps 6 to 8 are simulated from the first frame: play from there, not from a frame picked in the middle.
-      The pictures are rendered with EEVEE from these exact files by <a href="https://github.com/marcgardent/base-node-language/blob/main/examples/tutorials/clone_wall/render.py"><code>render.py</code></a>, in front of the same backdrop, under the same lights.
+      The pictures are rendered with EEVEE from these exact files by <a href="https://github.com/marcgardent/base-node-for-blender/blob/main/examples/tutorials/clone_wall/render.py"><code>render.py</code></a>, in front of the same backdrop, under the same lights.
     </p>
 
     <h2 id="idea">Three kinds of node</h2>
@@ -124,8 +124,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -190,8 +194,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -261,8 +269,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -333,8 +345,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -407,8 +423,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -498,8 +518,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -591,8 +615,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -607,8 +635,8 @@ geometry graph clone_wall(
   // A band: up a ramp to the front, down an inverted ramp behind it; their minimum is a tent
   rise = linear_falloff(origin: CombineXYZ(x: front - 0.5), direction: across, length: 0.5)
   fall = invert_falloff(
-    linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
-  w = combine_falloffs(rise, fall, mode: Minimum)
+    weight: linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
+  w = combine_falloffs(a: rise, b: fall, mode: Minimum)
   // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
   shapes = GeometryToInstance(
     rounded_cube() |> SetMaterial(material: Cream),
@@ -670,8 +698,8 @@ shader graph clone_paint(
 ) -> Shader {
   "Satin plastic of the colour paint at rest, hot and glowing where the effect weighs"
   // weight, which the geometry stored on each clone: 0 at rest, 1 under the falloff
-  w = Attribute(attribute_name: "weight").factor
-  color = Mix(factor: w, a: paint, b: hot, data_type: RGBA)
+  w = Attribute[attribute_name: "weight"]().factor
+  color = Mix[RGBA](factor: w, a: paint, b: hot)
   return PrincipledBSDF(
     base_color: color,
     roughness: 0.32,
@@ -700,8 +728,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -716,8 +748,8 @@ geometry graph clone_wall(
   // A band: up a ramp to the front, down an inverted ramp behind it; their minimum is a tent
   rise = linear_falloff(origin: CombineXYZ(x: front - 0.5), direction: across, length: 0.5)
   fall = invert_falloff(
-    linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
-  w = combine_falloffs(rise, fall, mode: Minimum)
+    weight: linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
+  w = combine_falloffs(a: rise, b: fall, mode: Minimum)
   // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
   shapes = GeometryToInstance(
     rounded_cube() |> SetMaterial(material: Cream),
@@ -726,7 +758,7 @@ geometry graph clone_wall(
   return shapes
     |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
     // The weight where each clone stands, kept on it for the material
-    |> StoreNamedAttribute(name: "weight", value: w, domain: INSTANCE)
+    |> StoreNamedAttribute[INSTANCE](name: "weight", value: w)
     |> random_effector(
       offset: (0.02, 0.02, 0.1),
       rotation: (0.5, 0.5, 0.8),
@@ -769,7 +801,7 @@ geometry graph clone_wall(
       <tr><td><code>spring_effector</code></td><td><code>stiffness</code>, <code>damping</code></td><td>How fast and how springy they follow.</td></tr>
       <tr><td><code>clone_paint</code></td><td><code>paint</code>, <code>hot</code>, <code>glow</code></td><td>The colour at rest, under the band, and how bright it glows there.</td></tr>
     </table>
-    <p class="try"><strong>Try:</strong> on step 8, set <code>damping</code> to 1.5: the wall rings long after the band. Give the effectors <code>invert_falloff(w)</code> instead of <code>w</code>: the whole wall stands out, and the band is a trough that runs through it. Swap <code>grid_cloner</code> for <code>radial_cloner(count: 48, radius: 1.5)</code> and the band sweeps a ring.</p>
+    <p class="try"><strong>Try:</strong> on step 8, set <code>damping</code> to 1.5: the wall rings long after the band. Give the effectors <code>invert_falloff(weight: w)</code> instead of <code>w</code>: the whole wall stands out, and the band is a trough that runs through it. Swap <code>grid_cloner</code> for <code>radial_cloner(count: 48, radius: 1.5)</code> and the band sweeps a ring.</p>
 
     <h2 id="files">Take it to Blender</h2>
     <p>
@@ -794,8 +826,8 @@ shader graph clone_paint(
 ) -> Shader {
   "Satin plastic of the colour paint at rest, hot and glowing where the effect weighs"
   // weight, which the geometry stored on each clone: 0 at rest, 1 under the falloff
-  w = Attribute(attribute_name: "weight").factor
-  color = Mix(factor: w, a: paint, b: hot, data_type: RGBA)
+  w = Attribute[attribute_name: "weight"]().factor
+  color = Mix[RGBA](factor: w, a: paint, b: hot)
   return PrincipledBSDF(
     base_color: color,
     roughness: 0.32,
@@ -824,8 +856,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -840,8 +876,8 @@ geometry graph clone_wall(
   // A band: up a ramp to the front, down an inverted ramp behind it; their minimum is a tent
   rise = linear_falloff(origin: CombineXYZ(x: front - 0.5), direction: across, length: 0.5)
   fall = invert_falloff(
-    linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
-  w = combine_falloffs(rise, fall, mode: Minimum)
+    weight: linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
+  w = combine_falloffs(a: rise, b: fall, mode: Minimum)
   // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
   shapes = GeometryToInstance(
     rounded_cube() |> SetMaterial(material: Cream),
@@ -850,7 +886,7 @@ geometry graph clone_wall(
   return shapes
     |> grid_cloner(count_x: 18, count_y: 10, spacing: (0.22, 0.22, 0.22), pick: Random, seed: 4)
     // The weight where each clone stands, kept on it for the material
-    |> StoreNamedAttribute(name: "weight", value: w, domain: INSTANCE)
+    |> StoreNamedAttribute[INSTANCE](name: "weight", value: w)
     |> random_effector(
       offset: (0.02, 0.02, 0.1),
       rotation: (0.5, 0.5, 0.8),
@@ -899,8 +935,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -950,8 +990,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -1006,8 +1050,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -1063,8 +1111,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -1122,8 +1174,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -1198,8 +1254,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -1275,8 +1335,12 @@ geometry graph rounded_cube(
   // Every point of a dense cube pulled to radius from the core, a smaller cube inside it
   h = size * 0.5 - radius
   p = Position()
-  core = min(max(p, CombineXYZ(-h, -h, -h)), CombineXYZ(h, h, h))
-  return Cube(size: CombineXYZ(size, size, size), vertices_x: 9, vertices_y: 9, vertices_z: 9)
+  core = min(max(p, CombineXYZ(x: -h, y: -h, z: -h)), CombineXYZ(x: h, y: h, z: h))
+  return Cube(
+      size: CombineXYZ(x: size, y: size, z: size),
+      vertices_x: 9,
+      vertices_y: 9,
+      vertices_z: 9)
     |> SetPosition(position: core + normalize(p - core) * radius)
     |> SetShadeSmooth()
 }
@@ -1291,8 +1355,8 @@ geometry graph clone_wall(
   // A band: up a ramp to the front, down an inverted ramp behind it; their minimum is a tent
   rise = linear_falloff(origin: CombineXYZ(x: front - 0.5), direction: across, length: 0.5)
   fall = invert_falloff(
-    linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
-  w = combine_falloffs(rise, fall, mode: Minimum)
+    weight: linear_falloff(origin: CombineXYZ(x: front), direction: across, length: 0.5))
+  w = combine_falloffs(a: rise, b: fall, mode: Minimum)
   // The collection to pick from: a rounded cube, a ball (the same, fully rounded), a puck
   shapes = GeometryToInstance(
     rounded_cube() |> SetMaterial(material: Cream),
@@ -1321,7 +1385,7 @@ geometry graph clone_wall(
 </script></bn-file>
     </div>
     <p class="muted">
-      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-language/tree/main/examples/tutorials/clone_wall"><code>examples/tutorials/clone_wall/</code></a>.
+      The files, with the script that renders this page's pictures, are in <a href="https://github.com/marcgardent/base-node-for-blender/tree/main/examples/tutorials/clone_wall"><code>examples/tutorials/clone_wall/</code></a>.
     </p>
 </div>
 </main>

@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anime portrait — Toon &amp; Anime tutorial — Ludopant</title>
+<meta name="description" content="Anime cel shading in Blender 5.3 and EEVEE, written in .bn with the Toon &amp; Anime pack: tones cut per light, a style per material, a shadow each light tints, a hard highlight in the hair and a rim light.">
+<link rel="canonical" href="https://ludopant.com/basenode-packs/tutorials/anime-portrait.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludopant">
+<meta property="og:title" content="Anime portrait — Toon &amp; Anime tutorial — Ludopant">
+<meta property="og:description" content="Anime cel shading in Blender 5.3 and EEVEE, written in .bn with the Toon &amp; Anime pack: tones cut per light, a style per material, a shadow each light tints, a hard highlight in the hair and a rim light.">
+<meta property="og:url" content="https://ludopant.com/basenode-packs/tutorials/anime-portrait.html">
+<meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/anime-portrait-step5.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../logo/ludopant.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../packs.css">
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-view.js"></script>
+<script type="module" src="https://blender.basenode.ludopant.com/view/bn-file.js"></script>
+</head>
+<body>
+<!-- Written by studio/ludopant.py of base-node-studio from its packs, stdlib and tutorials: edit those, not this file. -->
+
+<header class="top">
+  <div class="wrap">
+    <a href="../../" aria-label="Ludopant, home"><img class="logo" src="../../logo/ludopant.svg" alt="Ludopant"></a>
+    <nav>
+      <a href="../../#products">Products</a>
+      <a href="../../#studio">Studio</a>
+      <a href="../../#contact">Contact</a>
+      <a class="lang" href="../../fr/" hreflang="fr" lang="fr">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc packs tuto">
+<div class="wrap">
+<p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › <a href="../toon-anime/">Toon &amp; Anime</a> › Tutorial: Anime portrait</p>
+<h1>Anime portrait</h1>
+    <p class="lead">
+      A small bust shaded the way an anime frame is painted: a few flat tones, a coloured shadow, a hard highlight in the hair and a rim of light on its edge.
+      One material graph does it, <code>cel</code>, and each light of the scene says how it wants to be drawn.
+    </p>
+    <figure>
+      <img src="img/anime-portrait-step5.png" width="1000" height="750" alt="A stylised bust in flat colours on a pale floor: pink skin in three tones, blue hair with a fringe and small white highlights, a red shirt in four tones, a violet cast shadow">
+      <figcaption>Where we are going. Three lights, four materials, five steps.</figcaption>
+    </figure>
+
+    <h2 id="before">Before you start</h2>
+    <p>
+      You need three things:
+    </p>
+    <ul>
+      <li><strong>Blender 5.3</strong>, with <strong>EEVEE</strong>: <code>cel</code> is built on the lighting nodes that are new in 5.3, and Cycles does not run them.</li>
+      <li>The <a href="https://blender.basenode.ludopant.com/#blender">Base Node add-on</a>, version 1.0.0 or later.</li>
+      <li>The <a href="../toon-anime/"><strong>Toon &amp; Anime</strong></a> pack, sold by the author of Base Node apart from the open source project. It carries the module <code>cel</code>. The steps on this page are free to read, copy and change; the module they call is not.</li>
+    </ul>
+    <table>
+      <tr><th>Module</th><th>Pack</th><th>What it gives</th></tr>
+      <tr><td><code>cel</code></td><td>Toon &amp; Anime</td><td>The material <code>cel</code>: tones, shadow colours, highlight and rim, cut light by light.</td></tr>
+      <tr><td><code>toon</code></td><td>free, in the add-on</td><td>The light settings <code>cel</code> shares with it: <code>toon_threshold</code>, <code>toon_intensity</code>, <code>toon_rim</code>.</td></tr>
+    </table>
+    <p>
+      How a material sees one light at a time in Blender 5.3 is told in the free tutorial <a href="https://blender.basenode.ludopant.com/tutorials/toon-lights.html">Toon lights</a>. You do not need it here, but it says what <code>cel</code> does inside.
+    </p>
+    <p>
+      Every block below is a complete <code>.bn</code> file, its code beside the nodes it builds. Drag the file icon of a block onto empty space in Blender's 3D Viewport and keep <em>Instantiate the Example</em>: a new object carries <code>portrait</code> at the 3D cursor, with its four materials. Or press the copy button of the block, open a Geometry Node editor, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> and pick <em>Add as Modifier</em>.
+    </p>
+    <p>
+      The lights are not in the files: they belong to your scene, and each step says which ones to add. Set the viewport to <em>Rendered</em>, and the <em>View Transform</em> of the scene (<em>Render Properties</em>, <em>Color Management</em>) to <em>Standard</em>: a flat colour stays the colour you gave it.
+    </p>
+
+    <h2 id="step-1"><span class="n">1.</span> Three tones</h2>
+    <p>
+      Add a <strong>sun</strong>, strength 1, from the front left and a little above, pale warm. Then the file:
+    </p>
+    <p class="file">step1_tones.bn: <code>Skin</code>, <code>portrait</code>, <code>bust</code>, <code>Hair</code>, <code>Cloth</code>, <code>Floor</code></p>
+    <bn-view graph="Skin" height="480"><script type="text/bn">
+// @module anime_portrait_step1
+// @title Anime portrait, step 1: three tones
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender@5.3
+// @offer groups, example
+// @example portrait
+
+use cel
+
+shader(material: true) graph Skin() -> (surface: Shader) {
+  "Skin: three tones by default"
+  return (surface: cel(color: (0.98, 0.8, 0.68, 1.0)))
+}
+
+shader(material: true) graph Hair() -> (surface: Shader) {
+  "Hair"
+  return (surface: cel(color: (0.22, 0.24, 0.5, 1.0)))
+}
+
+shader(material: true) graph Cloth() -> (surface: Shader) {
+  "The shirt"
+  return (surface: cel(color: (0.92, 0.36, 0.3, 1.0)))
+}
+
+shader(material: true) graph Floor() -> (surface: Shader) {
+  "The floor"
+  return (surface: cel(color: (0.7, 0.68, 0.64, 1.0)))
+}
+
+geometry graph bust() -> Geometry {
+  "A head, its hair and fringe, a neck and a body"
+  head = UVSphere(segments: 64, rings: 32, radius: 0.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.6))
+    |> SetMaterial(material: Skin)
+  neck = Cylinder(vertices: 32, radius: 0.15, depth: 0.4).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.1))
+    |> SetMaterial(material: Skin)
+  cap = UVSphere(segments: 64, rings: 32, radius: 0.53).mesh
+    |> TransformGeometry(translation: (0.0, 0.1, 1.7), scale: (1.0, 1.0, 0.9))
+  lock = Cone(vertices: 24, radius_bottom: 0.12, depth: 0.32).mesh
+    |> TransformGeometry(rotation: (3.14159, 0.0, 0.0), scale: (1.0, 0.45, 1.0))
+  fringe = MeshLine(count: 5, start_location: (-0.28, -0.42, 1.88), offset: (0.14, 0.0, 0.0))
+    |> InstanceOnPoints(instance: lock, rotation: (-0.45, 0.0, 0.0))
+    |> RealizeInstances()
+  hair = JoinGeometry(cap, fringe)
+    |> SetMaterial(material: Hair)
+  body = Cone(vertices: 64, radius_top: 0.3, radius_bottom: 0.62, depth: 1.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+    |> SetMaterial(material: Cloth)
+  return JoinGeometry(head, neck, hair, body)
+    |> SetShadeSmooth()
+}
+
+geometry graph portrait() -> Geometry {
+  "The bust on a floor"
+  floor = Grid(size_x: 12.0, size_y: 12.0).mesh
+    |> SetMaterial(material: Floor)
+  return JoinGeometry(bust(), floor)
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>One call per material.</strong> Each material returns <code>cel</code> with its own <code>color</code>. Everything else takes the defaults of the node: three tones, a mauve shadow.</li>
+      <li><strong>Where the tones fall.</strong> <code>cel</code> asks the light how much it faces the surface, 0 to 1. Under <code>threshold</code> the surface is in shadow; above it, the rest of the range is cut into <code>bands - 1</code> equal steps up to the full colour.</li>
+      <li><strong>The shadow tone.</strong> Where no light reaches, the surface is <code>color</code> times <code>shadow</code>. A surface in full light is <code>color</code> itself, whatever the shadow.</li>
+    </ol>
+    <figure>
+      <img src="img/anime-portrait-step1.png" width="1000" height="750" loading="lazy" alt="The bust and the floor, every material in three flat tones, the shadows in a dull mauve">
+      <figcaption>Step 1. Three tones everywhere, one mauve for every shadow.</figcaption>
+    </figure>
+
+    <h2 id="step-2"><span class="n">2.</span> A style per material</h2>
+    <p>
+      Same sun. Each material now says how it wants to be cut:
+    </p>
+    <p class="file">step2_materials.bn: <code>Skin</code>, <code>portrait</code>, <code>bust</code>, <code>Hair</code>, <code>Cloth</code>, <code>Floor</code></p>
+    <bn-view graph="Skin" height="480"><script type="text/bn">
+// @module anime_portrait_step2
+// @title Anime portrait, step 2: a style per material
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender@5.3
+// @offer groups, example
+// @example portrait
+
+use cel
+
+shader(material: true) graph Skin() -> (surface: Shader) {
+  "Skin: three tones, a warm pink shadow, a light that reaches far round the face"
+  return (
+    surface: cel(
+      color: (0.98, 0.8, 0.68, 1.0),
+      shadow: (0.82, 0.55, 0.6, 1.0),
+      bands: 3.0,
+      threshold: 0.15))
+}
+
+shader(material: true) graph Hair() -> (surface: Shader) {
+  "Hair: two tones, a deep violet shadow"
+  return (
+    surface: cel(
+      color: (0.22, 0.24, 0.5, 1.0),
+      shadow: (0.5, 0.4, 0.75, 1.0),
+      bands: 2.0,
+      threshold: 0.3))
+}
+
+shader(material: true) graph Cloth() -> (surface: Shader) {
+  "The shirt: four tones, for its folds"
+  return (
+    surface: cel(
+      color: (0.92, 0.36, 0.3, 1.0),
+      shadow: (0.45, 0.32, 0.55, 1.0),
+      bands: 4.0,
+      threshold: 0.05))
+}
+
+shader(material: true) graph Floor() -> (surface: Shader) {
+  "The floor: two tones, a cold shadow"
+  return (
+    surface: cel(
+      color: (0.82, 0.8, 0.74, 1.0),
+      shadow: (0.5, 0.55, 0.7, 1.0),
+      bands: 2.0,
+      threshold: 0.2))
+}
+
+geometry graph bust() -> Geometry {
+  "A head, its hair and fringe, a neck and a body"
+  head = UVSphere(segments: 64, rings: 32, radius: 0.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.6))
+    |> SetMaterial(material: Skin)
+  neck = Cylinder(vertices: 32, radius: 0.15, depth: 0.4).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.1))
+    |> SetMaterial(material: Skin)
+  cap = UVSphere(segments: 64, rings: 32, radius: 0.53).mesh
+    |> TransformGeometry(translation: (0.0, 0.1, 1.7), scale: (1.0, 1.0, 0.9))
+  lock = Cone(vertices: 24, radius_bottom: 0.12, depth: 0.32).mesh
+    |> TransformGeometry(rotation: (3.14159, 0.0, 0.0), scale: (1.0, 0.45, 1.0))
+  fringe = MeshLine(count: 5, start_location: (-0.28, -0.42, 1.88), offset: (0.14, 0.0, 0.0))
+    |> InstanceOnPoints(instance: lock, rotation: (-0.45, 0.0, 0.0))
+    |> RealizeInstances()
+  hair = JoinGeometry(cap, fringe)
+    |> SetMaterial(material: Hair)
+  body = Cone(vertices: 64, radius_top: 0.3, radius_bottom: 0.62, depth: 1.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+    |> SetMaterial(material: Cloth)
+  return JoinGeometry(head, neck, hair, body)
+    |> SetShadeSmooth()
+}
+
+geometry graph portrait() -> Geometry {
+  "The bust on a floor"
+  floor = Grid(size_x: 12.0, size_y: 12.0).mesh
+    |> SetMaterial(material: Floor)
+  return JoinGeometry(bust(), floor)
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>Skin.</strong> Three tones and a warm pink shadow. A low <code>threshold</code>, 0.15, lets the light reach far round the face: a face in anime is rarely half dark.</li>
+      <li><strong>Hair and floor.</strong> Two tones, light and shadow, nothing between: the hard cut of a cel. A deep violet under the hair, a cold blue on the floor.</li>
+      <li><strong>Cloth.</strong> Four tones: a shirt has folds, and the extra steps draw them.</li>
+    </ol>
+    <figure>
+      <img src="img/anime-portrait-step2.png" width="1000" height="750" loading="lazy" alt="The same bust: two tones in the hair, three on the face, four on the shirt, a blue shadow on the floor">
+      <figcaption>Step 2. The number of tones and the shadow colour belong to each material.</figcaption>
+    </figure>
+    <p class="try"><strong>Try:</strong> set <code>bands</code> to <code>8.0</code> on the shirt: the cut melts back into a smooth shading.</p>
+
+    <h2 id="step-3"><span class="n">3.</span> Each light its shadow</h2>
+    <p>
+      The file of step 2, unchanged. This time the lights speak, through <strong>custom properties</strong>: select a light, <em>Object Properties</em>, <em>Custom Properties</em>, <em>New</em>.
+    </p>
+    <ul>
+      <li>On the warm sun: <code>cel_shadow</code>, a colour, <code>(0.16, 0.06, 0.04)</code>, a dark brown. Set its <em>Subtype</em> to <em>Color</em> in the property's settings.</li>
+      <li>Add a second sun, strength 1, from the right, blue <code>(0.5, 0.62, 1.0)</code>. Give it <code>cel_bands</code> at <code>2.0</code>, <code>toon_threshold</code> at <code>0.55</code>, <code>toon_intensity</code> at <code>0.6</code> and <code>cel_shadow</code> at <code>(0.12, 0.1, 0.22)</code>.</li>
+    </ul>
+    <ol class="steps">
+      <li><strong>A light's own shadow.</strong> Where a light does not reach, it still adds its <code>cel_shadow</code>, times the surface's colour. The warm sun leaves a warm shadow; the blue one leaves a cold one on the side it misses.</li>
+      <li><strong>A light's own cut.</strong> The blue sun cuts two tones whatever the material says, starts higher, at 0.55, and lights at 0.6 of its strength: a narrow fill on the right edges.</li>
+      <li><strong>A light without them.</strong> A property a light does not have takes the value of the node: the material's <code>bands</code>, its <code>threshold</code>, no shadow colour.</li>
+    </ol>
+    <figure>
+      <img src="img/anime-portrait-step3.png" width="1000" height="750" loading="lazy" alt="The bust with a second, narrow blue-lit band on its right side and warmer shadows">
+      <figcaption>Step 3. Two lights, each cut and each shadowed its own way, on one material per object.</figcaption>
+    </figure>
+
+    <h2 id="step-4"><span class="n">4.</span> A highlight in the hair</h2>
+    <p>
+      The same two suns. The hair gets a highlight:
+    </p>
+    <p class="file">step4_highlight.bn: <code>Hair</code>, <code>portrait</code>, <code>bust</code>, <code>Skin</code>, <code>Cloth</code>, <code>Floor</code></p>
+    <bn-view graph="Hair" height="480"><script type="text/bn">
+// @module anime_portrait_step4
+// @title Anime portrait, step 4: a highlight in the hair
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender@5.3
+// @offer groups, example
+// @example portrait
+
+use cel
+
+shader(material: true) graph Skin() -> (surface: Shader) {
+  "Skin: three tones, a warm pink shadow, a light that reaches far round the face"
+  return (
+    surface: cel(
+      color: (0.98, 0.8, 0.68, 1.0),
+      shadow: (0.82, 0.55, 0.6, 1.0),
+      bands: 3.0,
+      threshold: 0.15))
+}
+
+shader(material: true) graph Hair() -> (surface: Shader) {
+  "Hair: two tones, a deep violet shadow, a hard pale highlight"
+  return (
+    surface: cel(
+      color: (0.22, 0.24, 0.5, 1.0),
+      shadow: (0.5, 0.4, 0.75, 1.0),
+      bands: 2.0,
+      threshold: 0.3,
+      highlight: 0.5,
+      highlight_color: (0.7, 0.8, 1.0, 1.0),
+      roughness: 0.2))
+}
+
+shader(material: true) graph Cloth() -> (surface: Shader) {
+  "The shirt: four tones, for its folds"
+  return (
+    surface: cel(
+      color: (0.92, 0.36, 0.3, 1.0),
+      shadow: (0.45, 0.32, 0.55, 1.0),
+      bands: 4.0,
+      threshold: 0.05))
+}
+
+shader(material: true) graph Floor() -> (surface: Shader) {
+  "The floor: two tones, a cold shadow"
+  return (
+    surface: cel(
+      color: (0.82, 0.8, 0.74, 1.0),
+      shadow: (0.5, 0.55, 0.7, 1.0),
+      bands: 2.0,
+      threshold: 0.2))
+}
+
+geometry graph bust() -> Geometry {
+  "A head, its hair and fringe, a neck and a body"
+  head = UVSphere(segments: 64, rings: 32, radius: 0.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.6))
+    |> SetMaterial(material: Skin)
+  neck = Cylinder(vertices: 32, radius: 0.15, depth: 0.4).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.1))
+    |> SetMaterial(material: Skin)
+  cap = UVSphere(segments: 64, rings: 32, radius: 0.53).mesh
+    |> TransformGeometry(translation: (0.0, 0.1, 1.7), scale: (1.0, 1.0, 0.9))
+  lock = Cone(vertices: 24, radius_bottom: 0.12, depth: 0.32).mesh
+    |> TransformGeometry(rotation: (3.14159, 0.0, 0.0), scale: (1.0, 0.45, 1.0))
+  fringe = MeshLine(count: 5, start_location: (-0.28, -0.42, 1.88), offset: (0.14, 0.0, 0.0))
+    |> InstanceOnPoints(instance: lock, rotation: (-0.45, 0.0, 0.0))
+    |> RealizeInstances()
+  hair = JoinGeometry(cap, fringe)
+    |> SetMaterial(material: Hair)
+  body = Cone(vertices: 64, radius_top: 0.3, radius_bottom: 0.62, depth: 1.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+    |> SetMaterial(material: Cloth)
+  return JoinGeometry(head, neck, hair, body)
+    |> SetShadeSmooth()
+}
+
+geometry graph portrait() -> Geometry {
+  "The bust on a floor"
+  floor = Grid(size_x: 12.0, size_y: 12.0).mesh
+    |> SetMaterial(material: Floor)
+  return JoinGeometry(bust(), floor)
+}
+</script></bn-view>
+    <ol class="steps">
+      <li><strong>Cut, not blurred.</strong> <code>highlight</code> is how large the highlight is, 0 for none. <code>cel</code> asks each light for its glossy reflection, of <code>roughness</code> 0.2, and cuts it as hard as the tones: a flat shape, the way hair is painted.</li>
+      <li><strong>Its colour.</strong> The highlight is the light's colour times <code>highlight_color</code>, a pale blue: it does not take the hair's colour.</li>
+      <li><strong>Per light.</strong> A light can set its own size with <code>cel_highlight</code>; at 0 it makes none.</li>
+    </ol>
+    <figure>
+      <img src="img/anime-portrait-step4.png" width="1000" height="750" loading="lazy" alt="The bust with small hard white highlights on the fringe and a pale blue one on the side of the hair">
+      <figcaption>Step 4. A highlight on each lock of the fringe, and one where the blue sun glances off the hair.</figcaption>
+    </figure>
+
+    <h2 id="step-5"><span class="n">5.</span> A rim light</h2>
+    <p>
+      The file of step 4. Add a third sun, orange <code>(1.0, 0.62, 0.35)</code>, almost level, from behind the bust on the left. Two custom properties on it: <code>toon_threshold</code> at <code>0.3</code> and <code>toon_rim</code> at <code>1.0</code>.
+    </p>
+    <ol class="steps">
+      <li><strong>Its own colour.</strong> A rim light adds its band in its own colour, not multiplied by the surface: orange on the blue hair stays orange, where an ordinary light would turn it a dull grey.</li>
+      <li><strong>Only the edges.</strong> It comes from behind: it reaches the top of the hair and the left edge of the body, the sides the camera barely sees.</li>
+    </ol>
+    <figure>
+      <img src="img/anime-portrait-step5.png" width="1000" height="750" loading="lazy" alt="The finished bust with a pale orange rim on the top of the hair and on the left edges">
+      <figcaption>Step 5. The rim on the top of the hair and down the left side.</figcaption>
+    </figure>
+
+    <h2 id="tune">The knobs</h2>
+    <table>
+      <tr><th>Where</th><th>Name</th><th>What it does</th></tr>
+      <tr><td>node <code>cel</code></td><td><code>color</code>, <code>shadow</code></td><td>The surface's colour in full light, and what it is multiplied by where no light reaches.</td></tr>
+      <tr><td>node <code>cel</code></td><td><code>bands</code>, <code>threshold</code>, <code>softness</code></td><td>How many tones, where the first lit one starts, how wide their edges are: for the lights that do not say.</td></tr>
+      <tr><td>node <code>cel</code></td><td><code>highlight</code>, <code>highlight_color</code>, <code>roughness</code></td><td>The size of the hard highlight (0: none), its colour, and how spread the reflection it is cut from.</td></tr>
+      <tr><td>node <code>cel</code></td><td><code>intensity</code></td><td>How strong a light without <code>toon_intensity</code> lights.</td></tr>
+      <tr><td>light</td><td><code>cel_bands</code></td><td>How many tones this light cuts, 2 to 8.</td></tr>
+      <tr><td>light</td><td><code>cel_shadow</code></td><td>The colour this light leaves where it does not reach: a colour property.</td></tr>
+      <tr><td>light</td><td><code>cel_highlight</code></td><td>The size of this light's highlight; 0 for none.</td></tr>
+      <tr><td>light</td><td><code>toon_threshold</code>, <code>toon_intensity</code>, <code>toon_rim</code></td><td>Where its first tone starts, how strong it lights, and 1 to make it a rim light: the settings of the free module <code>toon</code>.</td></tr>
+    </table>
+
+    <h2 id="files">Take it to Blender</h2>
+    <p>
+      The finished bust, in one file. Drag the card onto empty space in Blender's 3D Viewport and keep <em>Instantiate the Example</em>, then add the three lights of step 5. A click on the card downloads the file.
+    </p>
+    <bn-file><script type="text/bn">
+// @module anime_portrait_step4
+// @title Anime portrait, step 4: a highlight in the hair
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender@5.3
+// @offer groups, example
+// @example portrait
+
+use cel
+
+shader(material: true) graph Skin() -> (surface: Shader) {
+  "Skin: three tones, a warm pink shadow, a light that reaches far round the face"
+  return (
+    surface: cel(
+      color: (0.98, 0.8, 0.68, 1.0),
+      shadow: (0.82, 0.55, 0.6, 1.0),
+      bands: 3.0,
+      threshold: 0.15))
+}
+
+shader(material: true) graph Hair() -> (surface: Shader) {
+  "Hair: two tones, a deep violet shadow, a hard pale highlight"
+  return (
+    surface: cel(
+      color: (0.22, 0.24, 0.5, 1.0),
+      shadow: (0.5, 0.4, 0.75, 1.0),
+      bands: 2.0,
+      threshold: 0.3,
+      highlight: 0.5,
+      highlight_color: (0.7, 0.8, 1.0, 1.0),
+      roughness: 0.2))
+}
+
+shader(material: true) graph Cloth() -> (surface: Shader) {
+  "The shirt: four tones, for its folds"
+  return (
+    surface: cel(
+      color: (0.92, 0.36, 0.3, 1.0),
+      shadow: (0.45, 0.32, 0.55, 1.0),
+      bands: 4.0,
+      threshold: 0.05))
+}
+
+shader(material: true) graph Floor() -> (surface: Shader) {
+  "The floor: two tones, a cold shadow"
+  return (
+    surface: cel(
+      color: (0.82, 0.8, 0.74, 1.0),
+      shadow: (0.5, 0.55, 0.7, 1.0),
+      bands: 2.0,
+      threshold: 0.2))
+}
+
+geometry graph bust() -> Geometry {
+  "A head, its hair and fringe, a neck and a body"
+  head = UVSphere(segments: 64, rings: 32, radius: 0.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.6))
+    |> SetMaterial(material: Skin)
+  neck = Cylinder(vertices: 32, radius: 0.15, depth: 0.4).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.1))
+    |> SetMaterial(material: Skin)
+  cap = UVSphere(segments: 64, rings: 32, radius: 0.53).mesh
+    |> TransformGeometry(translation: (0.0, 0.1, 1.7), scale: (1.0, 1.0, 0.9))
+  lock = Cone(vertices: 24, radius_bottom: 0.12, depth: 0.32).mesh
+    |> TransformGeometry(rotation: (3.14159, 0.0, 0.0), scale: (1.0, 0.45, 1.0))
+  fringe = MeshLine(count: 5, start_location: (-0.28, -0.42, 1.88), offset: (0.14, 0.0, 0.0))
+    |> InstanceOnPoints(instance: lock, rotation: (-0.45, 0.0, 0.0))
+    |> RealizeInstances()
+  hair = JoinGeometry(cap, fringe)
+    |> SetMaterial(material: Hair)
+  body = Cone(vertices: 64, radius_top: 0.3, radius_bottom: 0.62, depth: 1.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+    |> SetMaterial(material: Cloth)
+  return JoinGeometry(head, neck, hair, body)
+    |> SetShadeSmooth()
+}
+
+geometry graph portrait() -> Geometry {
+  "The bust on a floor"
+  floor = Grid(size_x: 12.0, size_y: 12.0).mesh
+    |> SetMaterial(material: Floor)
+  return JoinGeometry(bust(), floor)
+}
+</script></bn-file>
+    <p>The steps before it:</p>
+    <div class="cards">
+      <bn-file><script type="text/bn">
+// @module anime_portrait_step1
+// @title Anime portrait, step 1: three tones
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender@5.3
+// @offer groups, example
+// @example portrait
+
+use cel
+
+shader(material: true) graph Skin() -> (surface: Shader) {
+  "Skin: three tones by default"
+  return (surface: cel(color: (0.98, 0.8, 0.68, 1.0)))
+}
+
+shader(material: true) graph Hair() -> (surface: Shader) {
+  "Hair"
+  return (surface: cel(color: (0.22, 0.24, 0.5, 1.0)))
+}
+
+shader(material: true) graph Cloth() -> (surface: Shader) {
+  "The shirt"
+  return (surface: cel(color: (0.92, 0.36, 0.3, 1.0)))
+}
+
+shader(material: true) graph Floor() -> (surface: Shader) {
+  "The floor"
+  return (surface: cel(color: (0.7, 0.68, 0.64, 1.0)))
+}
+
+geometry graph bust() -> Geometry {
+  "A head, its hair and fringe, a neck and a body"
+  head = UVSphere(segments: 64, rings: 32, radius: 0.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.6))
+    |> SetMaterial(material: Skin)
+  neck = Cylinder(vertices: 32, radius: 0.15, depth: 0.4).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.1))
+    |> SetMaterial(material: Skin)
+  cap = UVSphere(segments: 64, rings: 32, radius: 0.53).mesh
+    |> TransformGeometry(translation: (0.0, 0.1, 1.7), scale: (1.0, 1.0, 0.9))
+  lock = Cone(vertices: 24, radius_bottom: 0.12, depth: 0.32).mesh
+    |> TransformGeometry(rotation: (3.14159, 0.0, 0.0), scale: (1.0, 0.45, 1.0))
+  fringe = MeshLine(count: 5, start_location: (-0.28, -0.42, 1.88), offset: (0.14, 0.0, 0.0))
+    |> InstanceOnPoints(instance: lock, rotation: (-0.45, 0.0, 0.0))
+    |> RealizeInstances()
+  hair = JoinGeometry(cap, fringe)
+    |> SetMaterial(material: Hair)
+  body = Cone(vertices: 64, radius_top: 0.3, radius_bottom: 0.62, depth: 1.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+    |> SetMaterial(material: Cloth)
+  return JoinGeometry(head, neck, hair, body)
+    |> SetShadeSmooth()
+}
+
+geometry graph portrait() -> Geometry {
+  "The bust on a floor"
+  floor = Grid(size_x: 12.0, size_y: 12.0).mesh
+    |> SetMaterial(material: Floor)
+  return JoinGeometry(bust(), floor)
+}
+</script></bn-file>
+      <bn-file><script type="text/bn">
+// @module anime_portrait_step2
+// @title Anime portrait, step 2: a style per material
+// @author Base Node tutorials
+// @license MIT OR Apache-2.0
+// @target blender@5.3
+// @offer groups, example
+// @example portrait
+
+use cel
+
+shader(material: true) graph Skin() -> (surface: Shader) {
+  "Skin: three tones, a warm pink shadow, a light that reaches far round the face"
+  return (
+    surface: cel(
+      color: (0.98, 0.8, 0.68, 1.0),
+      shadow: (0.82, 0.55, 0.6, 1.0),
+      bands: 3.0,
+      threshold: 0.15))
+}
+
+shader(material: true) graph Hair() -> (surface: Shader) {
+  "Hair: two tones, a deep violet shadow"
+  return (
+    surface: cel(
+      color: (0.22, 0.24, 0.5, 1.0),
+      shadow: (0.5, 0.4, 0.75, 1.0),
+      bands: 2.0,
+      threshold: 0.3))
+}
+
+shader(material: true) graph Cloth() -> (surface: Shader) {
+  "The shirt: four tones, for its folds"
+  return (
+    surface: cel(
+      color: (0.92, 0.36, 0.3, 1.0),
+      shadow: (0.45, 0.32, 0.55, 1.0),
+      bands: 4.0,
+      threshold: 0.05))
+}
+
+shader(material: true) graph Floor() -> (surface: Shader) {
+  "The floor: two tones, a cold shadow"
+  return (
+    surface: cel(
+      color: (0.82, 0.8, 0.74, 1.0),
+      shadow: (0.5, 0.55, 0.7, 1.0),
+      bands: 2.0,
+      threshold: 0.2))
+}
+
+geometry graph bust() -> Geometry {
+  "A head, its hair and fringe, a neck and a body"
+  head = UVSphere(segments: 64, rings: 32, radius: 0.5).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.6))
+    |> SetMaterial(material: Skin)
+  neck = Cylinder(vertices: 32, radius: 0.15, depth: 0.4).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 1.1))
+    |> SetMaterial(material: Skin)
+  cap = UVSphere(segments: 64, rings: 32, radius: 0.53).mesh
+    |> TransformGeometry(translation: (0.0, 0.1, 1.7), scale: (1.0, 1.0, 0.9))
+  lock = Cone(vertices: 24, radius_bottom: 0.12, depth: 0.32).mesh
+    |> TransformGeometry(rotation: (3.14159, 0.0, 0.0), scale: (1.0, 0.45, 1.0))
+  fringe = MeshLine(count: 5, start_location: (-0.28, -0.42, 1.88), offset: (0.14, 0.0, 0.0))
+    |> InstanceOnPoints(instance: lock, rotation: (-0.45, 0.0, 0.0))
+    |> RealizeInstances()
+  hair = JoinGeometry(cap, fringe)
+    |> SetMaterial(material: Hair)
+  body = Cone(vertices: 64, radius_top: 0.3, radius_bottom: 0.62, depth: 1.0).mesh
+    |> TransformGeometry(translation: (0.0, 0.0, 0.5))
+    |> SetMaterial(material: Cloth)
+  return JoinGeometry(head, neck, hair, body)
+    |> SetShadeSmooth()
+}
+
+geometry graph portrait() -> Geometry {
+  "The bust on a floor"
+  floor = Grid(size_x: 12.0, size_y: 12.0).mesh
+    |> SetMaterial(material: Floor)
+  return JoinGeometry(bust(), floor)
+}
+</script></bn-file>
+    </div>
+</div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>© 2026 Ludopant Creative Studio</span>
+    <span><a href="../../legal-notice.html">Legal notice</a> · <a href="https://github.com/marcgardent">GitHub</a></span>
+    <p class="tm">Blender is a trademark of the Blender Foundation. The other products named on this page are trademarks of their owners, named here for comparison only; Ludopant is not affiliated with them.</p>
+  </div>
+</footer>
+
+</body>
+</html>
