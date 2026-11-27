@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Smart Materials — BaseNode Packs — Ludopant</title>
-<meta name="description" content="Smart Materials, a pack of 3 Base Node modules for Blender 5.2+: a texture painter&#x27;s smart materials, live in Geometry Nodes and shaders.">
+<meta name="description" content="Smart Materials, a pack of 5 Base Node modules for Blender 5.2+: a texture painter&#x27;s smart materials, live in Geometry Nodes and shaders.">
 <link rel="canonical" href="https://ludopant.com/basenode-packs/smart-materials/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Ludopant">
 <meta property="og:title" content="Smart Materials — BaseNode Packs — Ludopant">
-<meta property="og:description" content="Smart Materials, a pack of 3 Base Node modules for Blender 5.2+: a texture painter&#x27;s smart materials, live in Geometry Nodes and shaders.">
+<meta property="og:description" content="Smart Materials, a pack of 5 Base Node modules for Blender 5.2+: a texture painter&#x27;s smart materials, live in Geometry Nodes and shaders.">
 <meta property="og:url" content="https://ludopant.com/basenode-packs/smart-materials/">
 <meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/smart-crate-step5.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -42,11 +42,11 @@
 <dl class="facts">
 <dt>For</dt><dd>Texture artists who know Substance Painter</dd>
 <dt>Modelled on</dt><dd>Substance 3D Painter</dd>
-<dt>Modules</dt><dd>3</dd>
+<dt>Modules</dt><dd>5</dd>
 <dt>Blender</dt><dd>5.2 and later, tested at each release</dd>
 <dt>Store</dt><dd>Coming soon on Superhive</dd>
 </dl>
-<p>Mesh maps computed live and stored as attributes (curvature, ambient occlusion, thickness, position, islands, sky), the generators that turn them into masks (edge wear, metal edge wear, dirt, dust, grunge, dripping rust) and the wear only a mesh can carry (chipped edges, dents, rivets, stitches, streaks and drips).</p>
+<p>Mesh maps computed live and stored as attributes (curvature, ambient occlusion, thickness, position, islands, sky), the generators that turn them into masks (edge wear, metal edge wear, dirt, dust, grunge, dripping rust) and the wear only a mesh can carry (chipped edges, dents, rivets, stitches, streaks and drips). A weighted Voronoi, cells from triangles to hexagons with their corners rounded, and on it shagreen, the stingray leather of galuchat, its pearls sized by a weight.</p>
 
 <h2>The modules</h2>
 <p>A module is a <code>.bn</code> file of node groups. Once the pack is installed, a graph calls it with <code>use</code>, and Blender builds its groups.</p>
@@ -55,6 +55,8 @@
 <tr><td><code>generators</code></td><td>The generators of a texture painter's smart materials, as shader groups that turn the mesh maps into masks: levels (Histogram Scan), grunge, curvature, occlusion, edge wear, metal edge wear, dirt, dust, dripping rust, position, 3D distance, light</td></tr>
 <tr><td><code>mesh_effects</code></td><td>Wear a texture painter can only paint, made in the mesh by Geometry Nodes: chips knocked off the edges, dents, rivets and stitches along the seams, rust and dirt streaked down the walls from their tops and the rivets as a stain, paint or oil run down them in the material under them, wearing what it wears, dust settled in the corners; each stores where it acted, and a shader group reads it</td></tr>
 <tr><td><code>mesh_maps</code></td><td>Mesh maps computed live by Geometry Nodes and stored as attributes, as a texture painter bakes them: curvature, ambient occlusion, thickness, position, islands, and the sky a point sees above it; and the shader group that reads them</td></tr>
+<tr><td><code>shagreen</code></td><td>Shagreen, the stingray leather of galuchat: pearls from triangles to hexagons, their corners rounded, packed edge to edge by a weighted Voronoi, large ones and small ones squeezed between them, a weight for their size; the grooves dyed and lacquered, the pearls sanded white on top with grey clouds; on the UV map or boxed on the object, its pearl size in metres</td></tr>
+<tr><td><code>voronoi2d</code></td><td>Weighted 2D Voronoi (power diagram) for shaders: each site of a jittered grid carries a weight, random or given by a closure read at the site, which widens its cell over its neighbours'; the cell's point, weight and id, the distances to its two nearest edges, and its rim inset and rounded, for cells from triangles to hexagons</td></tr>
 </table>
 
 <h2>Free in Base Node, and what the pack adds</h2>

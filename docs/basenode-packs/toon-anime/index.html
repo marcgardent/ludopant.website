@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Toon &amp; Anime — BaseNode Packs — Ludopant</title>
-<meta name="description" content="Toon &amp; Anime, a pack of 1 Base Node modules for Blender 5.2+: anime cel shading lit light by light, for EEVEE in Blender 5.3.">
+<meta name="description" content="Toon &amp; Anime, a pack of 7 Base Node modules for Blender 5.2+: anime and manga rendering in Blender: cel shading, outlines, ink, hatching, faces, motion and paint.">
 <link rel="canonical" href="https://ludopant.com/basenode-packs/toon-anime/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Ludopant">
 <meta property="og:title" content="Toon &amp; Anime — BaseNode Packs — Ludopant">
-<meta property="og:description" content="Toon &amp; Anime, a pack of 1 Base Node modules for Blender 5.2+: anime cel shading lit light by light, for EEVEE in Blender 5.3.">
+<meta property="og:description" content="Toon &amp; Anime, a pack of 7 Base Node modules for Blender 5.2+: anime and manga rendering in Blender: cel shading, outlines, ink, hatching, faces, motion and paint.">
 <meta property="og:url" content="https://ludopant.com/basenode-packs/toon-anime/">
 <meta property="og:image" content="https://ludopant.com/basenode-packs/tutorials/img/anime-portrait-step5.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -37,26 +37,32 @@
 <p class="crumb"><a href="../../#products">Products</a> › <a href="../">BaseNode Packs</a> › Toon &amp; Anime</p>
 <p class="store">Coming soon on Superhive</p>
 <h1>Toon &amp; Anime</h1>
-<p class="lead">Anime cel shading lit light by light, for EEVEE in Blender 5.3.</p>
-<p class="cover"><img src="../tutorials/img/anime-portrait-step5.png" alt="Toon &amp; Anime: Anime cel shading lit light by light, for EEVEE in Blender 5.3"></p>
+<p class="lead">Anime and manga rendering in Blender: cel shading, outlines, ink, hatching, faces, motion and paint.</p>
+<p class="cover"><img src="../tutorials/img/anime-portrait-step5.png" alt="Toon &amp; Anime: Anime and manga rendering in Blender: cel shading, outlines, ink, hatching, faces, motion and paint"></p>
 <dl class="facts">
 <dt>For</dt><dd>Anime and toon artists on EEVEE</dd>
 <dt>Modelled on</dt><dd>Goo Engine</dd>
-<dt>Modules</dt><dd>1</dd>
+<dt>Modules</dt><dd>7</dd>
 <dt>Blender</dt><dd>5.2 and later, tested at each release</dd>
 <dt>Store</dt><dd>Coming soon on Superhive</dd>
 </dl>
-<p>Cel materials built on Blender 5.3's lighting nodes: two to eight hard tones per light, a highlight cut as hard as the tones, and a shadow each light tints in its own colour. Every light tunes its own style through custom properties: where its tones start, how many it cuts, its shadow colour, its highlight, or a rim in its own colour.</p>
+<p>Cel materials lit light by light on Blender 5.3's lighting nodes, with tones, highlights and shadow colours set on each light; manga hatching and screentone that thicken where a light does not reach. Outlines in Geometry Nodes: an inverted hull of variable width and edge lines (silhouette, creases, material borders) as tapered curves, tubes or Grease Pencil. Ink lines drawn after the render from the depth, normal and index passes, without halo and before the vector blur. Anime faces shaded as a smooth ball through edited normals; smear frames, speed lines and focus lines; and a painted finish of Kuwahara watercolour and oil, paper, pigment pooling and the anime grade.</p>
 
 <h2>The modules</h2>
 <p>A module is a <code>.bn</code> file of node groups. Once the pack is installed, a graph calls it with <code>use</code>, and Blender builds its groups.</p>
 <table>
 <tr><th>Module</th><th>What it gives</th></tr>
 <tr><td><code>cel</code></td><td>Anime cel shading lit light by light (Blender 5.3 lighting nodes): two to eight hard tones per light, a highlight cut in a hard shape, a shadow tinted by each light, and the toon module's thresholds, intensities and rims read on the lights</td></tr>
+<tr><td><code>face_normals</code></td><td>Clean anime face shading by edited normals: the normals of an ellipsoid around the head, blended into the face's own through a mask, transferred from a proxy mesh, a nose that keeps part of its own, and a nose shadow cut as one clean shape</td></tr>
+<tr><td><code>hatching3d</code></td><td>Manga hatching and screentone on 3D surfaces, light by light (Blender 5.3 lighting nodes): parallel lines that thicken and cross, or halftone dots that grow, wherever a light does not reach, in screen or object space, each light hatching at its own angle</td></tr>
+<tr><td><code>inklines</code></td><td>Anime ink lines drawn in the compositor from the render passes: depth edges measured relative to the distance and drawn on the nearer side only, crease lines by the angle between neighbouring normals, lines between object or material indices, a width in pixels that can thin with distance, a softness and a colour, no halo against the sky, and the lines inked before a vector blur so motion blur does not double them</td></tr>
+<tr><td><code>outline3d</code></td><td>The line work of an anime frame on 3D meshes, in Geometry Nodes: an inverted hull of variable width (a base width, an attribute or a vertex group, the distance to the camera, thinner in the hollows), and the edges drawn as tapered curves or tubes (silhouettes seen from the camera, creases over an angle, material borders, open boundaries)</td></tr>
+<tr><td><code>paint_finish</code></td><td>Painterly and anime finishing in the compositor: Kuwahara painting with watercolour and oil presets, colours flattened in OKLab steps that keep the edges, a procedural paper multiplied over the image, pigment pooled at the colour edges, the anime grade of lifted tinted shadows and a warm and cool split, the anime diffusion of a screened blur, and the whole chain in one graph</td></tr>
+<tr><td><code>speed_lines</code></td><td>Anime motion effects in Geometry Nodes: the smear frame that stretches a mesh back along its motion, ragged into several streaks, speed lines trailing from the back of a moving object as tapered curves or tubes, and the radial focus lines of manga with an inner clear radius, laid in a plane or in front of a camera; each animates by its phase</td></tr>
 </table>
 
 <h2>Free in Base Node, and what the pack adds</h2>
-<p>Free and open source, on <a href="https://blender.basenode.ludopant.com/">the Base Node site</a>: the language, the Blender add-on, the formatter and parsers, and the free modules of the standard library. The pack's modules build on the free module <code>toon</code>. The pack adds the modules above, their showcase files and this tutorial.</p>
+<p>Free and open source, on <a href="https://blender.basenode.ludopant.com/">the Base Node site</a>: the language, the Blender add-on, the formatter and parsers, and the free modules of the standard library. The pack's modules build on the free modules <code>grade</code>, <code>merge</code>, <code>toon</code>. The pack adds the modules above, their showcase files and this tutorial.</p>
 <table>
 <tr><th>Capability</th><th>Blender's own nodes</th><th>With the pack</th></tr>
 
